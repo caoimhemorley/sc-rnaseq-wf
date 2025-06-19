@@ -4,9 +4,10 @@ from cell_type_mapper.cli.map_to_on_the_fly_markers import OnTheFlyMapper
 from pathlib import Path
 import os
 import argparse
+
+
 # works best on CPU
 os.environ["AIBS_BKP_USE_TORCH"] = "false"
-
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["OMP_NUM_THREADS"] = "1"
@@ -23,7 +24,6 @@ RNG_SEED = 11235813
 N_PROCESSORS = 8
 MAX_GB = 48.0
 
-
 ##  how do we want to deal with this resource... it just needs to be downloaded once and then cached
 ##  the probably just copy it to the local directory first.
 ## TODO: make sure https://allen-brain-cell-atlas.s3-us-west-2.amazonaws.com/mapmycells/SEAAD/20240831/precomputed_stats.20231120.sea_ad.MTG.h5
@@ -34,7 +34,6 @@ PRECOMPUTED_STATS = (
 )
 
 
-
 def main(args: argparse.Namespace):
     """
     basic logic with args as input
@@ -42,12 +41,12 @@ def main(args: argparse.Namespace):
     """
 
     # not sure if we should use a tmp dir or not.
-    # tmp_dir = TMP_DIR 
+    # tmp_dir = TMP_DIR
     # if not tmp_dir.exists():
     #     tmp_dir.mkdir()
 
     # tmp_dir = Path(args.mmc_out_path)
-    # tmp_dir = Path.cwd() 
+    # tmp_dir = Path.cwd()
     # if not tmp_dir.exists():
     #     tmp_dir.mkdir()
 
@@ -111,7 +110,7 @@ if __name__ == "__main__":
         dest="mmc_taxonomy_path",
         type=str,
         help="Path to MMC taxonomy files",
-        default=f"{PRECOMPUTED_STATS}"
+        default=f"{PRECOMPUTED_STATS}",
     )
     parser.add_argument(
         "--output-name",

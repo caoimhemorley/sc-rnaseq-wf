@@ -29,7 +29,6 @@ import os
 #     TMP_DIR.mkdir()
 
 
-
 # CHUNK_SIZE = 40000
 # N_RUNNERS_UP = 5
 # RNG_SEED = 11235813
@@ -57,6 +56,7 @@ import os
 #     f"examples/data/abc_atlas_data/precomputed_stats.20231120.sea_ad.MTG.h5"
 # )
 
+
 # load resuults.
 # results header is the first 4 lines
 def read_csv_results(csv_results_path: str | Path) -> pd.DataFrame:
@@ -76,8 +76,7 @@ def read_csv_results(csv_results_path: str | Path) -> pd.DataFrame:
     return results
 
 
-
-def summarize_mmc_results(mmc_results : pd.DataFrame):
+def summarize_mmc_results(mmc_results: pd.DataFrame):
 
     # First get "classes"
     #  define row indices for each class
@@ -87,26 +86,47 @@ def summarize_mmc_results(mmc_results : pd.DataFrame):
 
     mmc_results.loc[gabaergic, "phenotype"] = "GABAergic"
     mmc_results.loc[glutamatergic, "phenotype"] = "Glutamatergic"
-    mmc_results.loc[non_neuronal, "phenotype"] = mmc_results.loc[non_neuronal, "subclass_name"]
+    mmc_results.loc[non_neuronal, "phenotype"] = mmc_results.loc[
+        non_neuronal, "subclass_name"
+    ]
 
-    mmc_results.loc[glutamatergic, "rho"] = mmc_results.loc[glutamatergic,  "class_correlation_coefficient"]
-    mmc_results.loc[gabaergic, "rho"] = mmc_results.loc[gabaergic, "class_correlation_coefficient"]
-    mmc_results.loc[non_neuronal, "rho"] = mmc_results.loc[non_neuronal, "subclass_correlation_coefficient"]
+    mmc_results.loc[glutamatergic, "rho"] = mmc_results.loc[
+        glutamatergic, "class_correlation_coefficient"
+    ]
+    mmc_results.loc[gabaergic, "rho"] = mmc_results.loc[
+        gabaergic, "class_correlation_coefficient"
+    ]
+    mmc_results.loc[non_neuronal, "rho"] = mmc_results.loc[
+        non_neuronal, "subclass_correlation_coefficient"
+    ]
 
-    mmc_results.loc[glutamatergic, "prob"] = mmc_results.loc[glutamatergic, "class_bootstrapping_probability"]
-    mmc_results.loc[gabaergic, "prob"] = mmc_results.loc[gabaergic, "class_bootstrapping_probability"]
-    mmc_results.loc[non_neuronal, "prob"] = mmc_results.loc[non_neuronal, "subclass_bootstrapping_probability"]
-
+    mmc_results.loc[glutamatergic, "prob"] = mmc_results.loc[
+        glutamatergic, "class_bootstrapping_probability"
+    ]
+    mmc_results.loc[gabaergic, "prob"] = mmc_results.loc[
+        gabaergic, "class_bootstrapping_probability"
+    ]
+    mmc_results.loc[non_neuronal, "prob"] = mmc_results.loc[
+        non_neuronal, "subclass_bootstrapping_probability"
+    ]
 
     mmc_results["cell_type"] = mmc_results["phenotype"]
 
     # change the phenotype to unknown if the  correlation or bootstrap probability < 0.5
-    mmc_results.loc[mmc_results["rho"] < 0.5, "cell_type"] = "unknown"
-    mmc_results.loc[mmc_results["prob"] < 0.5, "cell_type"] = "unknown"
+    mmc_results.loc[mmc_results["rho"] < 0.5, "cell_type"] = "Unknown"
+    mmc_results.loc[mmc_results["prob"] < 0.5, "cell_type"] = "Unknown"
 
-
-    return mmc_results[["cell_type", "phenotype", "rho", "prob","class_name", "subclass_name", "supertype_name" ]]
-
+    return mmc_results[
+        [
+            "cell_type",
+            "phenotype",
+            "rho",
+            "prob",
+            "class_name",
+            "subclass_name",
+            "supertype_name",
+        ]
+    ]
 
 
 def main(args: argparse.Namespace):
@@ -116,7 +136,7 @@ def main(args: argparse.Namespace):
     """
 
     # load MMC results
-    results = read_csv_results(args.mmc_results) 
+    results = read_csv_results(args.mmc_results)
 
     results = summarize_mmc_results(results)
 
@@ -130,7 +150,6 @@ def main(args: argparse.Namespace):
 
     # save the adata
     adata.write_h5ad(filename=args.adata_output, compression="gzip")
-
 
 
 if __name__ == "__main__":
@@ -159,6 +178,6 @@ if __name__ == "__main__":
         type=str,
         help="Path to MMC result CSV",
     )
-    
+
     args = parser.parse_args()
     main(args)
