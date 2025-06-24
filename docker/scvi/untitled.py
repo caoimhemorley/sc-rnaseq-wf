@@ -28,3 +28,11 @@ python3 -m pip install --upgrade "jax[cuda11_pip]==0.4.9" -f https://storage.goo
 # pip install --upgrade "jax[cuda12_pip]==${JAX_VERSION}" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
 pip install git+https://github.com/AllenInstitute/cell_type_mapper.git
+
+
+
+--------------------------
+
+
+
+
