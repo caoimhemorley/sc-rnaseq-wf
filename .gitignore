@@ -8,3 +8,4 @@ inputs.test_data*.json
 .wdltest.submission.json
 
 
+.ipynb_checkpoints/*

@@ -1,34 +1,46 @@
 #!/bin/bash
 
-ROOT="/home/jupyter/workspace/ws_files/data/preprocess"
+# ROOT="/home/jupyter/workspace/ws_files/data/preprocess"
 # Set variables
-COHORT_ID="pmdbs_sc_rnaseq_cohort_analysis_team-scherzer"
+INPUT_ID="asap-cohort"
+COHORT_ID="pmdbs_sc_rnaseq_cohort_analysis_asap-cohort"
+
+INPUT_ID="team-hardy"
+COHORT_ID="pmdbs_sc_rnaseq_cohort_analysis_team-hardy"
+
 BATCH_KEY="sample"
 LABEL_KEY="cell_type"
 N_TOP_GENES=5000
 
 # Input/output paths
-INPUT_PATH="${ROOT}"  # Path containing .h5 files
-PREPROCESSED_ADATA_DIR="${ROOT}/data/preprocessed_adata"
+# INPUT_PATH="${ROOT}"  # Path containing .h5 files
+PREPROCESSED_ADATA_DIR="${HOME}/workspace/data/testing"
+
+SCRIPT_DIR="${HOME}/repos/pmdbs-sc-rnaseq-wf/docker/scvi/scripts/main"
+
+PRECOMPUTED_STATS_DIR="${HOME}/workspace/data/ABC"
+
+echo $SCRIPT_DIR
+
+echo "${PREPROCESSED_ADATA_DIR}/${INPUT_ID}.merged_adata_object.h5ad"
+
+# Filter and normalize
+python "${SCRIPT_DIR}/filter.py" \
+    --adata-input "${PREPROCESSED_ADATA_DIR}/${INPUT_ID}.merged_adata_object.h5ad" \
+    --adata-output "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad"
 
 
-PRECOMPUTED_STATS_DIR="/home/jupyter/workspace/ws_files/ABC"
-
-# # Filter and normalize
-# python filter.py \
-#     --adata-input "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.merged_adata_object.h5ad" \
-#     --adata-output "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad" \
-#     --output-validation-file "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.validation_metrics.csv"
+echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad"
 
 # # now do mmc
-# python mmc.py \
+# python "${SCRIPT_DIR}/mmc.py" \
 #     --adata-input "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad" \
 #     --output-name "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}" \
 #     --mmc-taxonomy-path "${PRECOMPUTED_STATS_DIR}/precomputed_stats.20231120.sea_ad.MTG.h5" 
 #     # \
 #     # --mmc-out-path "$HOME/Projects/ASAP/pmdbs-sc-rnaseq-wf"
 
-# python process.py \
+# python "${SCRIPT_DIR}/process.py" \
 #     --adata-input "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad" \
 #     --batch-key "${BATCH_KEY}" \
 #     --adata-output "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered_normalized.h5ad" \
@@ -73,11 +85,11 @@ PRECOMPUTED_STATS_DIR="/home/jupyter/workspace/ws_files/ABC"
 #     --label-key "${LABEL_KEY}" \
 #     --output-report-dir "scib_report"
 
-# Plot features and groups
-python plot_feats_and_groups.py \
-    --adata-input "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.final.h5ad" \
-    --groups "sample,batch,cell_type,leiden_res_0.05,leiden_res_0.10,leiden_res_0.20,leiden_res_0.40" \
-    --features "n_genes_by_counts,total_counts,pct_counts_mt,pct_counts_rb,doublet_score,S_score,G2M_score" \
-    --output-group-umap-plot-prefix "${COHORT_ID}.groups.umap.png" \
-    --output-feature-umap-plot-prefix "${COHORT_ID}.features.umap.png"
+# # Plot features and groups
+# python plot_feats_and_groups.py \
+#     --adata-input "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.final.h5ad" \
+#     --groups "sample,batch,cell_type,leiden_res_0.05,leiden_res_0.10,leiden_res_0.20,leiden_res_0.40" \
+#     --features "n_genes_by_counts,total_counts,pct_counts_mt,pct_counts_rb,doublet_score,S_score,G2M_score" \
+#     --output-group-umap-plot-prefix "${COHORT_ID}.groups.umap.png" \
+#     --output-feature-umap-plot-prefix "${COHORT_ID}.features.umap.png"
     
