@@ -22,11 +22,11 @@ def filter_adata(adata: AnnData) -> AnnData:
 
     # muon api is better than the scanpyt api for this...
     # mu.pp.filter_obs(adata, "pct_counts_mt", lambda x: x <= pct_counts_mt_max)
-    adata = adata[adata.obs['pct_counts_mt'] <= pct_counts_mt_max ].copy()
+    adata = adata[adata.obs['pct_counts_mt'] <= pct_counts_mt_max ]
 
     print(f"----   filter 2")
     # mu.pp.filter_obs(adata, "doublet_score", lambda x: x < doublet_score_max)
-    adata = adata[adata.obs['doublet_score'] < doublet_score_max].copy()
+    adata = adata[adata.obs['doublet_score'] < doublet_score_max]
 
     print(f"----      filter 3")
     # mu.pp.filter_obs(
@@ -34,8 +34,8 @@ def filter_adata(adata: AnnData) -> AnnData:
     #     "total_counts",
     #     lambda x: (x >= total_counts_limits[0]) & (x <= total_counts_limits[1]),
     # )
-    adata = adata[adata.obs['total_counts'] >= total_counts_limits[0]].copy()
-    adata = adata[adata.obs['total_counts'] <= total_counts_limits[1]].copy()
+    adata = adata[adata.obs['total_counts'] >= total_counts_limits[0]]
+    adata = adata[adata.obs['total_counts'] <= total_counts_limits[1]]
 
     print(f"----         filter 4")
     # mu.pp.filter_obs(
@@ -44,8 +44,8 @@ def filter_adata(adata: AnnData) -> AnnData:
     #     lambda x: (x >= n_genes_by_counts_limits[0])
     #     & (x <= n_genes_by_counts_limits[1]),
     # )
-    adata = adata[adata.obs['n_genes_by_counts'] >= n_genes_by_counts_limits[0]].copy()
-    adata = adata[adata.obs['n_genes_by_counts'] <= n_genes_by_counts_limits[1]].copy()
+    adata = adata[adata.obs['n_genes_by_counts'] >= n_genes_by_counts_limits[0]]
+    adata = adata[adata.obs['n_genes_by_counts'] <= n_genes_by_counts_limits[1]]
 
     
     return adata
@@ -68,7 +68,8 @@ def main(args: argparse.Namespace):
     
     # 2. save the filtered adata
     #    save the filtered adata
-    adata.write_h5ad(filename=args.adata_output, compression="gzip")
+    # adata.write_h5ad(filename=args.adata_output, compression="gzip")
+    adata.write_h5ad(filename=args.adata_output)
     print(f"wrote {args.adata_output}")
 
 if __name__ == "__main__":

@@ -23,7 +23,7 @@ def label_with_scanvi(adata: ad.AnnData, model: scvi_model.SCVI ) -> tuple[ad.An
     early_stopping = True
     early_stopping_patience = 20
 
-
+    print("scanvi model from scvi")
     scanvi_model = scvi_model.SCANVI.from_scvi_model(
         model,
         adata=adata,
@@ -31,7 +31,7 @@ def label_with_scanvi(adata: ad.AnnData, model: scvi_model.SCVI ) -> tuple[ad.An
         unlabeled_category="Unknown"
         )
 
-
+    print("train scanvi model")
     scanvi_model.train(
         accelerator=accelerator, 
         max_epochs=scanvi_epochs,
@@ -39,6 +39,8 @@ def label_with_scanvi(adata: ad.AnnData, model: scvi_model.SCVI ) -> tuple[ad.An
         early_stopping_patience=early_stopping_patience,
         )
 
+
+    print("scanvi latents and predictions")
 
     adata.obsm[SCANVI_LATENT_KEY] = scanvi_model.get_latent_representation(adata)
     adata.obs[SCANVI_PREDICTIONS_KEY] = scanvi_model.predict(adata)
@@ -115,7 +117,13 @@ def main(args: argparse.Namespace):
     adata, model = integrate_with_scvi(adata, args.batch_key)
     # 3. save the integrated adata and scvi model
     model.save(args.output_scvi_dir, overwrite=True)
-    adata.write_h5ad(filename=args.adata_output, compression="gzip")
+
+    fname = args.adata_output
+    fname = fname.replace("integrated","scvi")
+
+    adata.write_h5ad(filename=fname, compression="gzip")
+
+    print("scanvi latents and predictions")
 
     # 4. get scANVI model
     adata, scanvi_model = label_with_scanvi(adata, model)
@@ -123,14 +131,17 @@ def main(args: argparse.Namespace):
     scanvi_model.save(args.output_scanvi_dir, overwrite=True)
    
     # 6. save the latent space
-    adata.write_h5ad(filename=args.adata_output, compression="gzip")
+    fname = args.adata_output
+    fname = fname.replace("integrated","scanvi")
+    adata.write_h5ad(filename=fname, compression="gzip")
 
-    adata = ad.read_h5ad(args.adata_output)  # type: ignore
+    # adata = ad.read_h5ad(args.adata_output)  # type: ignore
     
     # # 7. save the cell types to feather
     # adata.obs[[SCANVI_PREDICTIONS_KEY]].to_feather(args.cell_type_output)
     # 7. save the cell types to parquet
     adata.obs[[SCANVI_PREDICTIONS_KEY]].to_parquet(args.cell_type_output)
+    adata.write_h5ad(filename=args.adata_output, compression="gzip")
 
 
 if __name__ == "__main__":
