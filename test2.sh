@@ -21,14 +21,37 @@ SCRIPT_DIR="${HOME}/repos/pmdbs-sc-rnaseq-wf/docker/scvi/scripts/main"
 
 PRECOMPUTED_STATS_DIR="${HOME}/workspace/data/ABC"
 
+
+
+# python3 /opt/scripts/main/prep_metadata.py \
+# 	--adata-input ~{cellbender_counts} \
+# 	--sample-id ~{sample_id} \
+# 	--batch ~{batch} \
+# 	--team ~{team_id} \
+# 	--dataset ~{dataset_id} \
+# 	--adata-output ~{sample_id}.adata_object.h5ad
+    
+# while read -r adata_objects || [[ -n "${adata_objects}" ]]; do 
+# 	adata_path=$(realpath "${adata_objects}")
+# 	sample=$(basename "${adata_path}" ".adata_object.h5ad")
+# 	echo -e "${sample}\t${adata_path}" >> adata_samples_paths.tsv
+# done < ~{write_lines(preprocessed_adata_objects)}
+
+# python3 /opt/scripts/main/merge_and_plot_qc.py \
+# 	--adata-objects-fofn adata_samples_paths.tsv \
+# 	--adata-output ~{cohort_id}.merged_adata_object.h5ad \
+# 	--output-metadata-file ~{cohort_id}.initial_metadata.csv \
+# 	--output-validation-file ~{cohort_id}.validation_metrics.csv
+
+
 echo "$SCRIPT_DIR/filter.py"
 echo "--adata-input  ${PREPROCESSED_ADATA_DIR}/${INPUT_ID}.merged_adata_object.h5ad"
 echo "--adata-output ${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad"
 
-# # Filter and normalize
-# python "${SCRIPT_DIR}/filter.py" \
-#     --adata-input "${PREPROCESSED_ADATA_DIR}/${INPUT_ID}.merged_adata_object.h5ad" \
-#     --adata-output "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad"
+# Filter and normalize
+python "${SCRIPT_DIR}/filter.py" \
+    --adata-input "${PREPROCESSED_ADATA_DIR}/${INPUT_ID}.merged_adata_object.h5ad" \
+    --adata-output "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad"
 
 
 # echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad"
@@ -63,16 +86,16 @@ echo "--adata-output ${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad"
 
 # echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.annotated.h5ad"
 
-# Integration with scVI
-python "${SCRIPT_DIR}/integrate_scvi.py" \
-    --adata-input "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.annotated.h5ad" \
-    --batch-key "${BATCH_KEY}" \
-    --adata-output "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.integrated.h5ad" \
-    --output-scvi-dir "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.scvi_model" \
-    --output-scanvi-dir "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.scanvi_model" \
-    --output-cell-types-file "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.scanvi.cell_types.parquet"
+# # Integration with scVI
+# python "${SCRIPT_DIR}/integrate_scvi.py" \
+#     --adata-input "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.annotated.h5ad" \
+#     --batch-key "${BATCH_KEY}" \
+#     --adata-output "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.integrated.h5ad" \
+#     --output-scvi-dir "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.scvi_model" \
+#     --output-scanvi-dir "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.scanvi_model" \
+#     --output-cell-types-file "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.scanvi.cell_types.parquet"
 
-echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.integrated.h5ad"
+# echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.integrated.h5ad"
 
 # # Clustering and UMAP
 # python "${SCRIPT_DIR}/clustering_umap.py" \
@@ -95,7 +118,7 @@ echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.integrated.h5ad"
 #     --adata-input "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.final.h5ad" \
 #     --batch-key "${BATCH_KEY}" \
 #     --label-key "${LABEL_KEY}" \
-#     --output-report-dir "scib_report"
+#     --output-report-dir "${INPUT_ID}_scib_report"
 
 # echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.final.h5ad"
 

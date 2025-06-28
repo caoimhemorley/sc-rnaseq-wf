@@ -25,56 +25,56 @@ SCRIPT_DIR="${HOME}/repos/pmdbs-sc-rnaseq-wf/docker/scvi/scripts/main"
 
 PRECOMPUTED_STATS_DIR="${HOME}/workspace/data/ABC"
 
-echo "$SCRIPT_DIR/filter.py"
-echo "--adata-input  ${PREPROCESSED_ADATA_DIR}/${INPUT_ID}.merged_adata_object.h5ad"
-echo "--adata-output ${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad"
+# echo "$SCRIPT_DIR/filter.py"
+# echo "--adata-input  ${PREPROCESSED_ADATA_DIR}/${INPUT_ID}.merged_adata_object.h5ad"
+# echo "--adata-output ${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad"
 
-# Filter and normalize
-python "${SCRIPT_DIR}/filter.py" \
-    --adata-input "${PREPROCESSED_ADATA_DIR}/${INPUT_ID}.merged_adata_object.h5ad" \
-    --adata-output "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad"
+# # Filter and normalize
+# python "${SCRIPT_DIR}/filter.py" \
+#     --adata-input "${PREPROCESSED_ADATA_DIR}/${INPUT_ID}.merged_adata_object.h5ad" \
+#     --adata-output "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad"
 
 
-echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad"
+# echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad"
 
-# now do mmc
-python "${SCRIPT_DIR}/mmc.py" \
-    --adata-input "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad" \
-    --output-name "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}" \
-    --mmc-taxonomy-path "${PRECOMPUTED_STATS_DIR}/precomputed_stats.20231120.sea_ad.MTG.h5" 
-    # \
-    # --mmc-out-path "$HOME/Projects/ASAP/pmdbs-sc-rnaseq-wf"
+# # now do mmc
+# python "${SCRIPT_DIR}/mmc.py" \
+#     --adata-input "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad" \
+#     --output-name "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}" \
+#     --mmc-taxonomy-path "${PRECOMPUTED_STATS_DIR}/precomputed_stats.20231120.sea_ad.MTG.h5" 
+#     # \
+#     # --mmc-out-path "$HOME/Projects/ASAP/pmdbs-sc-rnaseq-wf"
 
-echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad"
+# echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad"
 
-python "${SCRIPT_DIR}/process.py" \
-    --adata-input "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad" \
-    --batch-key "${BATCH_KEY}" \
-    --adata-output "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered_normalized.h5ad" \
-    --n-top-genes "${N_TOP_GENES}" \
-    --output-all-genes "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.all_genes.csv" \
-    --output-hvg-genes "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.hvg_genes.csv" 
+# python "${SCRIPT_DIR}/process.py" \
+#     --adata-input "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad" \
+#     --batch-key "${BATCH_KEY}" \
+#     --adata-output "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered_normalized.h5ad" \
+#     --n-top-genes "${N_TOP_GENES}" \
+#     --output-all-genes "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.all_genes.csv" \
+#     --output-hvg-genes "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.hvg_genes.csv" 
 
-echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered_normalized.h5ad"
+# echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered_normalized.h5ad"
 
-# Transcriptional phenotype
-python "${SCRIPT_DIR}/transcriptional_phenotype.py" \
-    --adata-input "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered_normalized.h5ad" \
-    --mmc-results "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.mmc.SEAAD_results.csv" \
-    --output-cell-types-file "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.mmc.cell_types.parquet" \
-    --adata-output "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.annotated.h5ad" \
-    --mmc-results "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.mmc.SEAAD_results.csv" \
+# # Transcriptional phenotype
+# python "${SCRIPT_DIR}/transcriptional_phenotype.py" \
+#     --adata-input "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered_normalized.h5ad" \
+#     --mmc-results "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.mmc.SEAAD_results.csv" \
+#     --output-cell-types-file "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.mmc.cell_types.parquet" \
+#     --adata-output "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.annotated.h5ad" \
+#     --mmc-results "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.mmc.SEAAD_results.csv" \
 
-echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.annotated.h5ad"
+# echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.annotated.h5ad"
 
-# Integration with scVI
-python "${SCRIPT_DIR}/integrate_scvi.py" \
-    --adata-input "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.annotated.h5ad" \
-    --batch-key "${BATCH_KEY}" \
-    --adata-output "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.integrated.h5ad" \
-    --output-scvi-dir "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.scvi_model" \
-    --output-scanvi-dir "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.scanvi_model" \
-    --output-cell-types-file "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.scanvi.cell_types.parquet"
+# # Integration with scVI
+# python "${SCRIPT_DIR}/integrate_scvi.py" \
+#     --adata-input "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.annotated.h5ad" \
+#     --batch-key "${BATCH_KEY}" \
+#     --adata-output "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.integrated.h5ad" \
+#     --output-scvi-dir "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.scvi_model" \
+#     --output-scanvi-dir "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.scanvi_model" \
+#     --output-cell-types-file "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.scanvi.cell_types.parquet"
 
 echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.integrated.h5ad"
 
@@ -99,7 +99,7 @@ python "${SCRIPT_DIR}/artifact_metrics.py" \
     --adata-input "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.final.h5ad" \
     --batch-key "${BATCH_KEY}" \
     --label-key "${LABEL_KEY}" \
-    --output-report-dir "scib_report"
+    --output-report-dir "${INPUT_ID}_scib_report"
 
 echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.final.h5ad"
 

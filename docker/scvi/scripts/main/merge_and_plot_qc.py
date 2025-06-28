@@ -5,8 +5,8 @@ from anndata import AnnData
 import pandas as pd
 import sys
 
-sys.path.append("/opt/scripts/utility")
-from helpers import get_validation_metrics
+# sys.path.append("/opt/scripts/utility")
+# from helpers import get_validation_metrics
 
 
 def merge_adata(adata_objects_fofn: str) -> AnnData:
@@ -68,10 +68,10 @@ def main(args: argparse.Namespace):
     # save metadata
     adata.obs.to_csv(args.output_metadata_file, index=True)
 
-    #######  validation metrics
-    val_metrics = get_validation_metrics(adata, "concatenation")
-    # log the validation metrics
-    val_metrics.to_csv(args.output_validation_file, index=True)
+    # #######  validation metrics
+    # val_metrics = get_validation_metrics(adata, "concatenation")
+    # # log the validation metrics
+    # val_metrics.to_csv(args.output_validation_file, index=True)
 
 
 if __name__ == "__main__":

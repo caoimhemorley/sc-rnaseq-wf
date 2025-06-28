@@ -1,7 +1,10 @@
 import os
 import argparse
-import scvi.model as scvi_model
+# import scvi.model as scvi_model
 import anndata as ad
+
+import scvi
+
 
 
 SCANVI_LATENT_KEY = "X_scANVI"
@@ -10,7 +13,7 @@ SCVI_LATENT_KEY = "X_scVI"
 SCANVI_PREDICTIONS_KEY = "C_scANVI"
 
 
-def label_with_scanvi(adata: ad.AnnData, model: scvi_model.SCVI ) -> tuple[ad.AnnData, scvi_model.SCANVI]:
+def label_with_scanvi(adata: ad.AnnData, model: scvi.model.SCVI ) -> tuple[ad.AnnData, scvi.model.SCANVI]:
     """
     fit scANVI model to AnnData object
     """
@@ -24,7 +27,7 @@ def label_with_scanvi(adata: ad.AnnData, model: scvi_model.SCVI ) -> tuple[ad.An
     early_stopping_patience = 20
 
     print("scanvi model from scvi")
-    scanvi_model = scvi_model.SCANVI.from_scvi_model(
+    scanvi_model = scvi.model.SCANVI.from_scvi_model(
         model,
         adata=adata,
         labels_key="cell_type",
@@ -52,7 +55,7 @@ def label_with_scanvi(adata: ad.AnnData, model: scvi_model.SCVI ) -> tuple[ad.An
 
 def integrate_with_scvi(
     adata: ad.AnnData, batch_key: str,
-) -> tuple[ad.AnnData, scvi_model.SCVI]:
+) -> tuple[ad.AnnData, scvi.model.SCVI]:
     """
     fit scvi model to AnnData object
     """
@@ -75,7 +78,7 @@ def integrate_with_scvi(
     # integrate the data with `scVI`
     # noise = ["doublet_score", "pct_counts_mt", "pct_counts_rb"]
     categorical_covariate_keys = None
-    scvi_model.SCVI.setup_anndata(
+    scvi.model.SCVI.setup_anndata(
         adata,
         layer="counts",
         batch_key=batch_key,
@@ -83,7 +86,7 @@ def integrate_with_scvi(
         # categorical_covariate_keys=categorical_covariate_keys,
     )
 
-    model = scvi_model.SCVI(
+    model = scvi.model.SCVI(
         adata,
         n_layers=n_layers,
         n_latent=n_latent,
@@ -111,6 +114,25 @@ def main(args: argparse.Namespace):
     basic logic with args as input
 
     """
+
+    # Set the number of data loader workers
+    # scvi.settings.dl_num_workers = 2 # Or a value appropriate for your system
+
+
+    # fname = args.adata_output
+    # fname = fname.replace("integrated","scvi")
+    # print(f"{fname=}")
+    # fname = args.adata_output
+    # fname = fname.replace("integrated","scanvi")
+    # print(f"{fname=}")
+    # fname = args.adata_output
+    # print(f"{fname=}")
+
+    # adata = ad.read_h5ad(fname)  # type: ignore
+
+    # model_path = args.output_scvi_dir
+    # model = scvi.model.SCVI.load(model_path, adata)
+
     # 0. load data
     adata = ad.read_h5ad(args.adata_input)  # type: ignore
     # 2. process data
@@ -120,11 +142,11 @@ def main(args: argparse.Namespace):
 
     fname = args.adata_output
     fname = fname.replace("integrated","scvi")
-
     adata.write_h5ad(filename=fname, compression="gzip")
 
-    print("scanvi latents and predictions")
 
+    
+    print("scanvi latents and predictions")
     # 4. get scANVI model
     adata, scanvi_model = label_with_scanvi(adata, model)
     # 5. save the integrated adata and scvi model
