@@ -73,6 +73,17 @@ echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.filtered.h5ad"
 
 # echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.integrated.h5ad"
 
+# # transfer labels  with scANVI
+# python "${SCRIPT_DIR}/label_scanvi.py" \
+#     --adata-input "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.integrated.h5ad" \
+#     --batch-key "${BATCH_KEY}" \
+#     --adata-output "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.labeled.h5ad" \
+#     --output-scvi-dir "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.scvi_model" \
+#     --output-scanvi-dir "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.scanvi_model" \
+#     --output-cell-types-file "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.scanvi.cell_types.parquet"
+
+# echo "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.labeled.h5ad"
+
 # # Clustering and UMAP
 # python "${SCRIPT_DIR}/clustering_umap.py" \
 #     --adata-input "${PREPROCESSED_ADATA_DIR}/${COHORT_ID}.integrated.h5ad" \
