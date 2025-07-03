@@ -7,5 +7,6 @@ inputs.test_data*.json
 .wdltest.changes.json
 .wdltest.submission.json
 
-
 .ipynb_checkpoints/*
+
+.__pycache__/*
