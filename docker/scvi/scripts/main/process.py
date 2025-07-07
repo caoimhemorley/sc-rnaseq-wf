@@ -17,15 +17,10 @@ def process_adata(
     do feature selection and add PCA
     """
 
-    ### fixed parameters (TODO: make an argument)
-    n_components = 30
-    target_sum = 1e4
-    n_top_genes_all = 20_000
-
     # does this work with sparse uint8?
     adata.layers["counts"] = adata.X.copy()  # type: ignore
 
-    sc.pp.normalize_total(adata, target_sum=target_sum)
+    sc.pp.normalize_total(adata, target_sum=args.norm_target_sum)
     sc.pp.log1p(adata)
 
     # get cell cycle scores
@@ -44,7 +39,7 @@ def process_adata(
 
     hvgs_full = sc.experimental.pp.highly_variable_genes(
         adata,
-        n_top_genes=n_top_genes_all,
+        n_top_genes=args.n_top_genes,
         batch_key=batch_key,
         flavor="pearson_residuals",
         check_values=True,
@@ -72,7 +67,7 @@ def process_adata(
     adata = adata[:, adata.var.index.isin(hvgs_full)]
 
     # add PCA of log1p normalized
-    sc.pp.pca(adata, n_comps=n_components)
+    sc.pp.pca(adata, n_comps=args.n_comps)
     ## consider this alternate pca and avoid the normalization log1p?
     # scanpy.experimental.pp.normalize_pearson_residuals_pca(adata, *, theta=100, clip=None, n_comps=50, random_state=0, kwargs_pca=mappingproxy({}), mask_var=_empty, use_highly_variable=None, check_values=True, inplace=True)
 
@@ -117,52 +112,66 @@ def main(args: argparse.Namespace):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="normalize and identify features (hvg)"
+        description="Normalize and identify features (hvg)"
     )
     parser.add_argument(
         "--adata-input",
         dest="adata_input",
         type=str,
+        required=True,
         help="AnnData object for a dataset",
     )
     parser.add_argument(
         "--batch-key",
         dest="batch_key",
         type=str,
+        required=True,
         help="Key in AnnData object for batch information",
     )
     parser.add_argument(
         "--adata-output",
         dest="adata_output",
         type=str,
+        required=True,
         help="Output file to save AnnData object to",
     )
     parser.add_argument(
-        "--n-top-genes",
-        dest="n_top_genes",
+        "--norm-target-sum",
         type=int,
-        help="number of HVG genes to keep",
-        default=3000,
+        required=True,
+        help="The total count value that each cell will be normalized to [10000]",
+    )
+    parser.add_argument(
+        "--n-top-genes",
+        type=int,
+        required=True,
+        help="Number of HVG genes to keep [3000]",
+    )
+    parser.add_argument(
+        "--n-comps",
+        type=int,
+        required=True,
+        help="Number of principal components to compute [30]"
     )
     # parser.add_argument(
     #     "--marker-genes",
     #     dest="marker_genes",
     #     type=str,
-    #     default="resources/cellassign_card_markers.csv",  # this doesn't seem accurate
+    #     required=True,
     #     help="Path to marker_genes .csv file",
     # )
     parser.add_argument(
         "--output-all-genes",
         dest="full_gene_file",
         type=str,
-        default="./all_genes.csv",  # this doesn't seem accurate
+        required=True,
         help="Output file to save feature metadata (full genes)",
     )
     parser.add_argument(
         "--output-hvg-genes",
         dest="hvg_file",
         type=str,
-        default="./hvg_genes.csv",  # this doesn't seem accurate
+        required=True,
         help="Output file to save hvg metadata (full genes)",
     )
 

@@ -23,7 +23,10 @@ workflow cohort_analysis {
     	Array[Int] total_counts_limits
     	Array[Int] n_genes_by_counts_limits
 
+    	# Normalization parameters
+    	Int norm_target_sum
 		Int n_top_genes
+		Int n_comps
 
 		String scvi_latent_key
 		String batch_key
@@ -82,9 +85,10 @@ workflow cohort_analysis {
 			doublet_score_max = doublet_score_max,
 			total_counts_limits = total_counts_limits,
 			n_genes_by_counts_limits = n_genes_by_counts_limits,
+			norm_target_sum = norm_target_sum,
 			n_top_genes = n_top_genes,
+			n_comps = n_comps,
 			batch_key = batch_key,
-			cell_type_markers_list = cell_type_markers_list,
 			raw_data_path = raw_data_path,
 			workflow_info = workflow_info,
 			billing_project = billing_project,
@@ -95,7 +99,7 @@ workflow cohort_analysis {
 	call ClusterData.cluster_data {
 		input:
 			cohort_id = cohort_id,
-			normalized_adata_object = select_first([filter_and_normalize.normalized_adata_object]), #!FileCoercion
+			normalized_adata_object = filter_and_normalize.normalized_adata_object,
 			scvi_latent_key = scvi_latent_key,
 			batch_key = batch_key,
 			cell_type_markers_list = cell_type_markers_list,
@@ -163,10 +167,10 @@ workflow cohort_analysis {
 			merge_and_plot_qc_metrics.merged_adata_object
 		],
 		merge_and_plot_qc_metrics.qc_plots_png,
-		select_all([
+		[
 			filter_and_normalize.all_genes_csv,
 			filter_and_normalize.hvg_genes_csv
-		]),
+		],
 		[
 			cluster_data.scvi_model_tar_gz,
 			cluster_data.cell_types_csv
@@ -200,10 +204,10 @@ workflow cohort_analysis {
 		# Merged adata objects, filtered and normalized adata objects, QC plots
 		File merged_adata_object = merge_and_plot_qc_metrics.merged_adata_object #!FileCoercion
 		Array[File] qc_plots_png = merge_and_plot_qc_metrics.qc_plots_png #!FileCoercion
-		File? filtered_adata_object = filter_and_normalize.filtered_adata_object
-		File? normalized_adata_object = filter_and_normalize.normalized_adata_object
-		File? all_genes_csv = filter_and_normalize.all_genes_csv #!FileCoercion
-		File? hvg_genes_csv = filter_and_normalize.hvg_genes_csv #!FileCoercion
+		File filtered_adata_object = filter_and_normalize.filtered_adata_object
+		File normalized_adata_object = filter_and_normalize.normalized_adata_object
+		File all_genes_csv = filter_and_normalize.all_genes_csv #!FileCoercion
+		File hvg_genes_csv = filter_and_normalize.hvg_genes_csv #!FileCoercion
 
 		# Clustering output
 		File integrated_adata_object = cluster_data.integrated_adata_object
@@ -311,18 +315,16 @@ task filter_and_normalize {
     	Array[Int] total_counts_limits
     	Array[Int] n_genes_by_counts_limits
 
+    	Int norm_target_sum
 		Int n_top_genes
+		Int n_comps
 		String batch_key
-		File cell_type_markers_list
 
 		String raw_data_path
 		Array[Array[String]] workflow_info
 		String billing_project
 		String container_registry
 		String zones
-
-		# Purposefully unset
-		String? my_none
 	}
 
 	String merged_adata_object_basename = basename(merged_adata_object, ".h5ad")
@@ -340,36 +342,29 @@ task filter_and_normalize {
 			--n-genes-by-counts-limits ~{sep=' ' n_genes_by_counts_limits} \
 			--adata-output ~{merged_adata_object_basename}_filtered.h5ad
 
-		# TODO see whether this is still required given the change to python
-		# If any cells remain after filtering, the data is normalized and variable genes are identified
-		if [[ -s "~{merged_adata_object_basename}_filtered.h5ad" ]]; then
-			python3 /opt/scripts/main/process.py \
-				--adata-input ~{merged_adata_object_basename}_filtered.h5ad \
-				--batch-key ~{batch_key} \
-				--adata-output ~{merged_adata_object_basename}_filtered_normalized.h5ad \
-				--n-top-genes ~{n_top_genes} \
-				--marker-genes ~{cell_type_markers_list} \
-				--output-all-genes ~{cohort_id}.all_genes.csv \
-				--output-hvg-genes ~{cohort_id}.hvg_genes.csv
+		python3 /opt/scripts/main/process.py \
+			--adata-input ~{merged_adata_object_basename}_filtered.h5ad \
+			--batch-key ~{batch_key} \
+			--adata-output ~{merged_adata_object_basename}_filtered_normalized.h5ad \
+			--norm-target-sum ~{norm_target_sum} \
+			--n-top-genes ~{n_top_genes} \
+			--n-comps ~{n_comps} \
+			--output-all-genes ~{cohort_id}.all_genes.csv \
+			--output-hvg-genes ~{cohort_id}.hvg_genes.csv
 
-			upload_outputs \
-				-b ~{billing_project} \
-				-d ~{raw_data_path} \
-				-i ~{write_tsv(workflow_info)} \
-				-o "~{cohort_id}.all_genes.csv" \
-				-o "~{cohort_id}.hvg_genes.csv"
-
-			echo true > cells_remaining_post_filter.txt
-		else
-			echo false > cells_remaining_post_filter.txt
-		fi
+		upload_outputs \
+			-b ~{billing_project} \
+			-d ~{raw_data_path} \
+			-i ~{write_tsv(workflow_info)} \
+			-o "~{cohort_id}.all_genes.csv" \
+			-o "~{cohort_id}.hvg_genes.csv"
 	>>>
 
 	output {
-		File? filtered_adata_object = if read_boolean("cells_remaining_post_filter.txt") then "~{merged_adata_object_basename}_filtered.h5ad" else my_none
-		File? normalized_adata_object = if read_boolean("cells_remaining_post_filter.txt") then "~{merged_adata_object_basename}_filtered_normalized.h5ad" else my_none
-		String? all_genes_csv = if read_boolean("cells_remaining_post_filter.txt") then "~{raw_data_path}/~{cohort_id}.all_genes.csv" else my_none
-		String? hvg_genes_csv = if read_boolean("cells_remaining_post_filter.txt") then "~{raw_data_path}/~{cohort_id}.hvg_genes.csv" else my_none
+		File filtered_adata_object = "~{merged_adata_object_basename}_filtered.h5ad"
+		File normalized_adata_object = "~{merged_adata_object_basename}_filtered_normalized.h5ad"
+		String all_genes_csv = "~{raw_data_path}/~{cohort_id}.all_genes.csv"
+		String hvg_genes_csv = "~{raw_data_path}/~{cohort_id}.hvg_genes.csv"
 	}
 
 	runtime {

@@ -51,7 +51,9 @@ An input template file can be found at [workflows/inputs.json](workflows/inputs.
 | Int? | doublet_score_max | Maximum doublet detection score threshold. [0.2] |
 | Array[Int]? | total_counts_limits | Minimum and maximum total UMI (unique molecular identifier) counts per cell. [100, 100000] |
 | Array[Int]? | n_genes_by_counts_limits | Minimum and maximum number of genes detected per cell (genes with at least one count). [100, 10000] |
+| Int? | norm_target_sum | The total count value that each cell will be normalized to. [10000] |
 | Int? | n_top_genes | Number of HVG genes to keep. [3000] |
+| Int? | n_comps | Number of principal components to compute. [30] |
 | String? | scvi_latent_key | Latent key to save the scVI latent to. ['X_scvi'] |
 | String? | batch_key | Key in AnnData object for batch information. ['batch_id'] |
 | String? | label_key | Key to reference 'cell_type' labels. ['cell_type'] |

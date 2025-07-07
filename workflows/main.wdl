@@ -22,7 +22,12 @@ workflow pmdbs_sc_rnaseq_analysis {
 		Float doublet_score_max = 0.2
     	Array[Int] total_counts_limits = [100, 100000]
     	Array[Int] n_genes_by_counts_limits = [100, 10000]
+
+    	# Normalization parameters
+    	Int norm_target_sum = 10000
 		Int n_top_genes = 3000
+		Int n_comps = 30
+		
 		String scvi_latent_key = "X_scvi"
 		String batch_key = "batch_id"
 		String label_key = "cell_type"
@@ -98,7 +103,9 @@ workflow pmdbs_sc_rnaseq_analysis {
 					doublet_score_max = doublet_score_max,
 					total_counts_limits = total_counts_limits,
 					n_genes_by_counts_limits = n_genes_by_counts_limits,
+					norm_target_sum = norm_target_sum,
 					n_top_genes = n_top_genes,
+					n_comps = n_comps,
 					scvi_latent_key =scvi_latent_key,
 					batch_key = batch_key,
 					label_key = label_key,
@@ -132,7 +139,9 @@ workflow pmdbs_sc_rnaseq_analysis {
 				doublet_score_max = doublet_score_max,
 				total_counts_limits = total_counts_limits,
 				n_genes_by_counts_limits = n_genes_by_counts_limits,
+				norm_target_sum = norm_target_sum,
 				n_top_genes = n_top_genes,
+				n_comps = n_comps,
 				scvi_latent_key =scvi_latent_key,
 				batch_key = batch_key,
 				label_key = label_key,
@@ -250,7 +259,9 @@ workflow pmdbs_sc_rnaseq_analysis {
 		doublet_score_max: {help: "Maximum doublet detection score threshold. [0.2]"}
     	total_counts_limits: {help: "Minimum and maximum total UMI (unique molecular identifier) counts per cell. [100, 100000]"}
     	n_genes_by_counts_limits: {help: "Minimum and maximum number of genes detected per cell (genes with at least one count). [100, 10000]"}
+		norm_target_sum: {help: "The total count value that each cell will be normalized to. [10000]"}
 		n_top_genes: {help: "Number of HVG genes to keep. [8000]"}
+		n_comps: {help: "Number of principal components to compute. [30]"}
 		scvi_latent_key: {help: "Latent key to save the scVI latent to. ['X_scvi']"}
 		batch_key: {help: "Key in AnnData object for batch information. ['batch_id']"}
 		label_key: {help: "Key to reference 'cell_type' labels. ['cell_type']"}
