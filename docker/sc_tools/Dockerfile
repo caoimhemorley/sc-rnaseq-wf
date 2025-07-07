@@ -33,7 +33,9 @@ RUN apt-get -qq update \
 		libc6-dev \
 		libbz2-dev \
 		libffi-dev \
-		liblzma-dev
+		liblzma-dev \
+		git \
+	&& rm -rf /var/lib/apt/lists/*
 
 ARG PYTHON3_VERSION
 ENV PYTHON3_VERSION "${PYTHON3_VERSION}"
@@ -45,9 +47,8 @@ RUN cd /opt/Python-${PYTHON3_VERSION} && \
 	make && \
 	make altinstall
 
-ENV PATH "${PATH}:/opt/Python-${PYTHON3_VERSION}"
-
-RUN ln -s /opt/Python-${PYTHON3_VERSION}/python /opt/Python-${PYTHON3_VERSION}/python3
+RUN update-alternatives --install /usr/bin/python3 python3 /opt/Python-${PYTHON3_VERSION}/python 1 \
+	&& update-alternatives --set python3 /opt/Python-${PYTHON3_VERSION}/python
 
 COPY ./requirements.txt /opt/requirements.txt
 RUN python3 -m pip install -r /opt/requirements.txt
@@ -56,20 +57,15 @@ RUN python3 -m pip install -r /opt/requirements.txt
 RUN python3 -m pip install --upgrade "jax[cuda12_pip]==${JAX_VERSION}" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
 # Add override scripts
-COPY scripts/main /opt/scripts/main
-COPY scripts/utility /opt/scripts/utility
+COPY scripts /opt/scripts
+ENV PATH "${PATH}:/opt/scripts"
 
 # Add resources
 COPY resources /opt/resources
 
-# gcloud sdk; needed to upload output files
-ARG GCLOUD_CLI_VERSION
-ENV GCLOUD_CLI_VERSION "${GCLOUD_CLI_VERSION}"
-RUN wget "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-${GCLOUD_CLI_VERSION}-linux-x86_64.tar.gz" \
-	&& tar -zxvf "google-cloud-cli-${GCLOUD_CLI_VERSION}-linux-x86_64.tar.gz" --directory /opt \
-	&& rm "google-cloud-cli-${GCLOUD_CLI_VERSION}-linux-x86_64.tar.gz"
-
-ENV PATH "${PATH}:/opt/google-cloud-sdk/bin"
-
-COPY --from=scripts /opt/scripts /opt/scripts
-ENV PATH "${PATH}:/opt/scripts"
+# Cell Type Mapper
+ARG CELL_TYPE_MAPPER_VERSION
+ENV CELL_TYPE_MAPPER_VERSION "${CELL_TYPE_MAPPER_VERSION}"
+RUN git clone https://github.com/AllenInstitute/cell_type_mapper/tree/v${CELL_TYPE_MAPPER_VERSION} \
+	cd cell_type_mapper \
+	python3 -m pip install -e .

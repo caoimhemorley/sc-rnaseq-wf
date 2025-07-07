@@ -51,6 +51,7 @@ An input template file can be found at [workflows/inputs.json](workflows/inputs.
 | Int? | doublet_score_max | Maximum doublet detection score threshold. [0.2] |
 | Array[Int]? | total_counts_limits | Minimum and maximum total UMI (unique molecular identifier) counts per cell. [100, 100000] |
 | Array[Int]? | n_genes_by_counts_limits | Minimum and maximum number of genes detected per cell (genes with at least one count). [100, 10000] |
+| File? | allen_mtg_precomputed_stats| This is a precomputed statistics file from the [Allen Brain Cell Atlas - Seattle Alzheimer’s Disease Brain Cell Atlas (SEA-AD) consortium](https://portal.brain-map.org/atlases-and-data/bkp/mapmycells) containing reference statistics for the middle temporal gyrus (MTG) brain region sourced from https://allen-brain-cell-atlas.s3-us-west-2.amazonaws.com/mapmycells/SEAAD/20240831/precomputed_stats.20231120.sea_ad.MTG.h5. |
 | Int? | norm_target_sum | The total count value that each cell will be normalized to. [10000] |
 | Int? | n_top_genes | Number of HVG genes to keep. [3000] |
 | Int? | n_comps | Number of principal components to compute. [30] |
@@ -166,13 +167,16 @@ asap-dev-{cohort,team-xxyy}-{source}-{dataset}
 └── pmdbs_sc_rnaseq
     ├── cohort_analysis
     │   ├── ${cohort_id}.sample_list.tsv
-    │   ├── ${cohort_id}.merged_adata_object.h5ad
+    │   ├── ${cohort_id}.merged.h5ad
     │   ├── ${cohort_id}.initial_metadata.csv
     │   ├── ${cohort_id}.doublet_score.violin.png
     │   ├── ${cohort_id}.n_genes_by_counts.violin.png
     │   ├── ${cohort_id}.pct_counts_mt.violin.png
     │   ├── ${cohort_id}.pct_counts_rb.violin.png
     │   ├── ${cohort_id}.total_counts.violin.png
+    │   ├── ${cohort_id}.mmc_otf_mapping.SEAAD.extended_results.json
+    │   ├── ${cohort_id}.mmc_otf_mapping.SEAAD.results.csv
+    │   ├── ${cohort_id}.mmc_otf_mapping.SEAAD.log.txt 
     │   ├── ${cohort_id}.all_genes.csv
     │   ├── ${cohort_id}.hvg_genes.csv
     │   ├── ${cohort_id}_scvi_model.tar.gz
@@ -300,7 +304,7 @@ Docker images can be build using the [`build_docker_images`](https://github.com/
 
 ```bash
 # Build a single image
-./build_docker_images -d docker/scvi
+./build_docker_images -d docker/sc_tools
 
 # Build all images in the `docker` directory
 ./build_docker_images -d docker
@@ -315,7 +319,7 @@ Docker images can be build using the [`build_docker_images`](https://github.com/
 | :- | :- | :- |
 | cellbender | <ul><li>[cellbender v0.3.0](https://github.com/broadinstitute/CellBender/releases/tag/v0.3.0)</li><li>[google-cloud-cli 397.0.0](https://cloud.google.com/sdk/docs/release-notes#39700_2022-08-09)</li><li>[python 3.7.16](https://www.python.org/downloads/release/python-3716/)</li><li>[miniconda 23.1.0](https://docs.anaconda.com/miniconda/miniconda-release-notes/)</li><li>[cuda 11.4.0](https://developer.nvidia.com/cuda-11-4-0-download-archive)</li></ul> | [Dockerfile](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/main/docker/cellbender) |
 | cellranger | <ul><li>[cellranger v7.1.0](https://www.10xgenomics.com/support/software/cell-ranger/latest/release-notes/cr-release-notes#v7-1-0)</li><li>[google-cloud-cli 444.0.0](https://cloud.google.com/sdk/docs/release-notes#44400_2023-08-22)</li></ul> | [Dockerfile](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/main/docker/cellranger) |
-| scvi | <ul><li>[google-cloud-cli 444.0.0](https://cloud.google.com/sdk/docs/release-notes#44400_2023-08-22)</li><li>[python 3.10.12](https://www.python.org/downloads/release/python-31012/)</li><li>[cuda 12.3.0](https://developer.nvidia.com/cuda-12-3-0-download-archive)</li><li>[cuda 11.4.0](https://developer.nvidia.com/cuda-11-4-0-download-archive)</li></ul> Python libraries: <ul><li>[scvi-tools 1.2.0](https://github.com/scverse/scvi-tools/releases/tag/1.2.0)</li><li>argparse 1.4.0</li><li>[scanpy 1.9.8](https://scanpy.readthedocs.io/en/stable/release-notes/index.html#id5)</li><li>muon 0.1.5</li><li>pathlib 1.0.1</li><li>tables 3.9.2</li><li>scrublet 0.2.3</li><li>pymde 0.1.18</li><li>[scikit-misc 0.3.1](https://github.com/has2k1/scikit-misc/releases/tag/v0.3.1)</li><li>leidenalg 0.10.2</li><li>[harmonypy 0.0.9](https://github.com/slowkow/harmonypy/releases/tag/v0.0.9)</li><li>faiss-gpu 1.7.2</li><li>[scib-metrics 0.5.1](https://github.com/YosefLab/scib-metrics/releases/tag/v0.5.1)</li></ul>| [Dockerfile](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/main/docker/scvi) |
+| sc_tools | <ul><li>[google-cloud-cli 444.0.0](https://cloud.google.com/sdk/docs/release-notes#44400_2023-08-22)</li><li>[python 3.10.12](https://www.python.org/downloads/release/python-31012/)</li><li>[cuda 12.3.0](https://developer.nvidia.com/cuda-12-3-0-download-archive)</li><li>[cuda 11.4.0](https://developer.nvidia.com/cuda-11-4-0-download-archive)</li></ul> Python libraries: <ul><li>[scvi-tools 1.2.0](https://github.com/scverse/scvi-tools/releases/tag/1.2.0)</li><li>argparse 1.4.0</li><li>[scanpy 1.9.8](https://scanpy.readthedocs.io/en/stable/release-notes/index.html#id5)</li><li>muon 0.1.5</li><li>pathlib 1.0.1</li><li>tables 3.9.2</li><li>scrublet 0.2.3</li><li>pymde 0.1.18</li><li>[scikit-misc 0.3.1](https://github.com/has2k1/scikit-misc/releases/tag/v0.3.1)</li><li>leidenalg 0.10.2</li><li>[harmonypy 0.0.9](https://github.com/slowkow/harmonypy/releases/tag/v0.0.9)</li><li>faiss-gpu 1.7.2</li><li>[scib-metrics 0.5.1](https://github.com/YosefLab/scib-metrics/releases/tag/v0.5.1)</li><li>[cell_type_mapper 1.5.3](https://github.com/AllenInstitute/cell_type_mapper/releases/tag/v1.5.3)</li></ul>| [Dockerfile](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/main/docker/sc_tools) |
 | multiome | <ul><li>[google-cloud-cli 444.0.0](https://cloud.google.com/sdk/docs/release-notes#44400_2023-08-22)</li><li>[multiome seuratv4 environment](https://github.com/shahrozeabbas/Multiome-SeuratV4/tree/main)</li><li>[R scripts](https://github.com/shahrozeabbas/Harmony-RNA-Workflow/tree/main/scripts)</li></ul> | [Dockerfile](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/main/docker/multiome) |
 | util | <ul><li>[google-cloud-cli 444.0.0-slim](https://cloud.google.com/sdk/docs/release-notes#44400_2023-08-22)</li></ul> | [Dockerfile](https://github.com/ASAP-CRN/wf-common/tree/main/docker/util) |
 
@@ -328,9 +332,6 @@ In general, `wdl-ci` will use inputs provided in the [wdl-ci.config.json](./wdl-
 
 
 # Notes
-
-## Precomputed statistics from Allen Brain Cell Atlas (SEAAD project)
-This is a precomputed statistics file from the Allen Brain Cell Atlas (SEAAD project) containing reference statistics for the middle temporal gyrus (MTG) brain region sourced from https://allen-brain-cell-atlas.s3-us-west-2.amazonaws.com/mapmycells/SEAAD/20240831/precomputed_stats.20231120.sea_ad.MTG.h5.
 
 ## DEPRECATED - Cell type marker table
 The reference taxonomy for inference of cell types via [CellAssign](https://docs.scvi-tools.org/en/1.1.0/user_guide/models/cellassign.html) are sourced from https://github.com/NIH-CARD/brain-taxonomy/blob/main/markers/cellassign_card_markers.csv.

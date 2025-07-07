@@ -23,6 +23,9 @@ workflow pmdbs_sc_rnaseq_analysis {
     	Array[Int] total_counts_limits = [100, 100000]
     	Array[Int] n_genes_by_counts_limits = [100, 10000]
 
+    	# Allen Institute's Map My Cells
+    	File allen_mtg_precomputed_stats
+
     	# Normalization parameters
     	Int norm_target_sum = 10000
 		Int n_top_genes = 3000
@@ -102,6 +105,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 					doublet_score_max = doublet_score_max,
 					total_counts_limits = total_counts_limits,
 					n_genes_by_counts_limits = n_genes_by_counts_limits,
+					allen_mtg_precomputed_stats = allen_mtg_precomputed_stats,
 					norm_target_sum = norm_target_sum,
 					n_top_genes = n_top_genes,
 					n_comps = n_comps,
@@ -137,6 +141,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 				doublet_score_max = doublet_score_max,
 				total_counts_limits = total_counts_limits,
 				n_genes_by_counts_limits = n_genes_by_counts_limits,
+				allen_mtg_precomputed_stats = allen_mtg_precomputed_stats,
 				norm_target_sum = norm_target_sum,
 				n_top_genes = n_top_genes,
 				n_comps = n_comps,
@@ -183,10 +188,13 @@ workflow pmdbs_sc_rnaseq_analysis {
 		## List of samples included in the cohort
 		Array[File?] project_cohort_sample_list = project_cohort_analysis.cohort_sample_list
 
-		# Merged adata objects, filtered and normalized adata objects, QC plots
+		# Merged adata objects, QC plots, filtered adata objects, MMC results, normalized adata objects
 		Array[File?] project_merged_adata_object = project_cohort_analysis.merged_adata_object
 		Array[Array[File]?] project_qc_plots_png = project_cohort_analysis.qc_plots_png
 		Array[File?] project_filtered_adata_object = project_cohort_analysis.filtered_adata_object
+		Array[File?] project_mmc_otf_mapping_extended_results_json = project_cohort_analysis.mmc_otf_mapping_extended_results_json
+		Array[File?] project_mmc_otf_mapping_results_csv = project_cohort_analysis.mmc_otf_mapping_results_csv
+		Array[File?] project_mmc_otf_mapping_log_txt = project_cohort_analysis.mmc_otf_mapping_log_txt
 		Array[File?] project_normalized_adata_object = project_cohort_analysis.normalized_adata_object
 		Array[File?] project_all_genes_csv = project_cohort_analysis.all_genes_csv
 		Array[File?] project_hvg_genes_csv = project_cohort_analysis.hvg_genes_csv
@@ -213,10 +221,13 @@ workflow pmdbs_sc_rnaseq_analysis {
 		## List of samples included in the cohort
 		File? cohort_sample_list = cross_team_cohort_analysis.cohort_sample_list
 
-		# Merged adata objects, filtered and normalized adata objects, QC plots
+		# Merged adata objects, QC plots, filtered adata objects, MMC results, normalized adata objects
 		File? cohort_merged_adata_object = cross_team_cohort_analysis.merged_adata_object
 		Array[File]? cohort_qc_plots_png = cross_team_cohort_analysis.qc_plots_png
 		File? cohort_filtered_adata_object = cross_team_cohort_analysis.filtered_adata_object
+		File? cohort_mmc_otf_mapping_extended_results_json = cross_team_cohort_analysis.mmc_otf_mapping_extended_results_json
+		File? cohort_mmc_otf_mapping_results_csv = cross_team_cohort_analysis.mmc_otf_mapping_results_csv
+		File? cohort_mmc_otf_mapping_log_txt = cross_team_cohort_analysis.mmc_otf_mapping_log_txt
 		File? cohort_normalized_adata_object = cross_team_cohort_analysis.normalized_adata_object
 		File? cohort_all_genes_csv = cross_team_cohort_analysis.all_genes_csv
 		File? cohort_hvg_genes_csv = cross_team_cohort_analysis.hvg_genes_csv
@@ -252,6 +263,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 		doublet_score_max: {help: "Maximum doublet detection score threshold. [0.2]"}
     	total_counts_limits: {help: "Minimum and maximum total UMI (unique molecular identifier) counts per cell. [100, 100000]"}
     	n_genes_by_counts_limits: {help: "Minimum and maximum number of genes detected per cell (genes with at least one count). [100, 10000]"}
+		allen_mtg_precomputed_stats: {help: "A precomputed statistics file from the Allen Brain Cell Atlas - Seattle Alzheimer’s Disease Brain Cell Atlas (SEA-AD) consortium containing reference statistics for the middle temporal gyrus (MTG) brain region."}
 		norm_target_sum: {help: "The total count value that each cell will be normalized to. [10000]"}
 		n_top_genes: {help: "Number of HVG genes to keep. [8000]"}
 		n_comps: {help: "Number of principal components to compute. [30]"}
