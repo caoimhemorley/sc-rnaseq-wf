@@ -17,11 +17,11 @@ workflow pmdbs_sc_rnaseq_analysis {
 		# Preprocess
 		Float cellbender_fpr = 0.0
 
-		# Cohort analysis
-		Boolean run_cross_team_cohort_analysis = false
-		String cohort_raw_data_bucket
-		Array[String] cohort_staging_data_buckets
-
+		# Filtering parameters
+		Int pct_counts_mt_max = 10
+		Float doublet_score_max = 0.2
+    	Array[Int] total_counts_limits = [100, 100000]
+    	Array[Int] n_genes_by_counts_limits = [100, 10000]
 		Int n_top_genes = 3000
 		String scvi_latent_key = "X_scvi"
 		String batch_key = "batch_id"
@@ -30,6 +30,11 @@ workflow pmdbs_sc_rnaseq_analysis {
 
 		Array[String] groups = ["sample", "batch", "cell_type", "leiden_res_0.05", "leiden_res_0.10", "leiden_res_0.20", "leiden_res_0.40"]
 		Array[String] features = ["n_genes_by_counts", "total_counts", "pct_counts_mt", "pct_counts_rb", "doublet_score", "S_score", "G2M_score"]
+
+		# Cohort analysis
+		Boolean run_cross_team_cohort_analysis = false
+		String cohort_raw_data_bucket
+		Array[String] cohort_staging_data_buckets
 
 		String container_registry
 		String zones = "us-central1-c us-central1-f"
@@ -89,6 +94,10 @@ workflow pmdbs_sc_rnaseq_analysis {
 					preprocessed_adata_objects = preprocess.adata_object,
 					preprocessing_output_file_paths = preprocessing_output_file_paths,
 					project_cohort_analysis = true,
+					pct_counts_mt_max = pct_counts_mt_max,
+					doublet_score_max = doublet_score_max,
+					total_counts_limits = total_counts_limits,
+					n_genes_by_counts_limits = n_genes_by_counts_limits,
 					n_top_genes = n_top_genes,
 					scvi_latent_key =scvi_latent_key,
 					batch_key = batch_key,
@@ -119,6 +128,10 @@ workflow pmdbs_sc_rnaseq_analysis {
 				preprocessed_adata_objects = flatten(preprocess.adata_object),
 				preprocessing_output_file_paths = flatten(preprocessing_output_file_paths),
 				project_cohort_analysis = false,
+				pct_counts_mt_max = pct_counts_mt_max,
+				doublet_score_max = doublet_score_max,
+				total_counts_limits = total_counts_limits,
+				n_genes_by_counts_limits = n_genes_by_counts_limits,
 				n_top_genes = n_top_genes,
 				scvi_latent_key =scvi_latent_key,
 				batch_key = batch_key,
@@ -232,17 +245,21 @@ workflow pmdbs_sc_rnaseq_analysis {
 		cohort_id: {help: "Name of the cohort; used to name output files during cross-team cohort analysis."}
 		projects: {help: "The project ID, set of samples and their associated reads and metadata, output bucket locations, and whether or not to run project-level cohort analysis."}
 		cellranger_reference_data: {help: "Cellranger transcriptome reference data; see https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest."}
-		cellbender_fpr :{help: "Cellbender false positive rate. [0.0]"}
-		run_cross_team_cohort_analysis: {help: "Whether to run downstream harmonization steps on all samples across projects. If set to false, only preprocessing steps (cellranger and generating the initial adata object(s)) will run for samples. [false]"}
-		cohort_raw_data_bucket: {help: "Bucket to upload cross-team cohort intermediate files to."}
-		cohort_staging_data_buckets: {help: "Set of buckets to stage cross-team cohort analysis outputs in."}
+		cellbender_fpr: {help: "Cellbender false positive rate. [0.0]"}
+		pct_counts_mt_max: {help: "Maximum percentage of mitochondrial gene counts allowed per cell. [10]"}
+		doublet_score_max: {help: "Maximum doublet detection score threshold. [0.2]"}
+    	total_counts_limits: {help: "Minimum and maximum total UMI (unique molecular identifier) counts per cell. [100, 100000]"}
+    	n_genes_by_counts_limits: {help: "Minimum and maximum number of genes detected per cell (genes with at least one count). [100, 10000]"}
 		n_top_genes: {help: "Number of HVG genes to keep. [8000]"}
 		scvi_latent_key: {help: "Latent key to save the scVI latent to. ['X_scvi']"}
 		batch_key: {help: "Key in AnnData object for batch information. ['batch_id']"}
-		label_key : {help: "Key to reference 'cell_type' labels. ['cell_type']"}
+		label_key: {help: "Key to reference 'cell_type' labels. ['cell_type']"}
 		cell_type_markers_list: {help: "CSV file containing a list of major cell type markers; used to annotate clusters."}
 		groups: {help: "Groups to produce umap plots for. ['sample', 'batch', 'cell_type', 'leiden_res_0.05', 'leiden_res_0.10', 'leiden_res_0.20', 'leiden_res_0.40']"}
 		features: {help: "Features to produce umap plots for. ['n_genes_by_counts', 'total_counts', 'pct_counts_mt', 'pct_counts_rb', 'doublet_score', 'S_score', 'G2M_score']"}
+		run_cross_team_cohort_analysis: {help: "Whether to run downstream harmonization steps on all samples across projects. If set to false, only preprocessing steps (cellranger and generating the initial adata object(s)) will run for samples. [false]"}
+		cohort_raw_data_bucket: {help: "Bucket to upload cross-team cohort intermediate files to."}
+		cohort_staging_data_buckets: {help: "Set of buckets to stage cross-team cohort analysis outputs in."}
 		container_registry: {help: "Container registry where workflow Docker images are hosted."}
 		zones: {help: "Space-delimited set of GCP zones to spin up compute in."}
 	}

@@ -11,14 +11,6 @@ from helpers import update_validation_metrics
 
 
 def filter_adata(adata_fname: str) -> AnnData:
-    # TODO: make these cutoffs arguments...
-    ## Fixed Parameters
-    
-    pct_counts_mt_max = 10
-    doublet_score_max = 0.2
-    total_counts_limits = [100, 100000]
-    n_genes_by_counts_limits = [100, 10000]
-
     print(f"----load adata")
 
     # 0. load data
@@ -29,28 +21,29 @@ def filter_adata(adata_fname: str) -> AnnData:
     # For example, filter cells with a certain metadata label
     # muon api is better than the scanpyt api for this...
     # mu.pp.filter_obs(adata, "pct_counts_mt", lambda x: x <= pct_counts_mt_max)
-    keep_mt = adata_backed.obs['pct_counts_mt'] <= pct_counts_mt_max
+    print(f"----filter 1: pct_counts_mt_max")
+    keep_mt = adata_backed.obs['pct_counts_mt'] <= args.pct_counts_mt_max
 
-    print(f"----   filter 2")
+    print(f"----   filter 2: doublet_score_max")
     # mu.pp.filter_obs(adata, "doublet_score", lambda x: x < doublet_score_max)
-    keep_doublet = adata_backed.obs['doublet_score'] < doublet_score_max
+    keep_doublet = adata_backed.obs['doublet_score'] < args.doublet_score_max
 
-    print(f"----      filter 3")
+    print(f"----      filter 3: total_counts_limits")
     # mu.pp.filter_obs(
     #     adata,
     #     "total_counts",
     #     lambda x: (x >= total_counts_limits[0]) & (x <= total_counts_limits[1]),
     # )
-    keep_total_counts = (adata_backed.obs['total_counts'] >= total_counts_limits[0]) & (adata_backed.obs['total_counts'] <= total_counts_limits[1])
+    keep_total_counts = (adata_backed.obs['total_counts'] >= args.total_counts_limits[0]) & (adata_backed.obs['total_counts'] <= args.total_counts_limits[1])
 
-    print(f"----         filter 4")
+    print(f"----         filter 4: n_genes_by_counts_limits")
     # mu.pp.filter_obs(
     #     adata,
     #     "n_genes_by_counts",
     #     lambda x: (x >= n_genes_by_counts_limits[0])
     #     & (x <= n_genes_by_counts_limits[1]),
     # )
-    keep_n_genes_by_counts = (adata_backed.obs['n_genes_by_counts'] >= n_genes_by_counts_limits[0]) & (adata_backed.obs['n_genes_by_counts'] <= n_genes_by_counts_limits[1])
+    keep_n_genes_by_counts = (adata_backed.obs['n_genes_by_counts'] >= args.n_genes_by_counts_limits[0]) & (adata_backed.obs['n_genes_by_counts'] <= args.n_genes_by_counts_limits[1])
 
 
     keep_cells = keep_mt & keep_doublet & keep_total_counts & keep_n_genes_by_counts
@@ -74,33 +67,57 @@ def main(args: argparse.Namespace):
     # Set CPUs to use for parallel computing
     sc._settings.ScanpyConfig.n_jobs = -1
 
-    
     # 1. filter data
     adata = filter_adata(args.adata_input)
     print(f"---- filtered -----")
     
     # 2. save the filtered adata
-    #    save the filtered adata
-    # adata.write_h5ad(filename=args.adata_output, compression="gzip")
-    adata.write_h5ad(filename=args.adata_output)
+    adata.write_h5ad(filename=args.adata_output, compression="gzip")
     print(f"wrote {args.adata_output}")
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Filter")
     parser.add_argument(
         "--adata-input",
         dest="adata_input",
         type=str,
+        required=True,
         help="AnnData object for a dataset",
+    )
+    parser.add_argument(
+        "--pct-counts-mt-max",
+        type=int,
+        required=True,
+        help="Maximum percentage of mitochondrial gene counts allowed per cell [10]"
+    )
+    parser.add_argument(
+        "--doublet-score-max",
+        type=float,
+        required=True,
+        help="Maximum doublet detection score threshold [0.2]"
+    )
+    parser.add_argument(
+        "--total-counts-limits",
+        type=int,
+        nargs="+",
+        required=True,
+        help="Minimum and maximum total UMI (unique molecular identifier) counts per cell [100, 100000]"
+    )
+    parser.add_argument(
+        "--n-genes-by-counts-limits",
+        type=int,
+        nargs="+",
+        required=True,
+        help="Minimum and maximum number of genes detected per cell (genes with at least one count) [100, 10000]"
     )
     parser.add_argument(
         "--adata-output",
         dest="adata_output",
         type=str,
+        required=True,
         help="Output file to save AnnData object to",
     )
-    # TODO: add filter parameters as arguments
 
     args = parser.parse_args()
     main(args)

@@ -47,9 +47,10 @@ An input template file can be found at [workflows/inputs.json](workflows/inputs.
 | Array[[Project](#project)] | projects | The project ID, set of samples and their associated reads and metadata, output bucket locations, and whether or not to run project-level cohort analysis. |
 | File | cellranger_reference_data | Cellranger transcriptome reference data; see https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest. |
 | Float? | cellbender_fpr | Cellbender false positive rate for signal removal. [0.0] |
-| Boolean? | run_cross_team_cohort_analysis | Whether to run downstream harmonization steps on all samples across projects. If set to false, only preprocessing steps (cellranger and generating the initial adata object(s)) will run for samples. [false] |
-| String | cohort_raw_data_bucket | Bucket to upload cross-team cohort intermediate files to. |
-| Array[String] | cohort_staging_data_buckets | Buckets to upload cross-team cohort analysis outputs to. |
+| Float? | pct_counts_mt_max | Maximum percentage of mitochondrial gene counts allowed per cell. [10] |
+| Int? | doublet_score_max | Maximum doublet detection score threshold. [0.2] |
+| Array[Int]? | total_counts_limits | Minimum and maximum total UMI (unique molecular identifier) counts per cell. [100, 100000] |
+| Array[Int]? | n_genes_by_counts_limits | Minimum and maximum number of genes detected per cell (genes with at least one count). [100, 10000] |
 | Int? | n_top_genes | Number of HVG genes to keep. [3000] |
 | String? | scvi_latent_key | Latent key to save the scVI latent to. ['X_scvi'] |
 | String? | batch_key | Key in AnnData object for batch information. ['batch_id'] |
@@ -57,6 +58,9 @@ An input template file can be found at [workflows/inputs.json](workflows/inputs.
 | File | cell_type_markers_list | CSV file containing a list of major cell type markers; used to annotate cells. |
 | Array[String]? | groups | Groups to produce umap plots for. ['sample', 'batch', 'cell_type', 'leiden_res_0.05', 'leiden_res_0.10', 'leiden_res_0.20', 'leiden_res_0.40'] |
 | Array[String]? | features | Features to produce umap plots for. ['n_genes_by_counts', 'total_counts', 'pct_counts_mt', 'pct_counts_rb', 'doublet_score', 'S_score', 'G2M_score'] |
+| Boolean? | run_cross_team_cohort_analysis | Whether to run downstream harmonization steps on all samples across projects. If set to false, only preprocessing steps (cellranger and generating the initial adata object(s)) will run for samples. [false] |
+| String | cohort_raw_data_bucket | Bucket to upload cross-team cohort intermediate files to. |
+| Array[String] | cohort_staging_data_buckets | Buckets to upload cross-team cohort analysis outputs to. |
 | String | container_registry | Container registry where workflow Docker images are hosted. |
 | String? | zones | GCP zones where compute will take place. ['us-central1-c us-central1-f'] |
 

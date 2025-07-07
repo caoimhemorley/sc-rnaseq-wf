@@ -17,6 +17,12 @@ workflow cohort_analysis {
 
 		Boolean project_cohort_analysis
 
+		# Filtering parameters
+		Int pct_counts_mt_max
+		Float doublet_score_max
+    	Array[Int] total_counts_limits
+    	Array[Int] n_genes_by_counts_limits
+
 		Int n_top_genes
 
 		String scvi_latent_key
@@ -72,6 +78,10 @@ workflow cohort_analysis {
 		input:
 			cohort_id = cohort_id,
 			merged_adata_object = merge_and_plot_qc_metrics.merged_adata_object, #!FileCoercion
+			pct_counts_mt_max = pct_counts_mt_max,
+			doublet_score_max = doublet_score_max,
+			total_counts_limits = total_counts_limits,
+			n_genes_by_counts_limits = n_genes_by_counts_limits,
 			n_top_genes = n_top_genes,
 			batch_key = batch_key,
 			cell_type_markers_list = cell_type_markers_list,
@@ -296,6 +306,11 @@ task filter_and_normalize {
 		String cohort_id
 		File merged_adata_object
 
+		Int pct_counts_mt_max
+		Float doublet_score_max
+    	Array[Int] total_counts_limits
+    	Array[Int] n_genes_by_counts_limits
+
 		Int n_top_genes
 		String batch_key
 		File cell_type_markers_list
@@ -317,9 +332,12 @@ task filter_and_normalize {
 	command <<<
 		set -euo pipefail
 
-		# The validation metrics file is overwritten with updated validation metrics
 		python3 /opt/scripts/main/filter.py \
 			--adata-input ~{merged_adata_object} \
+			--pct-counts-mt-max ~{pct_counts_mt_max} \
+			--doublet-score-max ~{doublet_score_max} \
+			--total-counts-limits ~{sep=' ' total_counts_limits} \
+			--n-genes-by-counts-limits ~{sep=' ' n_genes_by_counts_limits} \
 			--adata-output ~{merged_adata_object_basename}_filtered.h5ad
 
 		# TODO see whether this is still required given the change to python
