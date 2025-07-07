@@ -94,12 +94,12 @@ if __name__ == "__main__":
         type=str,
         help="Output file to write metadata to",
     )
-    parser.add_argument(
-        "--output-validation-file",
-        dest="output_validation_file",
-        type=str,
-        help="Output file to write validation metrics to",
-    )
+    # parser.add_argument(
+    #     "--output-validation-file",
+    #     dest="output_validation_file",
+    #     type=str,
+    #     help="Output file to write validation metrics to",
+    # )
 
     args = parser.parse_args()
     main(args)

@@ -45,15 +45,6 @@
                     "count_columns"
                   ]
                 },
-                "qc_validation_metrics_csv": {
-                  "value": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.validation_metrics.csv",
-                  "test_tasks": [
-                    "compare_file_basename",
-                    "check_empty_lines",
-                    "check_comma_separated",
-                    "count_columns"
-                  ]
-                },
                 "qc_plots_png": {
                   "value": [
                     "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.n_genes_by_counts.violin.png",
@@ -79,7 +70,6 @@
               "inputs": {
                 "cohort_id": "${cohort_id}",
                 "merged_adata_object": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.merged_adata_object.h5ad",
-                "qc_validation_metrics_csv": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.validation_metrics.csv",
                 "n_top_genes": "${n_top_genes}",
                 "batch_key": "${batch_key}",
                 "cell_type_markers_list": "${input_file_path}/celltype_marker_table.csv",
@@ -115,15 +105,6 @@
                 },
                 "hvg_genes_csv": {
                   "value": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.hvg_genes.csv",
-                  "test_tasks": [
-                    "compare_file_basename",
-                    "check_empty_lines",
-                    "check_comma_separated",
-                    "count_columns"
-                  ]
-                },
-                "final_validation_metrics": {
-                  "value": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.final_validation_metrics.csv",
                   "test_tasks": [
                     "compare_file_basename",
                     "check_empty_lines",
