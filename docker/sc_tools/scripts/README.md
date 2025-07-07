@@ -27,7 +27,7 @@
 
 ## _INTEGRATE DATA_
 
-- _transcriptional-phenotype_:  cell transcritional phenotype [`transcriptional_phenotype.py`](./main/transcriptional_phenotype.py)
+- _transcriptional-phenotype_:  cell transcriptional phenotype [`transcriptional_phenotype.py`](./main/transcriptional_phenotype.py)
     - assign 'cell_type' to high-fidelity mappings (i.e. correlation >0.5 and bootstrap_probability>0.5), all else "unknown" to the high level labels.
     - annotate adata & export full celltypes
 

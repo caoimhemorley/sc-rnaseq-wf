@@ -117,10 +117,22 @@ workflow cohort_analysis {
 			zones = zones
 	}
 
-	call ClusterData.cluster_data {
+	call add_mapped_cell_types {
 		input:
 			cohort_id = cohort_id,
 			normalized_adata_object = normalize.normalized_adata_object,
+			mmc_results_csv = map_cell_types.mmc_results_csv, #!FileCoercion
+			raw_data_path = raw_data_path,
+			workflow_info = workflow_info,
+			billing_project = billing_project,
+			container_registry = container_registry,
+			zones = zones
+	}
+
+	call ClusterData.cluster_data {
+		input:
+			cohort_id = cohort_id,
+			mmc_adata_object = add_mapped_cell_types.mmc_adata_object,
 			scvi_latent_key = scvi_latent_key,
 			batch_key = batch_key,
 			raw_data_path = raw_data_path,
@@ -188,13 +200,16 @@ workflow cohort_analysis {
 		],
 		merge_and_plot_qc_metrics.qc_plots_png,
 		[
-			map_cell_types.mmc_otf_mapping_extended_results_json,
-			map_cell_types.mmc_otf_mapping_results_csv,
-			map_cell_types.mmc_otf_mapping_log_txt
+			map_cell_types.mmc_extended_results_json,
+			map_cell_types.mmc_results_csv,
+			map_cell_types.mmc_log_txt
 		],
 		[
 			normalize.all_genes_csv,
 			normalize.hvg_genes_csv
+		],
+		[
+			add_mapped_cell_types.mmc_results_parquet
 		],
 		[
 			cluster_data.scvi_model_tar_gz
@@ -229,10 +244,12 @@ workflow cohort_analysis {
 		File merged_adata_object = merge_and_plot_qc_metrics.merged_adata_object #!FileCoercion
 		Array[File] qc_plots_png = merge_and_plot_qc_metrics.qc_plots_png #!FileCoercion
 		File filtered_adata_object = filter.filtered_adata_object
-		File mmc_otf_mapping_extended_results_json = map_cell_types.mmc_otf_mapping_extended_results_json #!FileCoercion
-		File mmc_otf_mapping_results_csv = map_cell_types.mmc_otf_mapping_results_csv #!FileCoercion
-		File mmc_otf_mapping_log_txt = map_cell_types.mmc_otf_mapping_log_txt #!FileCoercion
+		File mmc_extended_results_json = map_cell_types.mmc_extended_results_json #!FileCoercion
+		File mmc_results_csv = map_cell_types.mmc_results_csv #!FileCoercion
+		File mmc_log_txt = map_cell_types.mmc_log_txt #!FileCoercion
 		File normalized_adata_object = normalize.normalized_adata_object
+		File mmc_results_parquet = add_mapped_cell_types.mmc_results_parquet #!FileCoercion
+		File mmc_adata_object = add_mapped_cell_types.mmc_adata_object
 		File all_genes_csv = normalize.all_genes_csv #!FileCoercion
 		File hvg_genes_csv = normalize.hvg_genes_csv #!FileCoercion
 
@@ -409,9 +426,9 @@ task map_cell_types {
 	>>>
 
 	output {
-		String mmc_otf_mapping_extended_results_json = "~{raw_data_path}/~{cohort_id}.mmc_otf_mapping.SEAAD.extended_results.json"
-		String mmc_otf_mapping_results_csv = "~{raw_data_path}/~{cohort_id}.mmc_otf_mapping.SEAAD.results.csv"
-		String mmc_otf_mapping_log_txt = "~{raw_data_path}/~{cohort_id}.mmc_otf_mapping.SEAAD.log.txt"
+		String mmc_extended_results_json = "~{raw_data_path}/~{cohort_id}.mmc_otf_mapping.SEAAD.extended_results.json"
+		String mmc_results_csv = "~{raw_data_path}/~{cohort_id}.mmc_otf_mapping.SEAAD.results.csv"
+		String mmc_log_txt = "~{raw_data_path}/~{cohort_id}.mmc_otf_mapping.SEAAD.log.txt"
 	}
 
 	runtime {
@@ -470,6 +487,54 @@ task normalize {
 		File normalized_adata_object = "~{cohort_id}.normalized.h5ad"
 		String all_genes_csv = "~{raw_data_path}/~{cohort_id}.all_genes.csv"
 		String hvg_genes_csv = "~{raw_data_path}/~{cohort_id}.hvg_genes.csv"
+	}
+
+	runtime {
+		docker: "~{container_registry}/sc_tools:1.0.0"
+		cpu: 4
+		memory: "~{mem_gb} GB"
+		disks: "local-disk ~{disk_size} HDD"
+		preemptible: 3
+		bootDiskSizeGb: 40
+		zones: zones
+	}
+}
+
+task add_mapped_cell_types {
+	input {
+		String cohort_id
+		File normalized_adata_object
+		File mmc_results_csv
+
+		String raw_data_path
+		Array[Array[String]] workflow_info
+		String billing_project
+		String container_registry
+		String zones
+	}
+
+	Int mem_gb = ceil(size(normalized_adata_object, "GB") * 18 + 20)
+	Int disk_size = ceil(size(normalized_adata_object, "GB") * 4 + 20)
+
+	command <<<
+		set -euo pipefail
+
+		python3 /opt/scripts/main/transcriptional_phenotype.py \
+			--adata-input ~{normalized_adata_object} \
+			--mmc-results ~{mmc_results_csv} \
+			--output-cell-types-file ~{cohort_id}.mmc_results.parquet \
+			--adata-output ~{cohort_id}.mmc.h5ad
+
+		upload_outputs \
+			-b ~{billing_project} \
+			-d ~{raw_data_path} \
+			-i ~{write_tsv(workflow_info)} \
+			-o "~{cohort_id}.mmc_results.parquet"
+	>>>
+
+	output {
+		String mmc_results_parquet = "~{raw_data_path}/~{cohort_id}.mmc_results.parquet"
+		File mmc_adata_object = "~{cohort_id}.mmc.h5ad"
 	}
 
 	runtime {

@@ -5,7 +5,7 @@ version 1.0
 workflow cluster_data {
 	input {
 		String cohort_id
-		File normalized_adata_object
+		File mmc_adata_object
 
 		String scvi_latent_key
 		String batch_key
@@ -20,7 +20,7 @@ workflow cluster_data {
 	call integrate_sample_data {
 		input:
 			cohort_id = cohort_id,
-			normalized_adata_object = normalized_adata_object,
+			mmc_adata_object = mmc_adata_object,
 			scvi_latent_key = scvi_latent_key,
 			batch_key = batch_key,
 			raw_data_path = raw_data_path,
@@ -48,7 +48,7 @@ workflow cluster_data {
 task integrate_sample_data {
 	input {
 		String cohort_id
-		File normalized_adata_object
+		File mmc_adata_object
 
 		String scvi_latent_key
 		String batch_key
@@ -60,8 +60,8 @@ task integrate_sample_data {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(normalized_adata_object, "GB") * 5 + 20)
-	Int disk_size = ceil(size(normalized_adata_object, "GB") * 3 + 50)
+	Int mem_gb = ceil(size(mmc_adata_object, "GB") * 5 + 20)
+	Int disk_size = ceil(size(mmc_adata_object, "GB") * 3 + 50)
 
 	command <<<
 		set -euo pipefail
@@ -71,7 +71,7 @@ task integrate_sample_data {
 		python3 /opt/scripts/main/integrate_scvi.py \
 			--latent-key ~{scvi_latent_key} \
 			--batch-key ~{batch_key} \
-			--adata-input ~{normalized_adata_object} \
+			--adata-input ~{mmc_adata_object} \
 			--adata-output ~{cohort_id}.merged_adata_object.scvi_integrated.h5ad \
 			--output-scvi-dir ~{cohort_id}_scvi_model
 
