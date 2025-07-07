@@ -27,11 +27,10 @@ workflow pmdbs_sc_rnaseq_analysis {
     	Int norm_target_sum = 10000
 		Int n_top_genes = 3000
 		Int n_comps = 30
-		
+
 		String scvi_latent_key = "X_scvi"
 		String batch_key = "batch_id"
 		String label_key = "cell_type"
-		File cell_type_markers_list
 
 		Array[String] groups = ["sample", "batch", "cell_type", "leiden_res_0.05", "leiden_res_0.10", "leiden_res_0.20", "leiden_res_0.40"]
 		Array[String] features = ["n_genes_by_counts", "total_counts", "pct_counts_mt", "pct_counts_rb", "doublet_score", "S_score", "G2M_score"]
@@ -109,7 +108,6 @@ workflow pmdbs_sc_rnaseq_analysis {
 					scvi_latent_key =scvi_latent_key,
 					batch_key = batch_key,
 					label_key = label_key,
-					cell_type_markers_list = cell_type_markers_list,
 					groups = groups,
 					features = features,
 					workflow_name = workflow_name,
@@ -145,7 +143,6 @@ workflow pmdbs_sc_rnaseq_analysis {
 				scvi_latent_key =scvi_latent_key,
 				batch_key = batch_key,
 				label_key = label_key,
-				cell_type_markers_list = cell_type_markers_list,
 				groups = groups,
 				features = features,
 				workflow_name = workflow_name,
@@ -198,8 +195,6 @@ workflow pmdbs_sc_rnaseq_analysis {
 		Array[File?] project_integrated_adata_object = project_cohort_analysis.integrated_adata_object
 		Array[File?] project_scvi_model_tar_gz = project_cohort_analysis.scvi_model_tar_gz
 		Array[File?] project_umap_cluster_adata_object = project_cohort_analysis.umap_cluster_adata_object
-		Array[File?] project_cell_annotated_adata_object = project_cohort_analysis.cell_annotated_adata_object
-		Array[File?] project_cell_types_csv = project_cohort_analysis.cell_types_csv
 
 		# PCA and Harmony integrated adata objects and artifact metrics
 		Array[File?] project_final_adata_object = project_cohort_analysis.final_adata_object
@@ -230,8 +225,6 @@ workflow pmdbs_sc_rnaseq_analysis {
 		File? cohort_integrated_adata_object = cross_team_cohort_analysis.integrated_adata_object
 		File? cohort_scvi_model_tar_gz = cross_team_cohort_analysis.scvi_model_tar_gz
 		File? cohort_umap_cluster_adata_object = cross_team_cohort_analysis.umap_cluster_adata_object
-		File? cohort_cell_annotated_adata_object = cross_team_cohort_analysis.cell_annotated_adata_object
-		File? cohort_cell_types_csv = cross_team_cohort_analysis.cell_types_csv
 
 		# PCA and Harmony integrated adata objects and artifact metrics
 		File? cohort_final_adata_object = cross_team_cohort_analysis.final_adata_object
@@ -265,7 +258,6 @@ workflow pmdbs_sc_rnaseq_analysis {
 		scvi_latent_key: {help: "Latent key to save the scVI latent to. ['X_scvi']"}
 		batch_key: {help: "Key in AnnData object for batch information. ['batch_id']"}
 		label_key: {help: "Key to reference 'cell_type' labels. ['cell_type']"}
-		cell_type_markers_list: {help: "CSV file containing a list of major cell type markers; used to annotate clusters."}
 		groups: {help: "Groups to produce umap plots for. ['sample', 'batch', 'cell_type', 'leiden_res_0.05', 'leiden_res_0.10', 'leiden_res_0.20', 'leiden_res_0.40']"}
 		features: {help: "Features to produce umap plots for. ['n_genes_by_counts', 'total_counts', 'pct_counts_mt', 'pct_counts_rb', 'doublet_score', 'S_score', 'G2M_score']"}
 		run_cross_team_cohort_analysis: {help: "Whether to run downstream harmonization steps on all samples across projects. If set to false, only preprocessing steps (cellranger and generating the initial adata object(s)) will run for samples. [false]"}

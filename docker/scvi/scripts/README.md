@@ -39,7 +39,7 @@
     - updated to do leiden at 4 resolutions - [0.05, 0.1, 0.2, 0.4]
         - FUTURE: we may choose `mde` (`clustering_mde.py`) over `umap`, as it is super fast and efficient on a GPU, and the embeddings are only useful for visualization so the choice is semi-arbitrary.
 
-- __DEPRICATED__  --- _annotation_: [`annotate_cells.py`](./main/annotate_cells.py).  
+- __DEPRECATED__  --- _annotation_: [`annotate_cells.py`](./main/DEPRECATED_annotate_cells.py).  
     - Use cellassign and a list of marker genes. Currently using CARD cortical list of genes.  NOTE: this is not annotating the "clusters" but the cells based on marker gene expression.
 
 - _alternate integration_: [`add_harmony.py`](./main/add_harmony.py)

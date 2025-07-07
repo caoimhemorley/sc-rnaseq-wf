@@ -57,7 +57,6 @@ An input template file can be found at [workflows/inputs.json](workflows/inputs.
 | String? | scvi_latent_key | Latent key to save the scVI latent to. ['X_scvi'] |
 | String? | batch_key | Key in AnnData object for batch information. ['batch_id'] |
 | String? | label_key | Key to reference 'cell_type' labels. ['cell_type'] |
-| File | cell_type_markers_list | CSV file containing a list of major cell type markers; used to annotate cells. |
 | Array[String]? | groups | Groups to produce umap plots for. ['sample', 'batch', 'cell_type', 'leiden_res_0.05', 'leiden_res_0.10', 'leiden_res_0.20', 'leiden_res_0.40'] |
 | Array[String]? | features | Features to produce umap plots for. ['n_genes_by_counts', 'total_counts', 'pct_counts_mt', 'pct_counts_rb', 'doublet_score', 'S_score', 'G2M_score'] |
 | Boolean? | run_cross_team_cohort_analysis | Whether to run downstream harmonization steps on all samples across projects. If set to false, only preprocessing steps (cellranger and generating the initial adata object(s)) will run for samples. [false] |
@@ -177,7 +176,6 @@ asap-dev-{cohort,team-xxyy}-{source}-{dataset}
     │   ├── ${cohort_id}.all_genes.csv
     │   ├── ${cohort_id}.hvg_genes.csv
     │   ├── ${cohort_id}_scvi_model.tar.gz
-    │   ├── ${cohort_id}.cell_types.csv
     │   ├── ${cohort_id}.final_adata.h5ad
     │   ├── ${cohort_id}.final_metadata.csv
     │   ├── ${team_id}.scib_report.csv
@@ -330,11 +328,14 @@ In general, `wdl-ci` will use inputs provided in the [wdl-ci.config.json](./wdl-
 
 
 # Notes
-## Cell type marker table
-The reference taxonomy for inference of cell types via [CellAssign](https://docs.scvi-tools.org/en/1.1.0/user_guide/models/cellassign.html) are sourced from https://github.com/NIH-CARD/brain-taxonomy/blob/main/markers/cellassign_card_markers.csv.
 
+## Precomputed statistics from Allen Brain Cell Atlas (SEAAD project)
+This is a precomputed statistics file from the Allen Brain Cell Atlas (SEAAD project) containing reference statistics for the middle temporal gyrus (MTG) brain region sourced from https://allen-brain-cell-atlas.s3-us-west-2.amazonaws.com/mapmycells/SEAAD/20240831/precomputed_stats.20231120.sea_ad.MTG.h5.
+
+## DEPRECATED - Cell type marker table
+The reference taxonomy for inference of cell types via [CellAssign](https://docs.scvi-tools.org/en/1.1.0/user_guide/models/cellassign.html) are sourced from https://github.com/NIH-CARD/brain-taxonomy/blob/main/markers/cellassign_card_markers.csv.
 
 ## `harmonized-wf-dev`→`pmdbs-sc-rna-seq`
 This repo and work was originally developed under the name `harmonized-wf-dev`.
 
-This workflow was initally set up to implement the [Harmony RNA snakemake workflow](https://github.com/shahrozeabbas/Harmony-RNA-Workflow) in WDL. The WDL version of the workflow aims to maintain backwards compatibility with the snakemake scripts. Scripts used by the WDL workflow were modified from the Harmony RNA snakemake repo; originals may be found [here](https://github.com/shahrozeabbas/Harmony-RNA-Workflow/tree/5384b546f02b6e68f154f77d25667fed03759870/scripts), and their modified R versions in [the docker/multiome/scripts directory](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/cohort-analysis-v1.0.0/docker/multiome/scripts). Eventually snakemake support was depricated and the workflows were migrated to Python. Initial version [here](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/harmonized_pmdbs_analysis-v1.1.0_1.0.0_2.1.0).
+This workflow was initally set up to implement the [Harmony RNA snakemake workflow](https://github.com/shahrozeabbas/Harmony-RNA-Workflow) in WDL. The WDL version of the workflow aims to maintain backwards compatibility with the snakemake scripts. Scripts used by the WDL workflow were modified from the Harmony RNA snakemake repo; originals may be found [here](https://github.com/shahrozeabbas/Harmony-RNA-Workflow/tree/5384b546f02b6e68f154f77d25667fed03759870/scripts), and their modified R versions in [the docker/multiome/scripts directory](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/cohort-analysis-v1.0.0/docker/multiome/scripts). Eventually snakemake support was deprecated and the workflows were migrated to Python. Initial version [here](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/harmonized_pmdbs_analysis-v1.1.0_1.0.0_2.1.0).

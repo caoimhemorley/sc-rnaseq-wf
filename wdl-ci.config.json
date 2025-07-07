@@ -78,7 +78,6 @@
                 "n_top_genes": "${n_top_genes}",
                 "n_comps": "${n_comps}",
                 "batch_key": "${batch_key}",
-                "cell_type_markers_list": "${input_file_path}/celltype_marker_table.csv",
                 "raw_data_path": "${cohort_raw_data_path}",
                 "workflow_info": "${workflow_info}",
                 "billing_project": "${billing_project}",
@@ -280,7 +279,6 @@
               "inputs": {
                 "integrated_adata_object": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.merged_adata_object.scvi_integrated.h5ad",
                 "scvi_latent_key": "${scvi_latent_key}",
-                "cell_type_markers_list": "${input_file_path}/celltype_marker_table.csv",
                 "container_registry": "${container_registry}",
                 "zones": "${zones}"
               },
@@ -290,43 +288,6 @@
                   "test_tasks": [
                     "compare_file_basename",
                     "check_hdf5"
-                  ]
-                }
-              }
-            }
-          ]
-        },
-        "annotate_cells": {
-          "key": "annotate_cells",
-          "digest": "mlvboabgx3cbaxls63kphawphzlvzdy2",
-          "tests": [
-            {
-              "inputs": {
-                "cohort_id": "${cohort_id}",
-                "cluster_adata_object": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.merged_adata_object.scvi_integrated.umap_cluster.h5ad",
-                "batch_key": "${batch_key}",
-                "cell_type_markers_list": "${input_file_path}/celltype_marker_table.csv",
-                "raw_data_path": "${cohort_raw_data_path}",
-                "workflow_info": "${workflow_info}",
-                "billing_project": "${billing_project}",
-                "container_registry": "${container_registry}",
-                "zones": "${zones}"
-              },
-              "output_tests": {
-                "cell_annotated_adata_object": {
-                  "value": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.merged_adata_object.scvi_integrated.umap_cluster.annotate_cells.h5ad",
-                  "test_tasks": [
-                    "compare_file_basename",
-                    "check_hdf5"
-                  ]
-                },
-                "cell_types_csv": {
-                  "value": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.cell_types.csv",
-                  "test_tasks": [
-                    "compare_file_basename",
-                    "check_empty_lines",
-                    "check_comma_separated",
-                    "count_columns"
                   ]
                 }
               }

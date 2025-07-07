@@ -32,8 +32,6 @@ workflow cohort_analysis {
 		String batch_key
 		String label_key
 
-		File cell_type_markers_list
-
 		Array[String] groups
 		Array[String] features
 
@@ -102,7 +100,6 @@ workflow cohort_analysis {
 			normalized_adata_object = filter_and_normalize.normalized_adata_object,
 			scvi_latent_key = scvi_latent_key,
 			batch_key = batch_key,
-			cell_type_markers_list = cell_type_markers_list,
 			raw_data_path = raw_data_path,
 			workflow_info = workflow_info,
 			billing_project = billing_project,
@@ -172,8 +169,7 @@ workflow cohort_analysis {
 			filter_and_normalize.hvg_genes_csv
 		],
 		[
-			cluster_data.scvi_model_tar_gz,
-			cluster_data.cell_types_csv
+			cluster_data.scvi_model_tar_gz
 		],
 		[
 			integrate_harmony.final_adata_object,
@@ -213,8 +209,6 @@ workflow cohort_analysis {
 		File integrated_adata_object = cluster_data.integrated_adata_object
 		File scvi_model_tar_gz = cluster_data.scvi_model_tar_gz
 		File umap_cluster_adata_object = cluster_data.umap_cluster_adata_object
-		File cell_annotated_adata_object = cluster_data.cell_annotated_adata_object
-		File cell_types_csv = cluster_data.cell_types_csv
 
 		# PCA and Harmony integrated adata objects
 		File final_adata_object = integrate_harmony.final_adata_object #!FileCoercion
