@@ -35,7 +35,6 @@ workflow pmdbs_sc_rnaseq_analysis {
 		String scanvi_latent_key = "X_scANVI"
 		String scanvi_predictions_key = "C_scANVI"
 		String batch_key = "batch_id"
-		String label_key = "cell_type"
 
 		Array[String] groups = ["sample", "batch", "cell_type", "leiden_res_0.05", "leiden_res_0.10", "leiden_res_0.20", "leiden_res_0.40"]
 		Array[String] features = ["n_genes_by_counts", "total_counts", "pct_counts_mt", "pct_counts_rb", "doublet_score", "S_score", "G2M_score"]
@@ -115,7 +114,6 @@ workflow pmdbs_sc_rnaseq_analysis {
 					scanvi_latent_key = scanvi_latent_key,
 					scanvi_predictions_key = scanvi_predictions_key,
 					batch_key = batch_key,
-					label_key = label_key,
 					groups = groups,
 					features = features,
 					workflow_name = workflow_name,
@@ -153,7 +151,6 @@ workflow pmdbs_sc_rnaseq_analysis {
 				scanvi_latent_key = scanvi_latent_key,
 				scanvi_predictions_key = scanvi_predictions_key,
 				batch_key = batch_key,
-				label_key = label_key,
 				groups = groups,
 				features = features,
 				workflow_name = workflow_name,
@@ -287,7 +284,6 @@ workflow pmdbs_sc_rnaseq_analysis {
 		scanvi_latent_key: {help: "Latent key to save the scANVI latent to. ['X_scANVI']"}
 		scanvi_predictions_key: {help: "scANVI cell type predictions column name. ['C_scANVI']"}
 		batch_key: {help: "Key in AnnData object for batch information. ['batch_id']"}
-		label_key: {help: "Key to reference 'cell_type' labels. ['cell_type']"}
 		groups: {help: "Groups to produce umap plots for. ['sample', 'batch', 'cell_type', 'leiden_res_0.05', 'leiden_res_0.10', 'leiden_res_0.20', 'leiden_res_0.40']"}
 		features: {help: "Features to produce umap plots for. ['n_genes_by_counts', 'total_counts', 'pct_counts_mt', 'pct_counts_rb', 'doublet_score', 'S_score', 'G2M_score']"}
 		run_cross_team_cohort_analysis: {help: "Whether to run downstream harmonization steps on all samples across projects. If set to false, only preprocessing steps (cellranger and generating the initial adata object(s)) will run for samples. [false]"}

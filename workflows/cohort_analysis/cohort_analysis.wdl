@@ -35,7 +35,6 @@ workflow cohort_analysis {
 		String scanvi_latent_key 
 		String scanvi_predictions_key
 		String batch_key
-		String label_key
 
 		Array[String] groups
 		Array[String] features
@@ -163,8 +162,8 @@ workflow cohort_analysis {
 			input:
 				cohort_id = cohort_id,
 				final_adata_object = integrate_harmony.final_adata_object, #!FileCoercion
+				scanvi_predictions_key = scanvi_predictions_key,
 				batch_key = batch_key,
-				label_key = label_key,
 				raw_data_path = raw_data_path,
 				workflow_info = workflow_info,
 				billing_project = billing_project,
@@ -617,8 +616,8 @@ task artifact_metrics {
 		String cohort_id
 		File final_adata_object
 
+		String scanvi_predictions_key
 		String batch_key
-		String label_key
 
 		String raw_data_path
 		Array[Array[String]] workflow_info
@@ -636,8 +635,8 @@ task artifact_metrics {
 		nvidia-smi
 
 		python3 /opt/scripts/main/artifact_metrics.py \
+			--predictions-key ~{scanvi_predictions_key} \
 			--batch-key ~{batch_key} \
-			--label-key ~{label_key} \
 			--adata-input ~{final_adata_object} \
 			--output-report-dir scib_report_dir
 

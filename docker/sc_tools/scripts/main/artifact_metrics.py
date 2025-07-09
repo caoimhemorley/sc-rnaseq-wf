@@ -19,14 +19,14 @@ def get_artifact_metrics(
     # Set CPUs to use for parallel computing
     sc._settings.ScanpyConfig.n_jobs = -1
 
-    # these should be there...
+    # These should be there...
     if "X_pca" not in adata.obsm:
+        print("[WARNING] No X_pca, running sc.pp.pca()")
         sc.pp.pca(adata, n_comps=n_comps)
-        print("warning: no X_pca")
 
     if "X_pca_harmony" not in adata.obsm:
+        print("[WARNING] No X_pca_harmony, running sc.external.pp.harmony_integrate()")
         sc.external.pp.harmony_integrate(adata, "sample")
-        print("warning: no X_pca_harmony")
 
     adata.obsm["Unintegrated"] = adata.obsm["X_pca"]
     biocons = BioConservation(isolated_labels=False)
@@ -48,10 +48,6 @@ def get_artifact_metrics(
 
 
 def main(args: argparse.Namespace):
-    """
-    basic logic with args as input
-
-    """
     adata = sc.read_h5ad(args.adata_input)  # type: ignore
 
     # save the results
@@ -59,37 +55,36 @@ def main(args: argparse.Namespace):
     if not report_dir.exists():
         report_dir.mkdir(parents=True, exist_ok=True)
 
-    report_df = get_artifact_metrics(adata, args.batch_key, args.label_key, report_dir)
+    report_df = get_artifact_metrics(adata, args.batch_key, args.predictions_key, report_dir)
     report_df.to_csv((report_dir / "scib_report.csv"), index=True)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Compute `scib` metrics on final artefacts"
+        description="Compute `scib` metrics on final artifacts"
     )
     parser.add_argument(
-        "--label-key",
-        dest="label_key",
+        "--predictions-key",
         type=str,
-        default="C_scANVI",
-        help="key to reference our 'cell_type' labels",
+        required=True,
+        help="scANVI cell type predictions column name in AnnData object that references our 'cell_type' labels",
     )
     parser.add_argument(
         "--batch-key",
-        dest="batch_key",
         type=str,
+        required=True,
         help="Key in AnnData object for batch information",
     )
     parser.add_argument(
         "--adata-input",
-        dest="adata_input",
         type=str,
+        required=True,
         help="AnnData object for a dataset",
     )
     parser.add_argument(
         "--output-report-dir",
-        dest="scib_report_dir",
         type=str,
+        required=True,
         help="Output folder to save `scib` report",
     )
 
