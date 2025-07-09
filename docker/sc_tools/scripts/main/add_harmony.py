@@ -3,34 +3,22 @@ import scanpy as sc
 from anndata import AnnData
 
 
-def add_harmony(adata: AnnData, n_comps: int = 30):
+def add_harmony(adata: AnnData):
     """
-    adds PCA and Harmony integration to AnnData object in place
+    Adds Harmony integration to AnnData object in place
     """
     # Set CPUs to use for parallel computing
     sc._settings.ScanpyConfig.n_jobs = -1
 
-    # make sure we have PCA (should already be there)
-    if "X_pca" not in adata.obsm:
-        sc.pp.pca(adata, n_comps=n_comps)
-
-    # add harmony
     if "X_pca_harmony" not in adata.obsm:
-        # print("Running Harmony integration")
+        print("Running Harmony integration")
         sc.external.pp.harmony_integrate(adata, args.batch_key)
 
 
 def main(args: argparse.Namespace):
-    """
-    basic logic with args as input
-
-    """
-    # Fixed parameters
-    n_comps = 30
-
     adata = sc.read_h5ad(args.adata_input)  # type: ignore
-    # operations done in place
-    add_harmony(adata, n_comps=n_comps)
+    # Operations done in place
+    add_harmony(adata)
 
     # 9. write_h5ad
     adata.write_h5ad(filename=args.adata_output, compression="gzip")
@@ -43,7 +31,7 @@ def main(args: argparse.Namespace):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Add PCA and Harmony integration")
+    parser = argparse.ArgumentParser(description="Add Harmony integration")
     parser.add_argument(
         "--batch-key",
         dest="batch_key",

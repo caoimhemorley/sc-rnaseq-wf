@@ -58,6 +58,6 @@
 
 
 ## _PLOTTING_
-- _plot features and groups_: [`plot_feats_and_groups.py`](./main/plot_feats_and_groups.py) 
-    - Features: "n_genes_by_counts", "total_counts", "pct_counts_mt", "pct_counts_rb", "doublet_score", "S_score", "G2M_score"
+- _plot groups and features_: [`plot_groups_and_feats.py`](./main/plot_groups_and_feats.py) 
     - Groups: "sample", "batch", "cell_type"
+    - Features: "n_genes_by_counts", "total_counts", "pct_counts_mt", "pct_counts_rb", "doublet_score", "S_score", "G2M_score"

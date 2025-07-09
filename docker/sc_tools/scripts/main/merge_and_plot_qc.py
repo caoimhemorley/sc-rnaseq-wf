@@ -56,10 +56,6 @@ def gen_qc_plots(adata: AnnData):
 
 
 def main(args: argparse.Namespace):
-    """
-    basic logic with args as input
-
-    """
     adata = merge_adata(args.adata_objects_fofn)
     gen_qc_plots(adata)
 

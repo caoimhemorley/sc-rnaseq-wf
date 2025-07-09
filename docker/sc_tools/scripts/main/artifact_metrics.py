@@ -13,20 +13,8 @@ from pandas import DataFrame
 def get_artifact_metrics(
     adata: AnnData, batch_key: str, label_key: str, scib_report_dir: Path | str
 ) -> DataFrame:
-    # Fixed parameters
-    n_comps = 30
-
     # Set CPUs to use for parallel computing
     sc._settings.ScanpyConfig.n_jobs = -1
-
-    # These should be there...
-    if "X_pca" not in adata.obsm:
-        print("[WARNING] No X_pca, running sc.pp.pca()")
-        sc.pp.pca(adata, n_comps=n_comps)
-
-    if "X_pca_harmony" not in adata.obsm:
-        print("[WARNING] No X_pca_harmony, running sc.external.pp.harmony_integrate()")
-        sc.external.pp.harmony_integrate(adata, "sample")
 
     adata.obsm["Unintegrated"] = adata.obsm["X_pca"]
     biocons = BioConservation(isolated_labels=False)
