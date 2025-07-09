@@ -72,22 +72,22 @@ task integrate_sample_data {
 			--latent-key ~{scvi_latent_key} \
 			--batch-key ~{batch_key} \
 			--adata-input ~{mmc_adata_object} \
-			--adata-output ~{cohort_id}.merged_adata_object.scvi_integrated.h5ad \
+			--adata-output ~{cohort_id}.scvi_integrated.h5ad \
 			--output-scvi-dir ~{cohort_id}_scvi_model
 
 		# Model name cannot be changed because scvi models serialization expects a path containing a model.pt object
-		tar -czvf "~{cohort_id}_scvi_model.tar.gz" "~{cohort_id}_scvi_model"
+		tar -czvf "~{cohort_id}.scvi_model.tar.gz" "~{cohort_id}_scvi_model"
 
 		upload_outputs \
 			-b ~{billing_project} \
 			-d ~{raw_data_path} \
 			-i ~{write_tsv(workflow_info)} \
-			-o "~{cohort_id}_scvi_model.tar.gz"
+			-o "~{cohort_id}.scvi_model.tar.gz"
 	>>>
 
 	output {
-		File integrated_adata_object = "~{cohort_id}.merged_adata_object.scvi_integrated.h5ad"
-		String scvi_model_tar_gz = "~{raw_data_path}/~{cohort_id}_scvi_model.tar.gz"
+		File integrated_adata_object = "~{cohort_id}.scvi_integrated.h5ad"
+		String scvi_model_tar_gz = "~{raw_data_path}/~{cohort_id}.scvi_model.tar.gz"
 	}
 
 	runtime {

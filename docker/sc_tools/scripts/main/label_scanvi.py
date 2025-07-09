@@ -27,7 +27,7 @@ def label_with_scanvi(
     early_stopping_patience = 20
 
     print("scanvi model from scvi")
-    scanvi_model = scvi.model.SCANVI.from_scvi_model(
+    scanvi_model = c(
         model, adata=adata, labels_key="cell_type", unlabeled_category="Unknown"
     )
 

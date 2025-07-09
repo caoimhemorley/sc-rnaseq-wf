@@ -1,13 +1,7 @@
 import os
 import argparse
-
 import anndata as ad
-
-# import scvi.model as scvi_model
 import scvi
-
-SCVI_LATENT_KEY = "X_scVI"
-
 
 def integrate_with_scvi(
     adata: ad.AnnData,
@@ -61,17 +55,12 @@ def integrate_with_scvi(
         # plan_kwargs=plan_kwargs,
     )
 
-    adata.obsm[SCVI_LATENT_KEY] = model.get_latent_representation()  # type: ignore
+    adata.obsm[args.latent_key] = model.get_latent_representation()  # type: ignore
 
     return (adata, model)
 
 
 def main(args: argparse.Namespace):
-    """
-    basic logic with args as input
-
-    """
-
     # Set the number of data loader workers
     # scvi.settings.dl_num_workers = 2 # Or a value appropriate for your system
 
@@ -81,66 +70,45 @@ def main(args: argparse.Namespace):
     adata, model = integrate_with_scvi(adata, args.batch_key)
     # 3. save the integrated adata and scvi model
     model.save(args.output_scvi_dir, overwrite=True)
-
-    fname = args.adata_output
-    fname = fname.replace("integrated", "scvi")
-    adata.write_h5ad(filename=fname, compression="gzip")
+    adata.write_h5ad(filename=args.adata_output, compression="gzip")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run scVI integration")
-    # parser.add_argument(
-    #     "--latent-key",
-    #     dest="latent_key",
-    #     type=str,
-    #     default="X_scvi",
-    #     help="Latent key to save the scvi latent to",
-    # )
-    # parser.add_argument(
-    #     "--scanvi-latent-key",
-    #     dest="scanvi_latent_key",
-    #     type=str,
-    #     default="X_scanvi",
-    #     help="Latent key to save the scanvi latent to",
-    # )
+    parser.add_argument(
+        "--latent-key",
+        type=str,
+        required=True,
+        help="Latent key to save the scVI latent to",
+    )
     parser.add_argument(
         "--batch-key",
         dest="batch_key",
         type=str,
+        required=True,
         help="Key in AnnData object for batch information",
     )
     parser.add_argument(
         "--adata-input",
         dest="adata_input",
         type=str,
+        required=True,
         help="AnnData object for a dataset",
     )
     parser.add_argument(
         "--adata-output",
         dest="adata_output",
         type=str,
+        required=True,
         help="Output file to save AnnData object to",
     )
     parser.add_argument(
         "--output-scvi-dir",
         dest="output_scvi_dir",
         type=str,
+        required=True,
         help="Output folder to save `scvi` model",
     )
-    # parser.add_argument(
-    #     "--output-scanvi-dir",
-    #     dest="output_scanvi_dir",
-    #     type=str,
-    #     help="Output folder to save `scanvi` model",
-    # )
 
-    # parser.add_argument(
-    #     "--output-cell-types-file",
-    #     dest="cell_type_output",
-    #     type=str,
-    #     help="Output file to write celltypes to",
-    # )
-
-    # TODO: optional scvi arguments
     args = parser.parse_args()
     main(args)
