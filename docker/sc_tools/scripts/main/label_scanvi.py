@@ -50,8 +50,8 @@ def main(args: argparse.Namespace):
     adata = ad.read_h5ad(args.adata_input)  # type: ignore
     model_path = args.scvi_outputs_dir
     model = scvi.model.SCVI.load(
-        dir_path = model_path,
-        adata = adata,
+        dir_path=model_path,
+        adata=adata,
     )
     # 4. get scANVI model
     adata, scanvi_model = label_with_scanvi(adata, model)

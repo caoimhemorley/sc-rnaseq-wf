@@ -48,6 +48,7 @@ workflow cluster_data {
 
 	call cluster_cells {
 		input:
+			cohort_id = cohort_id,
 			labeled_cells_adata_object = assign_remaining_cells.labeled_cells_adata_object,
 			scvi_latent_key = scvi_latent_key,
 			container_registry = container_registry,
@@ -192,6 +193,7 @@ task assign_remaining_cells {
 
 task cluster_cells {
 	input {
+		String cohort_id
 		File labeled_cells_adata_object
 
 		String scvi_latent_key
@@ -200,7 +202,6 @@ task cluster_cells {
 		String zones
 	}
 
-	String integrated_adata_object_basename = basename(labeled_cells_adata_object, ".h5ad")
 	Int mem_gb = ceil(size(labeled_cells_adata_object, "GB") * 8.7 + 20)
 	Int disk_size = ceil(size([labeled_cells_adata_object], "GB") * 6 + 50)
 
@@ -208,13 +209,13 @@ task cluster_cells {
 		set -euo pipefail
 
 		python3 /opt/scripts/main/clustering_umap.py \
+			--latent-key ~{scvi_latent_key} \
 			--adata-input ~{labeled_cells_adata_object} \
-			--adata-output ~{integrated_adata_object_basename}.umap_cluster.h5ad \
-			--latent-key ~{scvi_latent_key}
+			--adata-output ~{cohort_id}.umap_cluster.h5ad
 	>>>
 
 	output {
-		File umap_cluster_adata_object = "~{integrated_adata_object_basename}.umap_cluster.h5ad"
+		File umap_cluster_adata_object = "~{cohort_id}.umap_cluster.h5ad"
 	}
 
 	runtime {

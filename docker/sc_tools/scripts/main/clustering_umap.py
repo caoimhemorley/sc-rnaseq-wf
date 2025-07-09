@@ -3,11 +3,6 @@ import scanpy as sc
 from anndata import AnnData
 
 
-SCANVI_LATENT_KEY = "X_scANVI"
-SCVI_LATENT_KEY = "X_scVI"
-
-SCANVI_PREDICTIONS_KEY = "C_scANVI"
-
 def get_cluster_umap(adata: AnnData, latent_key: str) -> AnnData:
     ### fixed parameters (TODO: make an argument)
     n_neighbors = 15  # default
@@ -21,36 +16,41 @@ def get_cluster_umap(adata: AnnData, latent_key: str) -> AnnData:
     # change to igraph for future default compatibility
     for resolution in leiden_reslns:
         sc.tl.leiden(
-            adata, resolution=resolution, key_added=f"leiden_res_{resolution:4.2f}", flavor="igraph", n_iterations=2, directed = False
+            adata,
+            resolution=resolution,
+            key_added=f"leiden_res_{resolution:4.2f}",
+            flavor="igraph",
+            n_iterations=2,
+            directed = False,
         )
     sc.tl.umap(adata)
     return adata
 
 
 def main(args: argparse.Namespace):
-    """
-    basic logic with args as input
-
-    """
     adata = sc.read_h5ad(args.adata_input)  # type: ignore
-    # Hard code latent_key
-    latent_key = SCVI_LATENT_KEY
-    adata = get_cluster_umap(adata, latent_key)
+    adata = get_cluster_umap(adata, args.latent_key)
     adata.write_h5ad(filename=args.adata_output, compression="gzip")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Annotate clusters")
     parser.add_argument(
-        "--adata-input",
-        dest="adata_input",
+        "--latent-key",
         type=str,
+        required=True,
+        help="Latent key to save the scVI latent to",
+    )
+    parser.add_argument(
+        "--adata-input",
+        type=str,
+        required=True,
         help="AnnData object for a dataset",
     )
     parser.add_argument(
         "--adata-output",
-        dest="adata_output",
         type=str,
+        required=True,
         help="Output file to save AnnData object to",
     )
 
