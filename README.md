@@ -55,7 +55,9 @@ An input template file can be found at [workflows/inputs.json](workflows/inputs.
 | Int? | norm_target_sum | The total count value that each cell will be normalized to. [10000] |
 | Int? | n_top_genes | Number of HVG genes to keep. [3000] |
 | Int? | n_comps | Number of principal components to compute. [30] |
-| String? | scvi_latent_key | Latent key to save the scVI latent to. ['X_scvi'] |
+| String? | scvi_latent_key | Latent key to save the scVI latent to. ['X_scVI'] |
+| String? | scanvi_latent_key | Latent key to save the scANVI latent to. ['X_scANVI'] |
+| String? | scanvi_predictions_key | scANVI cell type predictions column name. ['C_scANVI'] |
 | String? | batch_key | Key in AnnData object for batch information. ['batch_id'] |
 | String? | label_key | Key to reference 'cell_type' labels. ['cell_type'] |
 | Array[String]? | groups | Groups to produce umap plots for. ['sample', 'batch', 'cell_type', 'leiden_res_0.05', 'leiden_res_0.10', 'leiden_res_0.20', 'leiden_res_0.40'] |
@@ -179,8 +181,10 @@ asap-dev-{cohort,team-xxyy}-{source}-{dataset}
     │   ├── ${cohort_id}.mmc_otf_mapping.SEAAD.log.txt 
     │   ├── ${cohort_id}.all_genes.csv
     │   ├── ${cohort_id}.hvg_genes.csv
-    │   ├── ${cohort_id}.mmc_results.parquet
-    │   ├── ${cohort_id}_scvi_model.tar.gz
+    │   ├── ${cohort_id}.mmc_results.parquet.gzip
+    │   ├── ${cohort_id}.scvi_model.tar.gz
+    │   ├── ${cohort_id}.scanvi_model.tar.gz
+    │   ├── ${cohort_id}.scanvi_cell_types.parquet.gzip
     │   ├── ${cohort_id}.final_adata.h5ad
     │   ├── ${cohort_id}.final_metadata.csv
     │   ├── ${team_id}.scib_report.csv
@@ -280,10 +284,13 @@ Docker images are defined in [the `docker` directory](docker). Each image must m
 Example directory structure:
 ```bash
 docker
-├── scvi
+├── sc_tools
 │   ├── build.env
-│   └── Dockerfile
-└── samtools
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   └── scripts
+│       └── ...
+└── cellbender
     ├── build.env
     └── Dockerfile
 ```

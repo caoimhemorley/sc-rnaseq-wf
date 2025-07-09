@@ -107,7 +107,7 @@ if __name__ == "__main__":
         dest="output_scvi_dir",
         type=str,
         required=True,
-        help="Output folder to save `scvi` model",
+        help="Output folder to save scVI model",
     )
 
     args = parser.parse_args()

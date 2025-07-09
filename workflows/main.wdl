@@ -32,6 +32,8 @@ workflow pmdbs_sc_rnaseq_analysis {
 		Int n_comps = 30
 
 		String scvi_latent_key = "X_scVI"
+		String scanvi_latent_key = "X_scANVI"
+		String scanvi_predictions_key = "C_scANVI"
 		String batch_key = "batch_id"
 		String label_key = "cell_type"
 
@@ -109,7 +111,9 @@ workflow pmdbs_sc_rnaseq_analysis {
 					norm_target_sum = norm_target_sum,
 					n_top_genes = n_top_genes,
 					n_comps = n_comps,
-					scvi_latent_key =scvi_latent_key,
+					scvi_latent_key = scvi_latent_key,
+					scanvi_latent_key = scanvi_latent_key,
+					scanvi_predictions_key = scanvi_predictions_key,
 					batch_key = batch_key,
 					label_key = label_key,
 					groups = groups,
@@ -146,6 +150,8 @@ workflow pmdbs_sc_rnaseq_analysis {
 				n_top_genes = n_top_genes,
 				n_comps = n_comps,
 				scvi_latent_key =scvi_latent_key,
+				scanvi_latent_key = scanvi_latent_key,
+				scanvi_predictions_key = scanvi_predictions_key,
 				batch_key = batch_key,
 				label_key = label_key,
 				groups = groups,
@@ -196,7 +202,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 		Array[File?] project_mmc_results_csv = project_cohort_analysis.mmc_results_csv
 		Array[File?] project_mmc_log_txt = project_cohort_analysis.mmc_log_txt
 		Array[File?] project_normalized_adata_object = project_cohort_analysis.normalized_adata_object
-		Array[File?] project_mmc_results_parquet = project_cohort_analysis.mmc_results_parquet
+		Array[File?] project_mmc_results_parquet_gzip = project_cohort_analysis.mmc_results_parquet_gzip
 		Array[File?] project_mmc_adata_object = project_cohort_analysis.mmc_adata_object
 		Array[File?] project_all_genes_csv = project_cohort_analysis.all_genes_csv
 		Array[File?] project_hvg_genes_csv = project_cohort_analysis.hvg_genes_csv
@@ -204,6 +210,9 @@ workflow pmdbs_sc_rnaseq_analysis {
 		# Clustering outputs
 		Array[File?] project_integrated_adata_object = project_cohort_analysis.integrated_adata_object
 		Array[File?] project_scvi_model_tar_gz = project_cohort_analysis.scvi_model_tar_gz
+		Array[File?] project_labeled_cells_adata_object = project_cohort_analysis.labeled_cells_adata_object
+		Array[File?] project_scanvi_model_tar_gz = project_cohort_analysis.scanvi_model_tar_gz
+		Array[File?] project_scanvi_cell_types_parquet_gzip = project_cohort_analysis.scanvi_cell_types_parquet_gzip
 		Array[File?] project_umap_cluster_adata_object = project_cohort_analysis.umap_cluster_adata_object
 
 		# PCA and Harmony integrated adata objects and artifact metrics
@@ -231,7 +240,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 		File? cohort_mmc_results_csv = cross_team_cohort_analysis.mmc_results_csv
 		File? cohort_mmc_log_txt = cross_team_cohort_analysis.mmc_log_txt
 		File? cohort_normalized_adata_object = cross_team_cohort_analysis.normalized_adata_object
-		File? cohort_mmc_results_parquet = cross_team_cohort_analysis.mmc_results_parquet
+		File? cohort_mmc_results_parquet_gzip = cross_team_cohort_analysis.mmc_results_parquet_gzip
 		File? cohort_mmc_adata_object = cross_team_cohort_analysis.mmc_adata_object
 		File? cohort_all_genes_csv = cross_team_cohort_analysis.all_genes_csv
 		File? cohort_hvg_genes_csv = cross_team_cohort_analysis.hvg_genes_csv
@@ -239,6 +248,9 @@ workflow pmdbs_sc_rnaseq_analysis {
 		# Clustering outputs
 		File? cohort_integrated_adata_object = cross_team_cohort_analysis.integrated_adata_object
 		File? cohort_scvi_model_tar_gz = cross_team_cohort_analysis.scvi_model_tar_gz
+		File? cohort_labeled_cells_adata_object = cross_team_cohort_analysis.labeled_cells_adata_object
+		File? cohort_scanvi_model_tar_gz = cross_team_cohort_analysis.scanvi_model_tar_gz
+		File? cohort_scanvi_cell_types_parquet_gzip = cross_team_cohort_analysis.scanvi_cell_types_parquet_gzip
 		File? cohort_umap_cluster_adata_object = cross_team_cohort_analysis.umap_cluster_adata_object
 
 		# PCA and Harmony integrated adata objects and artifact metrics
@@ -271,7 +283,9 @@ workflow pmdbs_sc_rnaseq_analysis {
 		norm_target_sum: {help: "The total count value that each cell will be normalized to. [10000]"}
 		n_top_genes: {help: "Number of HVG genes to keep. [8000]"}
 		n_comps: {help: "Number of principal components to compute. [30]"}
-		scvi_latent_key: {help: "Latent key to save the scVI latent to. ['X_scvi']"}
+		scvi_latent_key: {help: "Latent key to save the scVI latent to. ['X_scVI']"}
+		scanvi_latent_key: {help: "Latent key to save the scANVI latent to. ['X_scANVI']"}
+		scanvi_predictions_key: {help: "scANVI cell type predictions column name. ['C_scANVI']"}
 		batch_key: {help: "Key in AnnData object for batch information. ['batch_id']"}
 		label_key: {help: "Key to reference 'cell_type' labels. ['cell_type']"}
 		groups: {help: "Groups to produce umap plots for. ['sample', 'batch', 'cell_type', 'leiden_res_0.05', 'leiden_res_0.10', 'leiden_res_0.20', 'leiden_res_0.40']"}

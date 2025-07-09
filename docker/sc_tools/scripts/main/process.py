@@ -175,6 +175,5 @@ if __name__ == "__main__":
         help="Output file to save hvg metadata (full genes)",
     )
 
-
     args = parser.parse_args()
     main(args)

@@ -82,6 +82,7 @@ if __name__ == "__main__":
         required=True,
         help="Prefix used to name output files",
     )
+    
     args = parser.parse_args()
     main(args)
 

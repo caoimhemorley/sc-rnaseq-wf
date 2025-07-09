@@ -32,6 +32,8 @@ workflow cohort_analysis {
 		Int n_comps
 
 		String scvi_latent_key
+		String scanvi_latent_key 
+		String scanvi_predictions_key
 		String batch_key
 		String label_key
 
@@ -134,6 +136,8 @@ workflow cohort_analysis {
 			cohort_id = cohort_id,
 			mmc_adata_object = add_mapped_cell_types.mmc_adata_object,
 			scvi_latent_key = scvi_latent_key,
+			scanvi_latent_key = scanvi_latent_key,
+			scanvi_predictions_key = scanvi_predictions_key,
 			batch_key = batch_key,
 			raw_data_path = raw_data_path,
 			workflow_info = workflow_info,
@@ -209,10 +213,12 @@ workflow cohort_analysis {
 			normalize.hvg_genes_csv
 		],
 		[
-			add_mapped_cell_types.mmc_results_parquet
+			add_mapped_cell_types.mmc_results_parquet_gzip
 		],
 		[
-			cluster_data.scvi_model_tar_gz
+			cluster_data.scvi_model_tar_gz,
+			cluster_data.scanvi_model_tar_gz,
+			cluster_data.scanvi_cell_types_parquet_gzip
 		],
 		[
 			integrate_harmony.final_adata_object,
@@ -248,7 +254,7 @@ workflow cohort_analysis {
 		File mmc_results_csv = map_cell_types.mmc_results_csv #!FileCoercion
 		File mmc_log_txt = map_cell_types.mmc_log_txt #!FileCoercion
 		File normalized_adata_object = normalize.normalized_adata_object
-		File mmc_results_parquet = add_mapped_cell_types.mmc_results_parquet #!FileCoercion
+		File mmc_results_parquet_gzip = add_mapped_cell_types.mmc_results_parquet_gzip #!FileCoercion
 		File mmc_adata_object = add_mapped_cell_types.mmc_adata_object
 		File all_genes_csv = normalize.all_genes_csv #!FileCoercion
 		File hvg_genes_csv = normalize.hvg_genes_csv #!FileCoercion
@@ -256,6 +262,9 @@ workflow cohort_analysis {
 		# Clustering output
 		File integrated_adata_object = cluster_data.integrated_adata_object
 		File scvi_model_tar_gz = cluster_data.scvi_model_tar_gz
+		File labeled_cells_adata_object = cluster_data.labeled_cells_adata_object
+		File scanvi_model_tar_gz = cluster_data.scanvi_model_tar_gz
+		File scanvi_cell_types_parquet_gzip = cluster_data.scanvi_cell_types_parquet_gzip
 		File umap_cluster_adata_object = cluster_data.umap_cluster_adata_object
 
 		# PCA and Harmony integrated adata objects
@@ -522,7 +531,7 @@ task add_mapped_cell_types {
 		python3 /opt/scripts/main/transcriptional_phenotype.py \
 			--adata-input ~{normalized_adata_object} \
 			--mmc-results ~{mmc_results_csv} \
-			--output-cell-types-file ~{cohort_id}.mmc_results.parquet \
+			--output-cell-types-file ~{cohort_id}.mmc_results.parquet.gzip \
 			--adata-output ~{cohort_id}.mmc.h5ad
 
 		upload_outputs \
@@ -533,7 +542,7 @@ task add_mapped_cell_types {
 	>>>
 
 	output {
-		String mmc_results_parquet = "~{raw_data_path}/~{cohort_id}.mmc_results.parquet"
+		String mmc_results_parquet_gzip = "~{raw_data_path}/~{cohort_id}.mmc_results.parquet.gzip"
 		File mmc_adata_object = "~{cohort_id}.mmc.h5ad"
 	}
 

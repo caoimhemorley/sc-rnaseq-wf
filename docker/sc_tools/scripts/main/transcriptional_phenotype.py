@@ -102,7 +102,7 @@ def main(args: argparse.Namespace):
     results = summarize_mmc_results(results)
 
     # save the results to parquet file.. or feather?
-    results.to_parquet(args.output_cell_types_file)
+    results.to_parquet(args.output_cell_types_file, compression="gzip")
 
     # load the adata
     adata = sc.read_h5ad(args.adata_input)
