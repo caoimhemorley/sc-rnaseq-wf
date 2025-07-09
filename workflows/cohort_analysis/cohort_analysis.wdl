@@ -691,11 +691,11 @@ task plot_groups_and_features {
 	command <<<
 		set -euo pipefail
 
-		python3 /opt/scripts/main/plot_feats_and_groups.py \
+		python3 /opt/scripts/main/plot_groups_and_feats.py \
 			--adata-input ~{final_adata_object} \
-			--group ~{sep=',' groups} \
+			--groups ~{sep=',' groups} \
 			--output-group-umap-plot-prefix "~{cohort_id}" \
-			--feature ~{sep=',' features} \
+			--features ~{sep=',' features} \
 			--output-feature-umap-plot-prefix "~{cohort_id}"
 
 		mv "plots/umap~{cohort_id}_groups_umap.png" "plots/~{cohort_id}.groups.umap.png"

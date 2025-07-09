@@ -41,40 +41,42 @@ def make_f_and_g_plots(adata: sc.AnnData, group_name: str, feature_name: str, gr
 
 
 def main(args: argparse.Namespace):
-    """
-    basic logic with args as input
-
-    """
     adata = sc.read_h5ad(args.adata_input)  # type: ignore
     group_name = args.output_group_umap_plot_prefix
     feature_name = args.output_feature_umap_plot_prefix
-    make_f_and_g_plots(adata, group_name, feature_name,args.groups,args.features)
+    make_f_and_g_plots(adata, group_name, feature_name, args.groups, args.features)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Plot groups")
+    parser = argparse.ArgumentParser(description="Plot groups and features")
     parser.add_argument(
         "--adata-input",
-        dest="adata_input",
         type=str,
+        required=True,
         help="AnnData object for a dataset",
     )
     parser.add_argument(
-        "--groups", dest="groups", type=str, help="Group to plot umaps for"
+        "--groups",
+        type=str,
+        required=True,
+        help="Group to plot umaps for"
     )
     parser.add_argument(
         "--output-group-umap-plot-prefix",
-        dest="output_group_umap_plot_prefix",
         type=str,
-        help="Output file prefix to write the group umap plot to; will write both a PDF and a PNG.",
+        required=True,
+        help="Output file prefix to write the group umap plot to; will write both a PDF and a PNG",
     )
     parser.add_argument(
-        "--features", dest="features", type=str, help="Feature to plot umaps for"
+        "--features",
+        type=str,
+        required=True,
+        help="Feature to plot umaps for"
     )
     parser.add_argument(
         "--output-feature-umap-plot-prefix",
-        dest="output_feature_umap_plot_prefix",
         type=str,
+        required=True,
         help="Output file to write the feature umap plot to",
     )
 
