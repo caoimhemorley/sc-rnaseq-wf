@@ -207,7 +207,7 @@ asap-dev-{cohort,team-xxyy}-{source}-{dataset}
         ├── ${sampleA_id}.cellbender.log
         ├── ${sampleA_id}.cellbender.h5
         ├── ${sampleA_id}.cellbend_posterior.h5
-        ├── ${sampleA_id}.adata_object.h5ad
+        ├── ${sampleA_id}.cleaned_unfiltered.h5ad
         ├── ${sampleB_id}.filtered_feature_bc_matrix.h5
         ├── ${sampleB_id}.metrics_summary.csv
         ├── ${sampleB_id}.molecule_info.h5
@@ -221,7 +221,7 @@ asap-dev-{cohort,team-xxyy}-{source}-{dataset}
         ├── ${sampleB_id}.cellbender.log
         ├── ${sampleB_id}.cellbender.h5
         ├── ${sampleB_id}.cellbend_posterior.h5
-        ├── ${sampleB_id}.adata_object.h5ad
+        ├── ${sampleB_id}.cleaned_unfiltered.h5ad
         ├── ...
         ├── ${sampleN_id}.filtered_feature_bc_matrix.h5
         ├── ${sampleN_id}.metrics_summary.csv
@@ -236,7 +236,7 @@ asap-dev-{cohort,team-xxyy}-{source}-{dataset}
         ├── ${sampleN_id}.cellbender.log
         ├── ${sampleN_id}.cellbender.h5
         ├── ${sampleN_id}.cellbend_posterior.h5
-        ├── ${sampleN_id}.adata_object.h5ad
+        ├── ${sampleN_id}.cleaned_unfiltered.h5ad
         └── MANIFEST.tsv
 ```
 

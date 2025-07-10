@@ -12,7 +12,7 @@
 - _merge and plot QC_: [`merge_and_plot_qc.py`](./main/merge_and_plot_qc.py)
     - Merges adatas
     - Plot general QC metrics for all cells
-    - Save initial metadata 
+    - Save initial metadata
 
 - _filtering_: [`filter.py`](./main/filter.py)
     - QC filtering
