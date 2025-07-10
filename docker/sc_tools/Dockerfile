@@ -1,5 +1,5 @@
 ARG CUDA_VERSION
-FROM us-central1-docker.pkg.dev/dnastack-asap-parkinsons/workflow-images/util:1.1.1 as scripts
+FROM us-central1-docker.pkg.dev/dnastack-asap-parkinsons/workflow-images/util:1.2.0 as scripts
 
 FROM nvcr.io/nvidia/cuda:${CUDA_VERSION}-base-ubuntu20.04
 ENV CUDA_VERSION "${CUDA_VERSION}"
@@ -56,16 +56,14 @@ RUN python3 -m pip install -r /opt/requirements.txt
 # CUDA-enabled jaxlib is needed
 RUN python3 -m pip install --upgrade "jax[cuda12_pip]==${JAX_VERSION}" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
-# Add override scripts
-COPY scripts /opt/scripts
-ENV PATH "${PATH}:/opt/scripts"
-
-# Add resources
-COPY resources /opt/resources
-
 # Cell Type Mapper
 ARG CELL_TYPE_MAPPER_VERSION
 ENV CELL_TYPE_MAPPER_VERSION "${CELL_TYPE_MAPPER_VERSION}"
 RUN git clone https://github.com/AllenInstitute/cell_type_mapper/tree/v${CELL_TYPE_MAPPER_VERSION} \
 	cd cell_type_mapper \
 	python3 -m pip install -e .
+
+COPY scripts /opt/scripts
+ENV PATH "${PATH}:/opt/scripts"
+
+COPY resources /opt/resources
