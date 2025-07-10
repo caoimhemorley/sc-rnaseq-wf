@@ -68,7 +68,7 @@ workflow cluster_data {
 		File labeled_cells_adata_object = assign_remaining_cells.labeled_cells_adata_object
 		File scanvi_model_tar_gz = assign_remaining_cells.scanvi_model_tar_gz #!FileCoercion
 		File scanvi_cell_types_parquet_gzip = assign_remaining_cells.scanvi_cell_types_parquet_gzip #!FileCoercion
-		File umap_cluster_adata_object = cluster_cells.umap_cluster_adata_object
+		File umap_clustered_adata_object = cluster_cells.umap_clustered_adata_object
 	}
 }
 
@@ -223,11 +223,11 @@ task cluster_cells {
 			--n-neighbors ~{n_neighbors} \
 			--leiden-res ~{sep=' ' leiden_res} \
 			--adata-input ~{labeled_cells_adata_object} \
-			--adata-output ~{cohort_id}.umap_cluster.h5ad
+			--adata-output ~{cohort_id}.umap_clustered.h5ad
 	>>>
 
 	output {
-		File umap_cluster_adata_object = "~{cohort_id}.umap_cluster.h5ad"
+		File umap_clustered_adata_object = "~{cohort_id}.umap_clustered.h5ad"
 	}
 
 	runtime {

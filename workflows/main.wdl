@@ -218,7 +218,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 		Array[File?] project_labeled_cells_adata_object = project_cohort_analysis.labeled_cells_adata_object
 		Array[File?] project_scanvi_model_tar_gz = project_cohort_analysis.scanvi_model_tar_gz
 		Array[File?] project_scanvi_cell_types_parquet_gzip = project_cohort_analysis.scanvi_cell_types_parquet_gzip
-		Array[File?] project_umap_cluster_adata_object = project_cohort_analysis.umap_cluster_adata_object
+		Array[File?] project_umap_clustered_adata_object = project_cohort_analysis.umap_clustered_adata_object
 
 		# PCA and Harmony integrated adata objects and artifact metrics
 		Array[File?] project_final_adata_object = project_cohort_analysis.final_adata_object
@@ -256,7 +256,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 		File? cohort_labeled_cells_adata_object = cross_team_cohort_analysis.labeled_cells_adata_object
 		File? cohort_scanvi_model_tar_gz = cross_team_cohort_analysis.scanvi_model_tar_gz
 		File? cohort_scanvi_cell_types_parquet_gzip = cross_team_cohort_analysis.scanvi_cell_types_parquet_gzip
-		File? cohort_umap_cluster_adata_object = cross_team_cohort_analysis.umap_cluster_adata_object
+		File? cohort_umap_clustered_adata_object = cross_team_cohort_analysis.umap_clustered_adata_object
 
 		# PCA and Harmony integrated adata objects and artifact metrics
 		File? cohort_final_adata_object = cross_team_cohort_analysis.final_adata_object

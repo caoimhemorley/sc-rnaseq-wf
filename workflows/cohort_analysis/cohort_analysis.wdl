@@ -155,7 +155,7 @@ workflow cohort_analysis {
 	call integrate_harmony {
 		input:
 			cohort_id = cohort_id,
-			umap_cluster_adata_object = cluster_data.umap_cluster_adata_object,
+			umap_clustered_adata_object = cluster_data.umap_clustered_adata_object,
 			batch_key = batch_key,
 			raw_data_path = raw_data_path,
 			workflow_info = workflow_info,
@@ -271,7 +271,7 @@ workflow cohort_analysis {
 		File labeled_cells_adata_object = cluster_data.labeled_cells_adata_object
 		File scanvi_model_tar_gz = cluster_data.scanvi_model_tar_gz
 		File scanvi_cell_types_parquet_gzip = cluster_data.scanvi_cell_types_parquet_gzip
-		File umap_cluster_adata_object = cluster_data.umap_cluster_adata_object
+		File umap_clustered_adata_object = cluster_data.umap_clustered_adata_object
 
 		# PCA and Harmony integrated adata objects
 		File final_adata_object = integrate_harmony.final_adata_object #!FileCoercion
@@ -566,7 +566,7 @@ task add_mapped_cell_types {
 task integrate_harmony {
 	input {
 		String cohort_id
-		File umap_cluster_adata_object
+		File umap_clustered_adata_object
 
 		String batch_key
 
@@ -577,8 +577,8 @@ task integrate_harmony {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(umap_cluster_adata_object, "GB") * 8 + 20)
-	Int disk_size = ceil(size(umap_cluster_adata_object, "GB") * 4 + 20)
+	Int mem_gb = ceil(size(umap_clustered_adata_object, "GB") * 8 + 20)
+	Int disk_size = ceil(size(umap_clustered_adata_object, "GB") * 4 + 20)
 
 	command <<<
 		set -euo pipefail
@@ -587,7 +587,7 @@ task integrate_harmony {
 
 		python3 /opt/scripts/main/add_harmony.py \
 			--batch-key ~{batch_key} \
-			--adata-input ~{umap_cluster_adata_object} \
+			--adata-input ~{umap_clustered_adata_object} \
 			--adata-output ~{cohort_id}.final.h5ad \
 			--output-metadata-file ~{cohort_id}.final_metadata.csv
 
