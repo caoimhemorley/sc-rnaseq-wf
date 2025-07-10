@@ -3,9 +3,7 @@ import scanpy as sc
 import numpy as np
 from scib_metrics.benchmark import Benchmarker, BioConservation
 from scib_metrics.nearest_neighbors import NeighborsResults
-
 from pathlib import Path
-
 from anndata import AnnData
 from pandas import DataFrame
 
@@ -38,7 +36,7 @@ def get_artifact_metrics(
 def main(args: argparse.Namespace):
     adata = sc.read_h5ad(args.adata_input)  # type: ignore
 
-    # save the results
+    # Save the results
     report_dir = Path.cwd() / args.scib_report_dir
     if not report_dir.exists():
         report_dir.mkdir(parents=True, exist_ok=True)

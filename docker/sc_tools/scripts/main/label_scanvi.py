@@ -8,7 +8,7 @@ def label_with_scanvi(
     adata: ad.AnnData, model: scvi.model.SCVI
 ) -> tuple[ad.AnnData, scvi.model.SCANVI]:
     """
-    fit scANVI model to AnnData object
+    Fit scANVI model to AnnData object
     """
     scanvi_epochs = 300
     batch_size = 1024
@@ -46,22 +46,22 @@ def main(args: argparse.Namespace):
     # Set the number of data loader workers
     # scvi.settings.dl_num_workers = 2 # Or a value appropriate for your system
 
-    # 0. load data
+    # 0. Load data
     adata = ad.read_h5ad(args.adata_input)  # type: ignore
     model_path = args.scvi_outputs_dir
     model = scvi.model.SCVI.load(
         dir_path=model_path,
         adata=adata,
     )
-    # 4. get scANVI model
+    # 4. Get scANVI model
     adata, scanvi_model = label_with_scanvi(adata, model)
-    # 5. save the integrated adata and scvi model
+    # 5. Save the integrated adata and scANVI model
     scanvi_model.save(args.output_scanvi_dir, overwrite=True)
-    # 6. save the latent space
+    # 6. Save the latent space
     adata.write_h5ad(filename=args.adata_output, compression="gzip")
-    # 7. save the cell types to feather
+    # 7. Save the cell types to feather
     # adata.obs[[args.predictions_key]].to_feather(args.output_cell_types_file, compression="gzip")
-    # 7. save the cell types to parquet
+    # 7. Save the cell types to parquet
     adata.obs[[args.predictions_key]].to_parquet(args.output_cell_types_file, compression="gzip")
 
 

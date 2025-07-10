@@ -13,7 +13,7 @@ from helpers import update_validation_metrics
 def filter_adata(adata_fname: str) -> AnnData:
     print(f"----load adata")
 
-    # 0. load data
+    # 0. Load data
     adata_backed = sc.read_h5ad(args.adata_input, backed='r')  # type: ignore
     print(f"read {args.adata_input}")
     
@@ -45,9 +45,7 @@ def filter_adata(adata_fname: str) -> AnnData:
     # )
     keep_n_genes_by_counts = (adata_backed.obs['n_genes_by_counts'] >= args.n_genes_by_counts_limits[0]) & (adata_backed.obs['n_genes_by_counts'] <= args.n_genes_by_counts_limits[1])
 
-
     keep_cells = keep_mt & keep_doublet & keep_total_counts & keep_n_genes_by_counts
-
     
     # Step 3: Read the filtered subset into memory
     print(f"APPLY FILTER")
@@ -60,18 +58,14 @@ def filter_adata(adata_fname: str) -> AnnData:
 
 
 def main(args: argparse.Namespace):
-    """
-    basic logic with args as input
-
-    """
     # Set CPUs to use for parallel computing
     sc._settings.ScanpyConfig.n_jobs = -1
 
-    # 1. filter data
+    # 1. Filter data
     adata = filter_adata(args.adata_input)
     print(f"---- filtered -----")
     
-    # 2. save the filtered adata
+    # 2. Save the filtered adata
     adata.write_h5ad(filename=args.adata_output, compression="gzip")
     print(f"wrote {args.adata_output}")
 
@@ -80,7 +74,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Filter")
     parser.add_argument(
         "--adata-input",
-        dest="adata_input",
         type=str,
         required=True,
         help="AnnData object for a dataset",
@@ -113,7 +106,6 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--adata-output",
-        dest="adata_output",
         type=str,
         required=True,
         help="Output file to save AnnData object to",

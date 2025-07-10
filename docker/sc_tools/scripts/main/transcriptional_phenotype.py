@@ -5,12 +5,11 @@ import argparse
 import pandas as pd
 import sys
 from anndata import AnnData
+from pathlib import Path
+import os
 
 sys.path.append("/opt/scripts/utility")
 from helpers import update_validation_metrics
-
-from pathlib import Path
-import os
 
 
 # os.environ["AIBS_BKP_USE_TORCH"] = "false"
@@ -24,8 +23,8 @@ import os
 # N_PROCESSORS = 8
 # MAX_GB = 48.0
 
-# load resuults.
-# results header is the first 4 lines
+
+# Results header is the first 4 lines
 def read_csv_results(csv_results_path: str | Path) -> pd.DataFrame:
     """
     Read the results file and return a pandas DataFrame
@@ -45,7 +44,7 @@ def read_csv_results(csv_results_path: str | Path) -> pd.DataFrame:
 
 def summarize_mmc_results(mmc_results: pd.DataFrame):
     # First get "classes"
-    #  define row indices for each class
+    # Define row indices for each class
     gabaergic = mmc_results["class_name"] == "Neuronal: GABAergic"
     glutamatergic = mmc_results["class_name"] == "Neuronal: Glutamatergic"
     non_neuronal = mmc_results["class_name"] == "Non-neuronal and Non-neural"
@@ -78,7 +77,7 @@ def summarize_mmc_results(mmc_results: pd.DataFrame):
 
     mmc_results["cell_type"] = mmc_results["phenotype"]
 
-    # change the phenotype to unknown if the  correlation or bootstrap probability < 0.5
+    # Change the phenotype to unknown if the correlation or bootstrap probability < 0.5
     mmc_results.loc[mmc_results["rho"] < 0.5, "cell_type"] = "Unknown"
     mmc_results.loc[mmc_results["prob"] < 0.5, "cell_type"] = "Unknown"
 
@@ -96,25 +95,21 @@ def summarize_mmc_results(mmc_results: pd.DataFrame):
 
 
 def main(args: argparse.Namespace):
-    # load MMC results
+    # Load MMC results
     results = read_csv_results(args.mmc_results)
-
     results = summarize_mmc_results(results)
-
-    # save the results to parquet file.. or feather?
+    # Save the results to parquet file.. or feather?
     results.to_parquet(args.output_cell_types_file, compression="gzip")
 
-    # load the adata
+    # Load the adata
     adata = sc.read_h5ad(args.adata_input)
-
     adata.obs = adata.obs.merge(results, left_index=True, right_index=True)
-
-    # save the adata
+    # Save the adata
     adata.write_h5ad(filename=args.adata_output, compression="gzip")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Transcriptional Phenotype (MMC)")
+    parser = argparse.ArgumentParser(description="Assign cell type to high-fidelity mappings/transcriptional phenotype (MMC)")
     parser.add_argument(
         "--adata-input",
         type=str,

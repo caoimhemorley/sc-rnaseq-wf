@@ -4,16 +4,15 @@ from anndata import AnnData
 
 
 def get_cluster_umap(adata: AnnData, latent_key: str) -> AnnData:
-    ### fixed parameters (TODO: make an argument)
+    # Fixed parameters (TODO: make an argument)
     n_neighbors = 15  # default
     leiden_reslns = [0.05, 0.1, 0.2, 0.4]
     # Set CPUs to use for parallel computing
     sc._settings.ScanpyConfig.n_jobs = -1
 
-    # calculate neighbor graph on scVI latent
+    # Calculate neighbor graph on scVI latent
     sc.pp.neighbors(adata, n_neighbors=n_neighbors, use_rep=latent_key)
-    # do leiden
-    # change to igraph for future default compatibility
+    # Do Leiden
     for resolution in leiden_reslns:
         sc.tl.leiden(
             adata,

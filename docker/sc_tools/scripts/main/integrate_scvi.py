@@ -8,10 +8,10 @@ def integrate_with_scvi(
     batch_key: str,
 ) -> tuple[ad.AnnData, scvi.model.SCVI]:
     """
-    fit scvi model to AnnData object
+    Fit scVI model to AnnData object
     """
 
-    ## fixed parameters
+    # Fixed parameters
     n_latent = 30
     n_layers = 2
     train_size = 0.85
@@ -23,10 +23,8 @@ def integrate_with_scvi(
     latent_distribution = "normal"
     early_stopping = True
     early_stopping_patience = 20
-    ## DEPRICATE these training parameters. defaults are good
-    # plan_kwargs = {"lr_factor": 0.1, "lr_patience": 20, "reduce_lr_on_plateau": True}
 
-    # integrate the data with `scVI`
+    # Integrate the data with scVI
     # noise = ["doublet_score", "pct_counts_mt", "pct_counts_rb"]
     categorical_covariate_keys = None
     scvi.model.SCVI.setup_anndata(
@@ -64,11 +62,11 @@ def main(args: argparse.Namespace):
     # Set the number of data loader workers
     # scvi.settings.dl_num_workers = 2 # Or a value appropriate for your system
 
-    # 0. load data
+    # 0. Load data
     adata = ad.read_h5ad(args.adata_input)  # type: ignore
-    # 2. process data
+    # 2. Process data
     adata, model = integrate_with_scvi(adata, args.batch_key)
-    # 3. save the integrated adata and scvi model
+    # 3. Save the integrated adata and scVI model
     model.save(args.output_scvi_dir, overwrite=True)
     adata.write_h5ad(filename=args.adata_output, compression="gzip")
 
@@ -83,28 +81,24 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--batch-key",
-        dest="batch_key",
         type=str,
         required=True,
         help="Key in AnnData object for batch information",
     )
     parser.add_argument(
         "--adata-input",
-        dest="adata_input",
         type=str,
         required=True,
         help="AnnData object for a dataset",
     )
     parser.add_argument(
         "--adata-output",
-        dest="adata_output",
         type=str,
         required=True,
         help="Output file to save AnnData object to",
     )
     parser.add_argument(
         "--output-scvi-dir",
-        dest="output_scvi_dir",
         type=str,
         required=True,
         help="Output folder to save scVI model",

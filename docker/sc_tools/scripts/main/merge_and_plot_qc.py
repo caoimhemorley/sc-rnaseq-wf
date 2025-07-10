@@ -11,7 +11,7 @@ import sys
 
 def merge_adata(adata_objects_fofn: str) -> AnnData:
     adatas = {}
-    #  note that the sample id should be the official ASAP_samples
+    # Note that the sample id should be the official ASAP_samples
     with open(adata_objects_fofn, "r") as file:
         for sample in file:
             # Check that sample line is not empty
@@ -20,7 +20,7 @@ def merge_adata(adata_objects_fofn: str) -> AnnData:
                 sample_name, file_path = columns
                 raw = sc.read_h5ad(file_path)
                 adatas[sample_name] = raw
-    # we could subset to the top_genes here before concat if we have memory issues (e.g. whole dataset harmonization.)
+    # We could subset to the top_genes here before concat if we have memory issues (e.g. whole dataset harmonization)
     adata = ad_concat(merge="same", uns_merge="same", index_unique="_", adatas=adatas)
 
     return adata
@@ -59,41 +59,41 @@ def main(args: argparse.Namespace):
     adata = merge_adata(args.adata_objects_fofn)
     gen_qc_plots(adata)
 
-    # export concatenated data.
+    # Export concatenated data
     adata.write_h5ad(filename=args.adata_output, compression="gzip")
-    # save metadata
+    # Save metadata
     adata.obs.to_csv(args.output_metadata_file, index=True)
 
-    # #######  validation metrics
+    # #######  Validation metrics
     # val_metrics = get_validation_metrics(adata, "concatenation")
-    # # log the validation metrics
+    # # Log the validation metrics
     # val_metrics.to_csv(args.output_validation_file, index=True)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Call doublets")
+    parser = argparse.ArgumentParser(description="Merge AnnData objects and plot QC metrics")
     parser.add_argument(
         "--adata-objects-fofn",
-        dest="adata_objects_fofn",
         type=str,
+        required=True,
         help="Newline-delimited TSV of sample names and paths to the set of input adata objects (file-of-filenames)",
     )
     parser.add_argument(
         "--adata-output",
-        dest="adata_output",
         type=str,
+        required=True,
         help="Output file to save AnnData object to",
     )
     parser.add_argument(
         "--output-metadata-file",
-        dest="output_metadata_file",
+        required=True,
         type=str,
         help="Output file to write metadata to",
     )
     # parser.add_argument(
     #     "--output-validation-file",
-    #     dest="output_validation_file",
     #     type=str,
+    #     required=True,
     #     help="Output file to write validation metrics to",
     # )
 

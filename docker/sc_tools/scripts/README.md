@@ -1,11 +1,13 @@
-# scVI analysis pipeline python scripts
+# PMDBS sc/sn RNAseq pipeline Python scripts with scVI
 
 ![Workflow diagram](../../../workflows/workflow_diagram.svg "Workflow diagram")
 
 
 ## _PREPROCESSING_
 - _pre-preprocessing_: executed by WDL [`cellbender :: remove_technical_artifacts`](../../../workflows/preprocess/preprocess.wdl#L327-L350)
-- _doublet detection_ + _qc metrics_: [`prep_metadata.py`](./main/prep_metadata.py), calculates `scrublet` metrics and adds additional metrics to metadata.
+
+- _doublet detection_ + _qc metrics_: [`prep_metadata.py`](./main/prep_metadata.py)
+    - Calculates `scrublet` metrics and adds additional metrics to metadata
 
 - _merge and plot QC_: [`merge_and_plot_qc.py`](./main/merge_and_plot_qc.py)
     - Merges adatas

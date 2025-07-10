@@ -14,16 +14,15 @@ def process_adata(
     batch_key: str
 ) -> tuple[AnnData, pd.DataFrame, pd.DataFrame]:
     """
-    do feature selection and add PCA
+    Do feature selection and add PCA
     """
 
-    # does this work with sparse uint8?
+    # Does this work with sparse uint8?
     adata.layers["counts"] = adata.X.copy()  # type: ignore
 
     sc.pp.normalize_total(adata, target_sum=args.norm_target_sum)
     sc.pp.log1p(adata)
 
-    # get cell cycle scores
     score_cell_cycle(adata, organism="human")
 
     # ### MAKE SURE MARKER GENES ARE KEPT
@@ -34,7 +33,7 @@ def process_adata(
     # WARNING: using 'sample' can cause loess to fail in the highly_variable_genes function
     # HACK: using 'batch_id' instead of 'sample' for now
     if batch_key == "sample" or batch_key == "sample_id":
-        print(f"WARNING: using 'batch_id' instead of '{batch_key}' for now")
+        print(f"[WARNING] Using 'batch_id' instead of '{batch_key}' for now")
         batch_key = "batch_id"
 
     hvgs_full = sc.experimental.pp.highly_variable_genes(
@@ -66,9 +65,9 @@ def process_adata(
     hvgs_full = hvgs_full.iloc[: args.n_top_genes].index.to_list()
     adata = adata[:, adata.var.index.isin(hvgs_full)]
 
-    # add PCA of log1p normalized
+    # Add PCA of log1p normalized
     sc.pp.pca(adata, n_comps=args.n_comps)
-    ## consider this alternate pca and avoid the normalization log1p?
+    ## Consider this alternate pca and avoid the normalization log1p?
     # scanpy.experimental.pp.normalize_pearson_residuals_pca(adata, *, theta=100, clip=None, n_comps=50, random_state=0, kwargs_pca=mappingproxy({}), mask_var=_empty, use_highly_variable=None, check_values=True, inplace=True)
 
     hvg_features = adata.var.copy()
@@ -76,61 +75,50 @@ def process_adata(
 
 
 def main(args: argparse.Namespace):
-    """
-    basic logic with args as input
-
-    """
-
     # Set CPUs to use for parallel computing
     sc._settings.ScanpyConfig.n_jobs = -1
 
-    # 0. load data
+    # 0. Load data
     adata = sc.read_h5ad(args.adata_input)  # type: ignore
-    # # 1. load marker_genes
-    # # alternative way to get markers:
-    # # https://github.com/NIH-CARD/brain-taxonomy/blob/main/markers/cellassign_card_markers.csv
+    # # 1. Load marker_genes
     # markers = pd.read_csv(args.marker_genes, index_col=0)
 
-    # 2. process data
+    # 2. Process data
     # adata, full_features, hvg_features = process_adata(adata, markers, args.batch_key)
     adata, full_features, hvg_features = process_adata(adata, args.batch_key)
 
-    # 3. save the filtered adata
-    # save the filtered adata
+    # 3. Save the filtered adata
     adata.write_h5ad(filename=args.adata_output, compression="gzip")
 
-    full_features.to_csv(args.full_gene_file, index=True)
-    hvg_features.to_csv(args.hvg_file, index=True)
+    full_features.to_csv(args.output_all_genes, index=True)
+    hvg_features.to_csv(args.output_hvg_genes, index=True)
 
-    # # 4. update the validation metrics
-    # #######  validation metrics
+    # # 4. Update the validation metrics
+    # #######  Validation metrics
     # val_metrics = pd.read_csv(args.output_validation_file, index_col=0)
     # output_metrics = update_validation_metrics(adata, "filter", val_metrics)
-    # # log the validation metrics
+    # # Log the validation metrics
     # output_metrics.to_csv(args.output_validation_file, index=True)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Normalize and identify features (hvg)"
+        description="Normalize and identify features (HVG)"
     )
     parser.add_argument(
         "--adata-input",
-        dest="adata_input",
         type=str,
         required=True,
         help="AnnData object for a dataset",
     )
     parser.add_argument(
         "--batch-key",
-        dest="batch_key",
         type=str,
         required=True,
         help="Key in AnnData object for batch information",
     )
     parser.add_argument(
         "--adata-output",
-        dest="adata_output",
         type=str,
         required=True,
         help="Output file to save AnnData object to",
@@ -155,24 +143,21 @@ if __name__ == "__main__":
     )
     # parser.add_argument(
     #     "--marker-genes",
-    #     dest="marker_genes",
     #     type=str,
     #     required=True,
     #     help="Path to marker_genes .csv file",
     # )
     parser.add_argument(
         "--output-all-genes",
-        dest="full_gene_file",
         type=str,
         required=True,
         help="Output file to save feature metadata (full genes)",
     )
     parser.add_argument(
         "--output-hvg-genes",
-        dest="hvg_file",
         type=str,
         required=True,
-        help="Output file to save hvg metadata (full genes)",
+        help="Output file to save HVG metadata (full genes)",
     )
 
     args = parser.parse_args()
