@@ -1,6 +1,6 @@
 version 1.0
 
-# Perform dataset integration, umap, clustering, and annotation steps
+# Perform dataset integration, annotation, and UMAP clustering steps
 
 workflow cluster_data {
 	input {
