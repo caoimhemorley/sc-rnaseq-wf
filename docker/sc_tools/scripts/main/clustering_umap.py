@@ -3,17 +3,14 @@ import scanpy as sc
 from anndata import AnnData
 
 
-def get_cluster_umap(adata: AnnData, latent_key: str) -> AnnData:
-    # Fixed parameters (TODO: make an argument)
-    n_neighbors = 15  # default
-    leiden_reslns = [0.05, 0.1, 0.2, 0.4]
+def get_cluster_umap(adata: AnnData, latent_key: str, n_neighbors : int) -> AnnData:
     # Set CPUs to use for parallel computing
     sc._settings.ScanpyConfig.n_jobs = -1
 
     # Calculate neighbor graph on scVI latent
     sc.pp.neighbors(adata, n_neighbors=n_neighbors, use_rep=latent_key)
     # Do Leiden
-    for resolution in leiden_reslns:
+    for resolution in args.leiden_res:
         sc.tl.leiden(
             adata,
             resolution=resolution,
@@ -28,7 +25,7 @@ def get_cluster_umap(adata: AnnData, latent_key: str) -> AnnData:
 
 def main(args: argparse.Namespace):
     adata = sc.read_h5ad(args.adata_input)  # type: ignore
-    adata = get_cluster_umap(adata, args.latent_key)
+    adata = get_cluster_umap(adata, args.latent_key, args.n_neighbors)
     adata.write_h5ad(filename=args.adata_output, compression="gzip")
 
 
@@ -39,6 +36,19 @@ if __name__ == "__main__":
         type=str,
         required=True,
         help="Latent key to save the scVI latent to",
+    )
+    parser.add_argument(
+        "--n-neighbors",
+        type=int,
+        required=True,
+        help="The size of local neighborhood (in terms of number of neighboring data points) used for manifold approximation [15]",
+    )
+    parser.add_argument(
+        "--leiden-res",
+        type=float,
+        nargs="+",
+        required=True,
+        help="Leiden resolutions which are the parameter values controlling the coarseness of the clustering [0.05, 0.1, 0.2, 0.4]",
     )
     parser.add_argument(
         "--adata-input",

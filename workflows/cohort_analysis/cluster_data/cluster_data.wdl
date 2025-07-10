@@ -7,10 +7,15 @@ workflow cluster_data {
 		String cohort_id
 		File mmc_adata_object
 
+		# Sample integration
 		String scvi_latent_key
 		String scanvi_latent_key 
 		String scanvi_predictions_key
 		String batch_key
+
+		# Clustering parameters
+		Int n_neighbors
+		Array[Float] leiden_res
 
 		String raw_data_path
 		Array[Array[String]] workflow_info
@@ -51,6 +56,8 @@ workflow cluster_data {
 			cohort_id = cohort_id,
 			labeled_cells_adata_object = assign_remaining_cells.labeled_cells_adata_object,
 			scvi_latent_key = scvi_latent_key,
+			n_neighbors = n_neighbors,
+			leiden_res = leiden_res,
 			container_registry = container_registry,
 			zones = zones
 	}
@@ -198,6 +205,9 @@ task cluster_cells {
 
 		String scvi_latent_key
 
+		Int n_neighbors
+		Array[Float] leiden_res
+
 		String container_registry
 		String zones
 	}
@@ -210,6 +220,8 @@ task cluster_cells {
 
 		python3 /opt/scripts/main/clustering_umap.py \
 			--latent-key ~{scvi_latent_key} \
+			--n-neighbors ~{n_neighbors} \
+			--leiden-res ~{sep=' ' leiden_res} \
 			--adata-input ~{labeled_cells_adata_object} \
 			--adata-output ~{cohort_id}.umap_cluster.h5ad
 	>>>

@@ -31,10 +31,15 @@ workflow cohort_analysis {
 		Int n_top_genes
 		Int n_comps
 
+		# Sample integration
 		String scvi_latent_key
 		String scanvi_latent_key 
 		String scanvi_predictions_key
 		String batch_key
+
+		# Clustering parameters
+		Int n_neighbors
+		Array[Float] leiden_res
 
 		Array[String] groups
 		Array[String] features
@@ -138,6 +143,8 @@ workflow cohort_analysis {
 			scanvi_latent_key = scanvi_latent_key,
 			scanvi_predictions_key = scanvi_predictions_key,
 			batch_key = batch_key,
+			n_neighbors = n_neighbors,
+			leiden_res = leiden_res,
 			raw_data_path = raw_data_path,
 			workflow_info = workflow_info,
 			billing_project = billing_project,

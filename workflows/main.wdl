@@ -31,10 +31,15 @@ workflow pmdbs_sc_rnaseq_analysis {
 		Int n_top_genes = 3000
 		Int n_comps = 30
 
+		# Sample integration
 		String scvi_latent_key = "X_scVI"
 		String scanvi_latent_key = "X_scANVI"
 		String scanvi_predictions_key = "C_scANVI"
 		String batch_key = "batch_id"
+
+		# Clustering parameters
+		Int n_neighbors = 15
+		Array[Float] leiden_res = [0.05, 0.1, 0.2, 0.4]
 
 		Array[String] groups = ["sample", "batch", "cell_type", "leiden_res_0.05", "leiden_res_0.10", "leiden_res_0.20", "leiden_res_0.40"]
 		Array[String] features = ["n_genes_by_counts", "total_counts", "pct_counts_mt", "pct_counts_rb", "doublet_score", "S_score", "G2M_score"]
@@ -114,6 +119,8 @@ workflow pmdbs_sc_rnaseq_analysis {
 					scanvi_latent_key = scanvi_latent_key,
 					scanvi_predictions_key = scanvi_predictions_key,
 					batch_key = batch_key,
+					n_neighbors = n_neighbors,
+					leiden_res = leiden_res,
 					groups = groups,
 					features = features,
 					workflow_name = workflow_name,
@@ -151,6 +158,8 @@ workflow pmdbs_sc_rnaseq_analysis {
 				scanvi_latent_key = scanvi_latent_key,
 				scanvi_predictions_key = scanvi_predictions_key,
 				batch_key = batch_key,
+				n_neighbors = n_neighbors,
+				leiden_res = leiden_res,
 				groups = groups,
 				features = features,
 				workflow_name = workflow_name,
@@ -284,6 +293,8 @@ workflow pmdbs_sc_rnaseq_analysis {
 		scanvi_latent_key: {help: "Latent key to save the scANVI latent to. ['X_scANVI']"}
 		scanvi_predictions_key: {help: "scANVI cell type predictions column name. ['C_scANVI']"}
 		batch_key: {help: "Key in AnnData object for batch information. ['batch_id']"}
+		n_neighbors: {help: "The size of local neighborhood (in terms of number of neighboring data points) used for manifold approximation. [15]"}
+		leiden_res: {help: "Leiden resolutions which are the parameter values controlling the coarseness of the clustering. [0.05, 0.1, 0.2, 0.4]"}
 		groups: {help: "Groups to produce umap plots for. ['sample', 'batch', 'cell_type', 'leiden_res_0.05', 'leiden_res_0.10', 'leiden_res_0.20', 'leiden_res_0.40']"}
 		features: {help: "Features to produce umap plots for. ['n_genes_by_counts', 'total_counts', 'pct_counts_mt', 'pct_counts_rb', 'doublet_score', 'S_score', 'G2M_score']"}
 		run_cross_team_cohort_analysis: {help: "Whether to run downstream harmonization steps on all samples across projects. If set to false, only preprocessing steps (cellranger and generating the initial adata object(s)) will run for samples. [false]"}
