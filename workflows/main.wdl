@@ -12,9 +12,8 @@ workflow pmdbs_sc_rnaseq_analysis {
 		String cohort_id
 		Array[Project] projects
 
-		File cellranger_reference_data
-
 		# Preprocess
+		File cellranger_reference_data
 		Float cellbender_fpr = 0.0
 
 		# Filtering parameters

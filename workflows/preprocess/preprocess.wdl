@@ -11,7 +11,6 @@ workflow preprocess {
 		Array[Sample] samples
 
 		File cellranger_reference_data
-
 		Float cellbender_fpr
 
 		String workflow_name
@@ -43,7 +42,7 @@ workflow preprocess {
 		String cleaned_unfiltered_adata_object_output = "~{adata_raw_data_path}/~{sample_object.sample_id}.cleaned_unfiltered.h5ad"
 	}
 
-	# For each sample, outputs an array of true/false: [cellranger_counts_complete, remove_technical_artifacts_complete]
+	# For each sample, outputs an array of true/false: [cellranger_counts_complete, remove_technical_artifacts_complete, cleaned_unfiltered_adata_object_complete]
 	call check_output_files_exist {
 		input:
 			cellranger_count_output_files = cellranger_count_output,
