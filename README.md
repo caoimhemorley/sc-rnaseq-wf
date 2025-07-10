@@ -186,7 +186,7 @@ asap-dev-{cohort,team-xxyy}-{source}-{dataset}
     │   ├── ${cohort_id}.scvi_model.tar.gz
     │   ├── ${cohort_id}.scanvi_model.tar.gz
     │   ├── ${cohort_id}.scanvi_cell_types.parquet.gzip
-    │   ├── ${cohort_id}.final_adata.h5ad
+    │   ├── ${cohort_id}.final.h5ad
     │   ├── ${cohort_id}.final_metadata.csv
     │   ├── ${team_id}.scib_report.csv
     │   ├── ${team_id}.scib_results.svg

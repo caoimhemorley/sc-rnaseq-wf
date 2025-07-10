@@ -588,19 +588,19 @@ task integrate_harmony {
 		python3 /opt/scripts/main/add_harmony.py \
 			--batch-key ~{batch_key} \
 			--adata-input ~{umap_cluster_adata_object} \
-			--adata-output ~{cohort_id}.final_adata.h5ad \
+			--adata-output ~{cohort_id}.final.h5ad \
 			--output-metadata-file ~{cohort_id}.final_metadata.csv
 
 		upload_outputs \
 			-b ~{billing_project} \
 			-d ~{raw_data_path} \
 			-i ~{write_tsv(workflow_info)} \
-			-o "~{cohort_id}.final_adata.h5ad" \
+			-o "~{cohort_id}.final.h5ad" \
 			-o "~{cohort_id}.final_metadata.csv"
 	>>>
 
 	output {
-		String final_adata_object = "~{raw_data_path}/~{cohort_id}.final_adata.h5ad"
+		String final_adata_object = "~{raw_data_path}/~{cohort_id}.final.h5ad"
 		String final_metadata_csv = "~{raw_data_path}/~{cohort_id}.final_metadata.csv"
 	}
 
