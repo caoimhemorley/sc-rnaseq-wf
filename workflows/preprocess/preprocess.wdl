@@ -405,7 +405,7 @@ task counts_to_adata {
 	command <<<
 		set -euo pipefail
 
-		python3 /opt/scripts/main/prep_metadata.py \
+		python3 prep_metadata.py \
 			--adata-input ~{cellbender_counts} \
 			--sample-id ~{sample_id} \
 			--batch ~{batch} \

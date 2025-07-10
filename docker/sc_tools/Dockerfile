@@ -64,6 +64,6 @@ RUN git clone https://github.com/AllenInstitute/cell_type_mapper/tree/v${CELL_TY
 	python3 -m pip install -e .
 
 COPY scripts /opt/scripts
-ENV PATH "${PATH}:/opt/scripts"
+ENV PATH "${PATH}:/opt/scripts:/opt/scripts/main"
 
 COPY resources /opt/resources
