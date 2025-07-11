@@ -19,7 +19,7 @@ RUN apt-get -qq update \
 
 ARG CELLRANGER_VERSION
 # N.B. this must be passed as a build arg (using the utility script: -b CELLRANGER_DOWNLOAD_QUERY_STRING='xxyy')
-#   Enter information here: https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest
+#   Enter information here: https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions
 #   The value of CELLRANGER_DOWNLOAD_QUERY_STRING = everything following the ? in the cURL request URL (no quotes)
 ARG CELLRANGER_DOWNLOAD_QUERY_STRING
 RUN wget -O cellranger-${CELLRANGER_VERSION}.tar.gz \
