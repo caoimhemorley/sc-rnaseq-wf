@@ -39,13 +39,13 @@ RUN apt-get -qq update \
 
 ARG PYTHON3_VERSION
 ENV PYTHON3_VERSION "${PYTHON3_VERSION}"
-RUN curl -O https://www.python.org/ftp/python/${PYTHON3_VERSION}/Python-${PYTHON3_VERSION}.tar.xz && \
-	tar -xvf Python-${PYTHON3_VERSION}.tar.xz --directory /opt/ && \
-	rm Python-${PYTHON3_VERSION}.tar.xz
-RUN cd /opt/Python-${PYTHON3_VERSION} && \
-	./configure && \
-	make && \
-	make altinstall
+RUN curl -O https://www.python.org/ftp/python/${PYTHON3_VERSION}/Python-${PYTHON3_VERSION}.tar.xz \
+	&& tar -xvf Python-${PYTHON3_VERSION}.tar.xz --directory /opt/ \
+	&& rm Python-${PYTHON3_VERSION}.tar.xz
+RUN cd /opt/Python-${PYTHON3_VERSION} \
+	&& ./configure \
+	&& make \
+	&& make altinstall
 
 RUN update-alternatives --install /usr/bin/python3 python3 /opt/Python-${PYTHON3_VERSION}/python 1 \
 	&& update-alternatives --set python3 /opt/Python-${PYTHON3_VERSION}/python
@@ -60,8 +60,8 @@ RUN python3 -m pip install --upgrade "jax[cuda12_pip]==${JAX_VERSION}" -f https:
 ARG CELL_TYPE_MAPPER_VERSION
 ENV CELL_TYPE_MAPPER_VERSION "${CELL_TYPE_MAPPER_VERSION}"
 RUN git clone https://github.com/AllenInstitute/cell_type_mapper/tree/v${CELL_TYPE_MAPPER_VERSION} \
-	cd cell_type_mapper \
-	python3 -m pip install -e .
+	&& cd cell_type_mapper \
+	&& python3 -m pip install -e .
 
 COPY scripts /opt/scripts
 ENV PATH "${PATH}:/opt/scripts:/opt/scripts/main"

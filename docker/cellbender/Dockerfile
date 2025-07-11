@@ -19,8 +19,8 @@ ENV MINICONDA_VERSION "${MINICONDA_VERSION}"
 ARG CUDA_VERSION
 ENV CUDA_VERSION "${CUDA_VERSION}"
 
-RUN apt-get -qq update && \
-	apt-get -qq install \
+RUN apt-get -qq update \
+	&& apt-get -qq install \
 		time \
 		xxd
 
