@@ -59,7 +59,7 @@ RUN python3 -m pip install --upgrade "jax[cuda12_pip]==${JAX_VERSION}" -f https:
 # Cell Type Mapper
 ARG CELL_TYPE_MAPPER_VERSION
 ENV CELL_TYPE_MAPPER_VERSION "${CELL_TYPE_MAPPER_VERSION}"
-RUN git clone https://github.com/AllenInstitute/cell_type_mapper/tree/v${CELL_TYPE_MAPPER_VERSION} \
+RUN git clone --branch v${CELL_TYPE_MAPPER_VERSION} https://github.com/AllenInstitute/cell_type_mapper.git \
 	&& cd cell_type_mapper \
 	&& python3 -m pip install -e .
 
