@@ -50,18 +50,18 @@ RUN cd /opt/Python-${PYTHON3_VERSION} \
 RUN update-alternatives --install /usr/bin/python3 python3 /opt/Python-${PYTHON3_VERSION}/python 1 \
 	&& update-alternatives --set python3 /opt/Python-${PYTHON3_VERSION}/python
 
-COPY ./requirements.txt /opt/requirements.txt
-RUN python3 -m pip install -r /opt/requirements.txt
-
-# CUDA-enabled jaxlib is needed
-RUN python3 -m pip install --upgrade "jax[cuda12_pip]==${JAX_VERSION}" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
-
 # Cell Type Mapper
 ARG CELL_TYPE_MAPPER_VERSION
 ENV CELL_TYPE_MAPPER_VERSION "${CELL_TYPE_MAPPER_VERSION}"
 RUN git clone --branch v${CELL_TYPE_MAPPER_VERSION} https://github.com/AllenInstitute/cell_type_mapper.git \
 	&& cd cell_type_mapper \
 	&& python3 -m pip install -e .
+
+COPY ./requirements.txt /opt/requirements.txt
+RUN python3 -m pip install -r /opt/requirements.txt
+
+# CUDA-enabled jaxlib is needed
+RUN python3 -m pip install --upgrade "jax[cuda12_pip]==${JAX_VERSION}" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
 COPY scripts /opt/scripts
 ENV PATH "${PATH}:/opt/scripts:/opt/scripts/main"
