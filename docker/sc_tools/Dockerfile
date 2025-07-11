@@ -63,7 +63,7 @@ RUN python3 -m pip install -r /opt/requirements.txt
 # CUDA-enabled jaxlib is needed
 RUN python3 -m pip install --upgrade "jax[cuda12_pip]==${JAX_VERSION}" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
-COPY scripts /opt/scripts
+COPY --from=scripts /opt/scripts /opt/scripts
 ENV PATH "${PATH}:/opt/scripts:/opt/scripts/main"
 
 COPY resources /opt/resources
