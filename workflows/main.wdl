@@ -95,7 +95,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 			preprocess.log,
 			preprocess.metrics_csv,
 			preprocess.posterior_probability,
-			preprocess.cleaned_unfiltered_adata_object
+			preprocess.initial_adata_object
 		]) #!StringCoercion
 
 		if (project.run_project_cohort_analysis) {
@@ -103,7 +103,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 				input:
 					cohort_id = project.team_id,
 					project_sample_ids = preprocess.project_sample_ids,
-					preprocessed_adata_objects = preprocess.cleaned_unfiltered_adata_object,
+					preprocessed_adata_objects = preprocess.initial_adata_object,
 					preprocessing_output_file_paths = preprocessing_output_file_paths,
 					project_cohort_analysis = true,
 					pct_counts_mt_max = pct_counts_mt_max,
@@ -142,7 +142,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 			input:
 				cohort_id = cohort_id,
 				project_sample_ids = flatten(preprocess.project_sample_ids),
-				preprocessed_adata_objects = flatten(preprocess.cleaned_unfiltered_adata_object),
+				preprocessed_adata_objects = flatten(preprocess.initial_adata_object),
 				preprocessing_output_file_paths = flatten(preprocessing_output_file_paths),
 				project_cohort_analysis = false,
 				pct_counts_mt_max = pct_counts_mt_max,
@@ -193,7 +193,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 		Array[Array[File]] cellbender_log = preprocess.log
 		Array[Array[File]] cellbender_metrics_csv = preprocess.metrics_csv
 		Array[Array[File]] cellbender_posterior_probability = preprocess.posterior_probability
-		Array[Array[File]] cleaned_unfiltered_adata_object = preprocess.cleaned_unfiltered_adata_object
+		Array[Array[File]] initial_adata_object = preprocess.initial_adata_object
 
 		# Project cohort analysis outputs
 		## List of samples included in the cohort

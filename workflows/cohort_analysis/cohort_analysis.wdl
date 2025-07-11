@@ -316,7 +316,7 @@ task merge_and_plot_qc_metrics {
 
 		python3 merge_and_plot_qc.py \
 			--adata-objects-fofn adata_samples_paths.tsv \
-			--adata-output ~{cohort_id}.merged.h5ad \
+			--adata-output ~{cohort_id}.merged_cleaned_unfiltered.h5ad \
 			--output-metadata-file ~{cohort_id}.initial_metadata.csv
 
 		mv "plots/violin_n_genes_by_counts.png" "plots/~{cohort_id}.n_genes_by_counts.violin.png"
@@ -329,7 +329,7 @@ task merge_and_plot_qc_metrics {
 			-b ~{billing_project} \
 			-d ~{raw_data_path} \
 			-i ~{write_tsv(workflow_info)} \
-			-o "~{cohort_id}.merged.h5ad" \
+			-o "~{cohort_id}.merged_cleaned_unfiltered.h5ad" \
 			-o "~{cohort_id}.initial_metadata.csv" \
 			-o plots/"~{cohort_id}.n_genes_by_counts.violin.png" \
 			-o plots/"~{cohort_id}.total_counts.violin.png" \
@@ -339,7 +339,7 @@ task merge_and_plot_qc_metrics {
 	>>>
 
 	output {
-		String merged_adata_object = "~{raw_data_path}/~{cohort_id}.merged.h5ad"
+		String merged_adata_object = "~{raw_data_path}/~{cohort_id}.merged_cleaned_unfiltered.h5ad"
 		String qc_initial_metadata_csv = "~{raw_data_path}/~{cohort_id}.initial_metadata.csv"
 
 		Array[String] qc_plots_png = [
