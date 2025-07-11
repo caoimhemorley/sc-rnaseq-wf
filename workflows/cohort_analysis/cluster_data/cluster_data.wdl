@@ -95,7 +95,7 @@ task integrate_sample_data {
 
 		nvidia-smi
 
-		python3 integrate_scvi.py \
+		integrate_scvi \
 			--latent-key ~{scvi_latent_key} \
 			--batch-key ~{batch_key} \
 			--adata-input ~{mmc_adata_object} \
@@ -159,7 +159,7 @@ task assign_remaining_cells {
 		mkdir -p "~{cohort_id}_scvi_model"
 		tar -xzvf ~{scvi_model_tar_gz} -C "~{cohort_id}_scvi_model" --strip-components=1
 
-		python3 label_scanvi.py \
+		label_scanvi \
 			--latent-key ~{scanvi_latent_key} \
 			--predictions-key ~{scanvi_predictions_key} \
 			--adata-input ~{integrated_adata_object} \
@@ -220,7 +220,7 @@ task cluster_cells {
 	command <<<
 		set -euo pipefail
 
-		python3 clustering_umap.py \
+		clustering_umap \
 			--latent-key ~{scvi_latent_key} \
 			--n-neighbors ~{n_neighbors} \
 			--leiden-res ~{sep=' ' leiden_res} \

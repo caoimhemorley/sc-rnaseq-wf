@@ -16,7 +16,7 @@ Common workflows, tasks, utility scripts, and docker images reused across harmon
 
 # Workflows
 
-Worfklows are defined in [the `workflows` directory](workflows). The python scripts which process the data at each stage can be found [the docker/scvi/scripts directory](docker/scvi/scripts).
+Worfklows are defined in [the `workflows` directory](workflows). The python scripts which process the data at each stage can be found [the docker/sc_tools/scripts directory](docker/sc_tools/scripts).
 
 ![Workflow diagram](workflows/workflow_diagram.svg "Workflow diagram")
 

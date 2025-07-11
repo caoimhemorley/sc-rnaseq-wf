@@ -314,7 +314,7 @@ task merge_and_plot_qc_metrics {
 			echo -e "${sample}\t${adata_path}" >> adata_samples_paths.tsv
 		done < ~{write_lines(preprocessed_adata_objects)}
 
-		python3 merge_and_plot_qc.py \
+		merge_and_plot_qc \
 			--adata-objects-fofn adata_samples_paths.tsv \
 			--adata-output ~{cohort_id}.merged_cleaned_unfiltered.h5ad \
 			--output-metadata-file ~{cohort_id}.initial_metadata.csv
@@ -383,7 +383,7 @@ task filter {
 	command <<<
 		set -euo pipefail
 
-		python3 filter.py \
+		filter \
 			--adata-input ~{merged_adata_object} \
 			--pct-counts-mt-max ~{pct_counts_mt_max} \
 			--doublet-score-max ~{doublet_score_max} \
@@ -428,7 +428,7 @@ task map_cell_types {
 	command <<<
 		set -euo pipefail
 
-		python3 mmc.py \
+		mmc \
 			--adata-input ~{filtered_adata_object} \
 			--mmc-taxonomy-path ~{allen_mtg_precomputed_stats} \
 			--output-prefix ~{cohort_id}.mmc_otf_mapping.SEAAD.
@@ -483,7 +483,7 @@ task normalize {
 	command <<<
 		set -euo pipefail
 
-		python3 process.py \
+		process \
 			--adata-input ~{filtered_adata_object} \
 			--batch-key ~{batch_key} \
 			--adata-output ~{cohort_id}.normalized.h5ad \
@@ -538,7 +538,7 @@ task add_mapped_cell_types {
 	command <<<
 		set -euo pipefail
 
-		python3 transcriptional_phenotype.py \
+		transcriptional_phenotype \
 			--adata-input ~{normalized_adata_object} \
 			--mmc-results ~{mmc_results_csv} \
 			--output-cell-types-file ~{cohort_id}.mmc_results.parquet.gzip \
@@ -590,7 +590,7 @@ task integrate_harmony {
 
 		nvidia-smi
 
-		python3 add_harmony.py \
+		add_harmony \
 			--batch-key ~{batch_key} \
 			--adata-input ~{umap_clustered_adata_object} \
 			--adata-output ~{cohort_id}.final.h5ad \
@@ -647,7 +647,7 @@ task artifact_metrics {
 
 		nvidia-smi
 
-		python3 artifact_metrics.py \
+		artifact_metrics \
 			--predictions-key ~{scanvi_predictions_key} \
 			--batch-key ~{batch_key} \
 			--adata-input ~{final_adata_object} \
@@ -705,7 +705,7 @@ task plot_groups_and_features {
 	command <<<
 		set -euo pipefail
 
-		python3 plot_groups_and_feats.py \
+		plot_groups_and_feats \
 			--adata-input ~{final_adata_object} \
 			--groups ~{sep=',' groups} \
 			--output-group-umap-plot-prefix "~{cohort_id}" \
