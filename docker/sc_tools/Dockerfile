@@ -64,6 +64,7 @@ RUN python3 -m pip install -r /opt/requirements.txt
 RUN python3 -m pip install --upgrade "jax[cuda12_pip]==${JAX_VERSION}" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
 COPY --from=scripts /opt/scripts /opt/scripts
+COPY /opt/scripts /opt/scripts
 ENV PATH "${PATH}:/opt/scripts:/opt/scripts/main"
 
 COPY resources /opt/resources
