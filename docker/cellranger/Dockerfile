@@ -30,5 +30,5 @@ RUN wget -O cellranger-${CELLRANGER_VERSION}.tar.gz \
 RUN ln -s /opt/cellranger-${CELLRANGER_VERSION}/cellranger /usr/local/bin/
 
 COPY --from=scripts /opt/scripts /opt/scripts
-COPY /opt/scripts /opt/scripts
+COPY scripts /opt/scripts
 ENV PATH "${PATH}:/opt/scripts"
