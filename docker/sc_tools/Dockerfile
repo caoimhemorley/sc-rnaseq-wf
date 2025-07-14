@@ -37,6 +37,14 @@ RUN apt-get -qq update \
 		git \
 	&& rm -rf /var/lib/apt/lists/*
 
+# gcloud sdk; needed to upload output files
+ARG GCLOUD_CLI_VERSION
+RUN wget "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-${GCLOUD_CLI_VERSION}-linux-x86_64.tar.gz" \
+	&& tar -zxvf "google-cloud-cli-${GCLOUD_CLI_VERSION}-linux-x86_64.tar.gz" --directory /opt \
+	&& rm "google-cloud-cli-${GCLOUD_CLI_VERSION}-linux-x86_64.tar.gz"
+
+ENV PATH "${PATH}:/opt/google-cloud-sdk/bin"
+
 ARG PYTHON3_VERSION
 ENV PYTHON3_VERSION "${PYTHON3_VERSION}"
 RUN curl -O https://www.python.org/ftp/python/${PYTHON3_VERSION}/Python-${PYTHON3_VERSION}.tar.xz \

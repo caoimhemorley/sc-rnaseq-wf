@@ -17,6 +17,14 @@ RUN apt-get -qq update \
 		xxd \
 		python3-dev
 
+# gcloud sdk; needed to upload output files
+ARG GCLOUD_CLI_VERSION
+RUN wget "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-${GCLOUD_CLI_VERSION}-linux-x86_64.tar.gz" \
+	&& tar -zxvf "google-cloud-cli-${GCLOUD_CLI_VERSION}-linux-x86_64.tar.gz" --directory /opt \
+	&& rm "google-cloud-cli-${GCLOUD_CLI_VERSION}-linux-x86_64.tar.gz"
+
+ENV PATH "${PATH}:/opt/google-cloud-sdk/bin"
+
 ARG CELLRANGER_VERSION
 # N.B. this must be passed as a build arg (using the utility script: -b CELLRANGER_DOWNLOAD_QUERY_STRING='xxyy')
 #   Enter information here: https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions
