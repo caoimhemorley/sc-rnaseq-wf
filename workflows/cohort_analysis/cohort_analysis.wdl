@@ -431,7 +431,7 @@ task map_cell_types {
 		mmc \
 			--adata-input ~{filtered_adata_object} \
 			--mmc-taxonomy-path ~{allen_mtg_precomputed_stats} \
-			--output-prefix ~{cohort_id}.mmc_otf_mapping.SEAAD.
+			--output-prefix ~{cohort_id}.mmc_otf_mapping.SEAAD
 
 		upload_outputs \
 			-b ~{billing_project} \
