@@ -548,7 +548,7 @@ task add_mapped_cell_types {
 			-b ~{billing_project} \
 			-d ~{raw_data_path} \
 			-i ~{write_tsv(workflow_info)} \
-			-o "~{cohort_id}.mmc_results.parquet"
+			-o "~{cohort_id}.mmc_results.parquet.gzip"
 	>>>
 
 	output {

@@ -9,6 +9,7 @@ import sys
 from anndata import AnnData
 from pathlib import Path
 import os
+import pyarrow
 
 sys.path.append("/opt/scripts/utility")
 from helpers import update_validation_metrics
