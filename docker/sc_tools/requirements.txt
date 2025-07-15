@@ -96,7 +96,7 @@ pytz==2024.1
 PyYAML==6.0.1
 requests==2.32.3
 rich==13.7.1
-scanpy==1.9.8
+scanpy==1.10.0
 scib-metrics==0.5.1
 scikit-image==0.23.2
 scikit-learn==1.5.0

@@ -39,7 +39,7 @@ def main(args: argparse.Namespace):
     adata = sc.read_h5ad(args.adata_input)  # type: ignore
 
     # Save the results
-    report_dir = Path.cwd() / args.scib_report_dir
+    report_dir = Path.cwd() / args.output_report_dir
     if not report_dir.exists():
         report_dir.mkdir(parents=True, exist_ok=True)
 
