@@ -15,8 +15,6 @@ workflow cohort_analysis {
 		# If provided, these files will be uploaded to the staging bucket alongside other intermediate files made by this workflow
 		Array[String] preprocessing_output_file_paths = []
 
-		Boolean project_cohort_analysis
-
 		# Filtering parameters
 		Int pct_counts_mt_max
 		Float doublet_score_max
@@ -164,19 +162,17 @@ workflow cohort_analysis {
 			zones = zones
 	}
 
-	if (project_cohort_analysis) {
-		call artifact_metrics {
-			input:
-				cohort_id = cohort_id,
-				final_adata_object = integrate_harmony.final_adata_object, #!FileCoercion
-				scanvi_predictions_key = scanvi_predictions_key,
-				batch_key = batch_key,
-				raw_data_path = raw_data_path,
-				workflow_info = workflow_info,
-				billing_project = billing_project,
-				container_registry = container_registry,
-				zones = zones
-		}
+	call artifact_metrics {
+		input:
+			cohort_id = cohort_id,
+			final_adata_object = integrate_harmony.final_adata_object, #!FileCoercion
+			scanvi_predictions_key = scanvi_predictions_key,
+			batch_key = batch_key,
+			raw_data_path = raw_data_path,
+			workflow_info = workflow_info,
+			billing_project = billing_project,
+			container_registry = container_registry,
+			zones = zones
 	}
 
 	call plot_groups_and_features {
@@ -230,10 +226,10 @@ workflow cohort_analysis {
 			integrate_harmony.final_adata_object,
 			integrate_harmony.final_metadata_csv,
 		],
-		select_all([
+		[
 			artifact_metrics.scib_report_results_csv,
 			artifact_metrics.scib_report_results_svg
-		]),
+		],
 		[
 			plot_groups_and_features.groups_umap_plot_png,
 			plot_groups_and_features.features_umap_plot_png
@@ -278,8 +274,8 @@ workflow cohort_analysis {
 		File final_metadata_csv = integrate_harmony.final_metadata_csv #!FileCoercion
 
 		# Artifact metrics
-		File? scib_report_results_csv = artifact_metrics.scib_report_results_csv #!FileCoercion
-		File? scib_report_results_svg = artifact_metrics.scib_report_results_svg #!FileCoercion
+		File scib_report_results_csv = artifact_metrics.scib_report_results_csv #!FileCoercion
+		File scib_report_results_svg = artifact_metrics.scib_report_results_svg #!FileCoercion
 
 		# Groups and features plots
 		File groups_umap_plot_png = plot_groups_and_features.groups_umap_plot_png #!FileCoercion
