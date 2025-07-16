@@ -1,8 +1,10 @@
 ARG CUDA_VERSION
+ARG UBUNTU_VERSION
 FROM us-central1-docker.pkg.dev/dnastack-asap-parkinsons/workflow-images/util:1.2.0 as scripts
 
-FROM nvcr.io/nvidia/cuda:${CUDA_VERSION}-base-ubuntu20.04
+FROM nvcr.io/nvidia/cuda:${CUDA_VERSION}-base-ubuntu${UBUNTU_VERSION}
 ENV CUDA_VERSION "${CUDA_VERSION}"
+ENV UBUNTU_VERSION "${UBUNTU_VERSION}"
 
 LABEL MAINTAINER="Karen Fang <karen@dnastack.com>"
 
@@ -12,8 +14,6 @@ ARG IMAGE_TAG
 ENV IMAGE_TAG "${IMAGE_TAG}"
 ARG JAX_VERSION
 ENV JAX_VERSION "${JAX_VERSION}"
-ARG CUDA_VERSION
-ENV CUDA_VERSION "${CUDA_VERSION}"
 
 ENV DEBIAN_FRONTEND noninteractive
 
