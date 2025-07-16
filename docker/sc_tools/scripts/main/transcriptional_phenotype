@@ -126,16 +126,16 @@ if __name__ == "__main__":
         help="Path to MMC results CSV",
     )
     parser.add_argument(
-        "--output-cell-types-file",
-        type=str,
-        required=True,
-        help="Output file to write cell types to",
-    )
-    parser.add_argument(
         "--adata-output",
         type=str,
         required=True,
         help="Output file to save AnnData object to",
+    )
+    parser.add_argument(
+        "--output-cell-types-file",
+        type=str,
+        required=True,
+        help="Output file to write cell types to",
     )
 
     args = parser.parse_args()

@@ -77,8 +77,8 @@ task integrate_sample_data {
 		String cohort_id
 		File mmc_adata_object
 
-		String batch_key
 		String scvi_latent_key
+		String batch_key
 
 		String raw_data_path
 		Array[Array[String]] workflow_info

@@ -205,8 +205,8 @@ workflow pmdbs_sc_rnaseq_analysis {
 		Array[File?] project_mmc_results_csv = project_cohort_analysis.mmc_results_csv
 		Array[File?] project_mmc_log_txt = project_cohort_analysis.mmc_log_txt
 		Array[File?] project_normalized_adata_object = project_cohort_analysis.normalized_adata_object
-		Array[File?] project_mmc_results_parquet_gzip = project_cohort_analysis.mmc_results_parquet_gzip
 		Array[File?] project_mmc_adata_object = project_cohort_analysis.mmc_adata_object
+		Array[File?] project_mmc_results_parquet_gzip = project_cohort_analysis.mmc_results_parquet_gzip
 		Array[File?] project_all_genes_csv = project_cohort_analysis.all_genes_csv
 		Array[File?] project_hvg_genes_csv = project_cohort_analysis.hvg_genes_csv
 
@@ -243,8 +243,8 @@ workflow pmdbs_sc_rnaseq_analysis {
 		File? cohort_mmc_results_csv = cross_team_cohort_analysis.mmc_results_csv
 		File? cohort_mmc_log_txt = cross_team_cohort_analysis.mmc_log_txt
 		File? cohort_normalized_adata_object = cross_team_cohort_analysis.normalized_adata_object
-		File? cohort_mmc_results_parquet_gzip = cross_team_cohort_analysis.mmc_results_parquet_gzip
 		File? cohort_mmc_adata_object = cross_team_cohort_analysis.mmc_adata_object
+		File? cohort_mmc_results_parquet_gzip = cross_team_cohort_analysis.mmc_results_parquet_gzip
 		File? cohort_all_genes_csv = cross_team_cohort_analysis.all_genes_csv
 		File? cohort_hvg_genes_csv = cross_team_cohort_analysis.hvg_genes_csv
 
