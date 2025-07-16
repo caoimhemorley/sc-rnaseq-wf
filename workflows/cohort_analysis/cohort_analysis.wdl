@@ -482,10 +482,10 @@ task normalize {
 		process \
 			--adata-input ~{filtered_adata_object} \
 			--batch-key ~{batch_key} \
-			--adata-output ~{cohort_id}.normalized.h5ad \
 			--norm-target-sum ~{norm_target_sum} \
 			--n-top-genes ~{n_top_genes} \
 			--n-comps ~{n_comps} \
+			--adata-output ~{cohort_id}.normalized.h5ad \
 			--output-all-genes ~{cohort_id}.all_genes.csv \
 			--output-hvg-genes ~{cohort_id}.hvg_genes.csv
 

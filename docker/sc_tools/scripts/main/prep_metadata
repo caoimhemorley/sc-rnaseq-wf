@@ -13,7 +13,7 @@ def prep_metadata(
     adata: AnnData, sample_id: str, batch_id: str, dataset_id: str, team_id: str
 ):
     # Set CPUs to use for parallel computing
-    sc._settings.ScanpyConfig.n_jobs = -1
+    sc.settings.n_jobs = -1
 
     adata.var_names_make_unique()
     adata.var["mt"] = adata.var_names.str.startswith("MT-")
@@ -26,7 +26,7 @@ def prep_metadata(
         inplace=True,
     )
 
-    sc.external.pp.scrublet(adata)
+    sc.pp.scrublet(adata)
     # Keep the metadata clean and drop predicted_doublet; rely on the probability of doublet (i.e., doublet_score)
     adata.obs.drop("predicted_doublet", axis=1, inplace=True)
 

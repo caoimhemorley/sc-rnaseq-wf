@@ -6,12 +6,12 @@ import scanpy as sc
 
 def make_f_and_g_plots(adata: sc.AnnData, group_name: str, feature_name: str, groups:str, features:str):
     # Set CPUs to use for parallel computing
-    sc._settings.ScanpyConfig.n_jobs = -1
+    sc.settings.n_jobs = -1
 
     # Set working directory and load packages
     sc.settings.verbosity = 1
     sc.settings.figdir = "plots/"
-    sc.settings.set_figure_params(
+    sc.set_figure_params(
         dpi=100, fontsize=10, dpi_save=300, format="png", figsize=("12", "8")
     )  # type: ignore
 

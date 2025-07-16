@@ -39,18 +39,12 @@ def gen_qc_plots(adata: AnnData):
     ]
 
     # Set CPUs to use for parallel computing
-    sc._settings.ScanpyConfig.n_jobs = -1
+    sc.settings.n_jobs = -1
 
     sc.settings.verbosity = 1
     sc.settings.figdir = "plots/"
-    sc.settings.set_figure_params(
-        dpi=100, fontsize=10, dpi_save=300, format="png", figsize=("12", "8")
-    )  # type: ignore
-
-    sc.settings.verbosity = 1
-    sc.settings.figdir = "plots/"
-    sc.settings.set_figure_params(
-        dpi=100, fontsize=10, dpi_save=300, format="png", figsize=("12", "8")
+    sc.set_figure_params(
+        dpi=100, fontsize=10, dpi_save=300, format="png", figsize=(12, 8)
     )  # type: ignore
 
     for metric in metrics:  # type: ignore

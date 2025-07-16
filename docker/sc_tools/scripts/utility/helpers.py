@@ -171,7 +171,6 @@ def anndata_from_h5(file: str, analyzed_barcodes_only: bool = True) -> anndata.A
                 d.pop("gene_names") if "gene_names" in d.keys() else d.pop("name")
             ).astype(str)
         },
-        dtype=X.dtype,
     )
     adata.obs.set_index("barcode", inplace=True)
     adata.var.set_index("gene_name", inplace=True)

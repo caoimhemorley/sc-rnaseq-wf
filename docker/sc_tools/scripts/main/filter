@@ -18,7 +18,7 @@ def filter_adata(adata_fname: str) -> AnnData:
     # 0. Load data
     adata_backed = sc.read_h5ad(args.adata_input, backed='r')  # type: ignore
     print(f"read {args.adata_input}")
-    
+
     # Step 2: Choose your filter condition on the `.obs` or `.var` (must be present in backed mode)
     # For example, filter cells with a certain metadata label
     # muon api is better than the scanpyt api for this...
@@ -48,25 +48,25 @@ def filter_adata(adata_fname: str) -> AnnData:
     keep_n_genes_by_counts = (adata_backed.obs['n_genes_by_counts'] >= args.n_genes_by_counts_limits[0]) & (adata_backed.obs['n_genes_by_counts'] <= args.n_genes_by_counts_limits[1])
 
     keep_cells = keep_mt & keep_doublet & keep_total_counts & keep_n_genes_by_counts
-    
+
     # Step 3: Read the filtered subset into memory
     print(f"APPLY FILTER")
     adata_filtered = adata_backed[keep_cells].to_memory()
-    
+
     # Step 4: Optional - Close the backed object to release file handles
     adata_backed.file.close()
-    
+
     return adata_filtered
 
 
 def main(args: argparse.Namespace):
     # Set CPUs to use for parallel computing
-    sc._settings.ScanpyConfig.n_jobs = -1
+    sc.settings.n_jobs = -1
 
     # 1. Filter data
     adata = filter_adata(args.adata_input)
     print(f"---- filtered -----")
-    
+
     # 2. Save the filtered adata
     adata.write_h5ad(filename=args.adata_output, compression="gzip")
     print(f"wrote {args.adata_output}")

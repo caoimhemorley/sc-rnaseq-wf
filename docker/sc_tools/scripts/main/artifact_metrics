@@ -14,7 +14,7 @@ def get_artifact_metrics(
     adata: AnnData, batch_key: str, label_key: str, scib_report_dir: Path | str
 ) -> DataFrame:
     # Set CPUs to use for parallel computing
-    sc._settings.ScanpyConfig.n_jobs = -1
+    sc.settings.n_jobs = -1
 
     adata.obsm["Unintegrated"] = adata.obsm["X_pca"]
     biocons = BioConservation(isolated_labels=False)

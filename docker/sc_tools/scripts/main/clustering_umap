@@ -7,7 +7,7 @@ from anndata import AnnData
 
 def get_cluster_umap(adata: AnnData, latent_key: str, n_neighbors : int) -> AnnData:
     # Set CPUs to use for parallel computing
-    sc._settings.ScanpyConfig.n_jobs = -1
+    sc.settings.n_jobs = -1
 
     # Calculate neighbor graph on scVI latent
     sc.pp.neighbors(adata, n_neighbors=n_neighbors, use_rep=latent_key)

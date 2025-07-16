@@ -78,7 +78,7 @@ def process_adata(
 
 def main(args: argparse.Namespace):
     # Set CPUs to use for parallel computing
-    sc._settings.ScanpyConfig.n_jobs = -1
+    sc.settings.n_jobs = -1
 
     # 0. Load data
     adata = sc.read_h5ad(args.adata_input)  # type: ignore
@@ -120,12 +120,6 @@ if __name__ == "__main__":
         help="Key in AnnData object for batch information",
     )
     parser.add_argument(
-        "--adata-output",
-        type=str,
-        required=True,
-        help="Output file to save AnnData object to",
-    )
-    parser.add_argument(
         "--norm-target-sum",
         type=int,
         required=True,
@@ -149,6 +143,12 @@ if __name__ == "__main__":
     #     required=True,
     #     help="Path to marker_genes .csv file",
     # )
+    parser.add_argument(
+        "--adata-output",
+        type=str,
+        required=True,
+        help="Output file to save AnnData object to",
+    )
     parser.add_argument(
         "--output-all-genes",
         type=str,

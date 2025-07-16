@@ -10,7 +10,7 @@ def add_harmony(adata: AnnData):
     Adds Harmony integration to AnnData object in place
     """
     # Set CPUs to use for parallel computing
-    sc._settings.ScanpyConfig.n_jobs = -1
+    sc.settings.n_jobs = -1
 
     print("Running Harmony integration")
     sc.external.pp.harmony_integrate(adata, args.batch_key)
