@@ -7,7 +7,7 @@
       "tasks": {
         "merge_and_plot_qc_metrics": {
           "key": "merge_and_plot_qc_metrics",
-          "digest": "tqz5pazvvo4uqihr7sqwp7oyorcg7s4u",
+          "digest": "oxndp5i6mfoirwljraxmkqvn6z2bcfeo",
           "tests": [
             {
               "inputs": {
@@ -65,7 +65,7 @@
         },
         "filter": {
           "key": "filter",
-          "digest": "",
+          "digest": "5kapgsz5zzyki5j4oc6nc32d2ecqjbve",
           "tests": [
             {
               "inputs": {
@@ -135,7 +135,7 @@
         },
         "normalize": {
           "key": "normalize",
-          "digest": "",
+          "digest": "ar4ghqctoshmkldx37jipz53ej2adykb",
           "tests": [
             {
               "inputs": {
@@ -183,7 +183,7 @@
         },
         "add_mapped_cell_types": {
           "key": "add_mapped_cell_types",
-          "digest": "",
+          "digest": "lk5tfxsxylnjxvtobfurh2zgueobvh7w",
           "tests": [
             {
               "inputs": {
@@ -217,7 +217,7 @@
         },
         "integrate_harmony": {
           "key": "integrate_harmony",
-          "digest": "qiizvox3qnj5jqpulxvgoltfo5dthndd",
+          "digest": "isbnmp4zrvep3g6web6uofdr53jwp3hi",
           "tests": [
             {
               "inputs": {
@@ -253,7 +253,7 @@
         },
         "artifact_metrics": {
           "key": "artifact_metrics",
-          "digest": "itacurm7rsdcwinn64vnfwz5plaxykqz",
+          "digest": "i6rlbrmelah7jia5p5k3c476cyvg2rpq",
           "tests": [
             {
               "inputs": {
@@ -290,7 +290,7 @@
         },
         "plot_groups_and_features": {
           "key": "plot_groups_and_features",
-          "digest": "bh2cfed7vxadnkpijndn4b5dtsei6twi",
+          "digest": "sg5rlabnz2c53ioakw5w4c6quaqgf75v",
           "tests": [
             {
               "inputs": {
@@ -334,7 +334,7 @@
       "tasks": {
         "integrate_sample_data": {
           "key": "integrate_sample_data",
-          "digest": "kuwz23earbcufnakk3wl7kz7w7d4m55g",
+          "digest": "lgemiugczkj46nl4sb447xvtvqnq7kzn",
           "tests": [
             {
               "inputs": {
@@ -412,7 +412,7 @@
         },
         "cluster_cells": {
           "key": "cluster_cells",
-          "digest": "lhwgsaecfal4ozmbrqkjw7zreqmdd7lm",
+          "digest": "iz6jx2zqm6qxfesujrj2gj2mjy3n6ajj",
           "tests": [
             {
               "inputs": {
@@ -585,7 +585,7 @@
         },
         "counts_to_adata": {
           "key": "counts_to_adata",
-          "digest": "ye6a4g74qet4cjwvma2lkpyw4xvdvko7",
+          "digest": "vqunk63reu4yvtlpbjtx6barg5sezveq",
           "tests": [
             {
               "inputs": {
@@ -639,7 +639,7 @@
       "tasks": {
         "write_cohort_sample_list": {
           "key": "write_cohort_sample_list",
-          "digest": "cve3yantcy3stjk7ggvycomu3qo7rizb",
+          "digest": "cn33tbof6zcgr72pzjgzqplvbtzg47bk",
           "tests": [
             {
               "inputs": {
