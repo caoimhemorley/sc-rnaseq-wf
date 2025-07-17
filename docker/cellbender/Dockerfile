@@ -24,5 +24,7 @@ RUN apt-get -qq update \
 		time \
 		xxd
 
+RUN ln -s $(which python3) /usr/bin/python3
+
 COPY --from=scripts /opt/scripts /opt/scripts
 ENV PATH "${PATH}:/opt/scripts"

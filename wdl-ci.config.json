@@ -393,7 +393,7 @@
                   ]
                 },
                 "scanvi_model_tar_gz": {
-                  "value": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.scanvi_model_tar_gz.tar.gz",
+                  "value": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.scanvi_model.tar.gz",
                   "test_tasks": [
                     "compare_file_basename",
                     "check_gzip"
