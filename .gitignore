@@ -13,3 +13,6 @@ ipynb_checkpoints/*
 
 # Python files
 __pycache__/*
+
+# Env files
+**/.env
