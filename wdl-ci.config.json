@@ -369,7 +369,7 @@
         },
         "assign_remaining_cells": {
           "key": "assign_remaining_cells",
-          "digest": "",
+          "digest": "t6zpftqv4vxzwy42zrx5hpjp4rakoeay",
           "tests": [
             {
               "inputs": {
@@ -450,7 +450,7 @@
         },
         "cellranger_count": {
           "key": "cellranger_count",
-          "digest": "hhcgqklxaklkzbikxpbp7gpwfalqc2as",
+          "digest": "zs74mp72bww55ceppln46kdd3t35fx6y",
           "tests": [
             {
               "inputs": {
@@ -507,7 +507,7 @@
         },
         "remove_technical_artifacts": {
           "key": "remove_technical_artifacts",
-          "digest": "f2ulwvwgf67cd7hgpjjxtly47tqhppgf",
+          "digest": "65aygqojmtwgqy5syt37ryhyh7adgqh2",
           "tests": [
             {
               "inputs": {
