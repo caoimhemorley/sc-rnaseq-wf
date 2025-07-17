@@ -180,10 +180,10 @@ asap-dev-{cohort,team-xxyy}-{source}-{dataset}
     │   ├── ${cohort_id}.mmc_otf_mapping.SEAAD.log.txt 
     │   ├── ${cohort_id}.all_genes.csv
     │   ├── ${cohort_id}.hvg_genes.csv
-    │   ├── ${cohort_id}.mmc_results.parquet.gzip
+    │   ├── ${cohort_id}.mmc_results.parquet
     │   ├── ${cohort_id}.scvi_model.tar.gz
     │   ├── ${cohort_id}.scanvi_model.tar.gz
-    │   ├── ${cohort_id}.scanvi_cell_types.parquet.gzip
+    │   ├── ${cohort_id}.scanvi_cell_types.parquet
     │   ├── ${cohort_id}.final.h5ad
     │   ├── ${cohort_id}.final_metadata.csv
     │   ├── ${team_id}.scib_report.csv

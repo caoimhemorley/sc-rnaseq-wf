@@ -206,7 +206,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 		Array[File?] project_mmc_log_txt = project_cohort_analysis.mmc_log_txt
 		Array[File?] project_normalized_adata_object = project_cohort_analysis.normalized_adata_object
 		Array[File?] project_mmc_adata_object = project_cohort_analysis.mmc_adata_object
-		Array[File?] project_mmc_results_parquet_gzip = project_cohort_analysis.mmc_results_parquet_gzip
+		Array[File?] project_mmc_results_parquet = project_cohort_analysis.mmc_results_parquet
 		Array[File?] project_all_genes_csv = project_cohort_analysis.all_genes_csv
 		Array[File?] project_hvg_genes_csv = project_cohort_analysis.hvg_genes_csv
 
@@ -215,7 +215,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 		Array[File?] project_scvi_model_tar_gz = project_cohort_analysis.scvi_model_tar_gz
 		Array[File?] project_labeled_cells_adata_object = project_cohort_analysis.labeled_cells_adata_object
 		Array[File?] project_scanvi_model_tar_gz = project_cohort_analysis.scanvi_model_tar_gz
-		Array[File?] project_scanvi_cell_types_parquet_gzip = project_cohort_analysis.scanvi_cell_types_parquet_gzip
+		Array[File?] project_scanvi_cell_types_parquet = project_cohort_analysis.scanvi_cell_types_parquet
 		Array[File?] project_umap_clustered_adata_object = project_cohort_analysis.umap_clustered_adata_object
 
 		# PCA and Harmony integrated adata objects and artifact metrics
@@ -244,7 +244,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 		File? cohort_mmc_log_txt = cross_team_cohort_analysis.mmc_log_txt
 		File? cohort_normalized_adata_object = cross_team_cohort_analysis.normalized_adata_object
 		File? cohort_mmc_adata_object = cross_team_cohort_analysis.mmc_adata_object
-		File? cohort_mmc_results_parquet_gzip = cross_team_cohort_analysis.mmc_results_parquet_gzip
+		File? cohort_mmc_results_parquet = cross_team_cohort_analysis.mmc_results_parquet
 		File? cohort_all_genes_csv = cross_team_cohort_analysis.all_genes_csv
 		File? cohort_hvg_genes_csv = cross_team_cohort_analysis.hvg_genes_csv
 
@@ -253,7 +253,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 		File? cohort_scvi_model_tar_gz = cross_team_cohort_analysis.scvi_model_tar_gz
 		File? cohort_labeled_cells_adata_object = cross_team_cohort_analysis.labeled_cells_adata_object
 		File? cohort_scanvi_model_tar_gz = cross_team_cohort_analysis.scanvi_model_tar_gz
-		File? cohort_scanvi_cell_types_parquet_gzip = cross_team_cohort_analysis.scanvi_cell_types_parquet_gzip
+		File? cohort_scanvi_cell_types_parquet = cross_team_cohort_analysis.scanvi_cell_types_parquet
 		File? cohort_umap_clustered_adata_object = cross_team_cohort_analysis.umap_clustered_adata_object
 
 		# PCA and Harmony integrated adata objects and artifact metrics

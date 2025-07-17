@@ -215,12 +215,12 @@ workflow cohort_analysis {
 			normalize.hvg_genes_csv
 		],
 		[
-			add_mapped_cell_types.mmc_results_parquet_gzip
+			add_mapped_cell_types.mmc_results_parquet
 		],
 		[
 			cluster_data.scvi_model_tar_gz,
 			cluster_data.scanvi_model_tar_gz,
-			cluster_data.scanvi_cell_types_parquet_gzip
+			cluster_data.scanvi_cell_types_parquet
 		],
 		[
 			integrate_harmony.final_adata_object,
@@ -257,7 +257,7 @@ workflow cohort_analysis {
 		File mmc_log_txt = map_cell_types.mmc_log_txt #!FileCoercion
 		File normalized_adata_object = normalize.normalized_adata_object
 		File mmc_adata_object = add_mapped_cell_types.mmc_adata_object
-		File mmc_results_parquet_gzip = add_mapped_cell_types.mmc_results_parquet_gzip #!FileCoercion
+		File mmc_results_parquet = add_mapped_cell_types.mmc_results_parquet #!FileCoercion
 		File all_genes_csv = normalize.all_genes_csv #!FileCoercion
 		File hvg_genes_csv = normalize.hvg_genes_csv #!FileCoercion
 
@@ -266,7 +266,7 @@ workflow cohort_analysis {
 		File scvi_model_tar_gz = cluster_data.scvi_model_tar_gz
 		File labeled_cells_adata_object = cluster_data.labeled_cells_adata_object
 		File scanvi_model_tar_gz = cluster_data.scanvi_model_tar_gz
-		File scanvi_cell_types_parquet_gzip = cluster_data.scanvi_cell_types_parquet_gzip
+		File scanvi_cell_types_parquet = cluster_data.scanvi_cell_types_parquet
 		File umap_clustered_adata_object = cluster_data.umap_clustered_adata_object
 
 		# PCA and Harmony integrated adata objects
@@ -538,18 +538,18 @@ task add_mapped_cell_types {
 			--adata-input ~{normalized_adata_object} \
 			--mmc-results ~{mmc_results_csv} \
 			--adata-output ~{cohort_id}.mmc.h5ad \
-			--output-cell-types-file ~{cohort_id}.mmc_results.parquet.gzip
+			--output-cell-types-file ~{cohort_id}.mmc_results.parquet
 
 		upload_outputs \
 			-b ~{billing_project} \
 			-d ~{raw_data_path} \
 			-i ~{write_tsv(workflow_info)} \
-			-o "~{cohort_id}.mmc_results.parquet.gzip"
+			-o "~{cohort_id}.mmc_results.parquet"
 	>>>
 
 	output {
 		File mmc_adata_object = "~{cohort_id}.mmc.h5ad"
-		String mmc_results_parquet_gzip = "~{raw_data_path}/~{cohort_id}.mmc_results.parquet.gzip"
+		String mmc_results_parquet = "~{raw_data_path}/~{cohort_id}.mmc_results.parquet"
 	}
 
 	runtime {

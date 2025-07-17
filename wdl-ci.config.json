@@ -119,7 +119,6 @@
                   "test_tasks": [
                     "compare_file_basename",
                     "check_empty_lines",
-                    "check_comma_separated",
                     "count_columns"
                   ]
                 },
@@ -205,11 +204,11 @@
                     "check_hdf5"
                   ]
                 },
-                "mmc_results_parquet_gzip": {
-                  "value": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.mmc_results.parquet.gzip",
+                "mmc_results_parquet": {
+                  "value": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.mmc_results.parquet",
                   "test_tasks": [
                     "compare_file_basename",
-                    "check_gzip"
+                    "check_parquet"
                   ]
                 }
               }
@@ -377,7 +376,7 @@
                 "cohort_id": "${cohort_id}",
                 "integrated_adata_object": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.scvi_integrated.h5ad",
                 "scvi_model_tar_gz": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.scvi_model.tar.gz",
-                "scvi_latent_key": "${scvi_latent_key}",
+                "scanvi_latent_key": "${scanvi_latent_key}",
                 "scanvi_predictions_key": "${scanvi_predictions_key}",
                 "raw_data_path": "${cohort_raw_data_path}",
                 "workflow_info": "${workflow_info}",
@@ -400,11 +399,11 @@
                     "check_gzip"
                   ]
                 },
-                "scanvi_cell_types_parquet_gzip": {
-                  "value": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.scanvi_cell_types.parquet.gzip",
+                "scanvi_cell_types_parquet": {
+                  "value": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.scanvi_cell_types.parquet",
                   "test_tasks": [
                     "compare_file_basename",
-                    "check_gzip"
+                    "check_parquet"
                   ]
                 }
               }
@@ -417,6 +416,7 @@
           "tests": [
             {
               "inputs": {
+                "cohort_id": "${cohort_id}",
                 "labeled_cells_adata_object": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.scanvi_labeled.h5ad",
                 "scvi_latent_key": "${scvi_latent_key}",
                 "n_neighbors": "${n_neighbors}",

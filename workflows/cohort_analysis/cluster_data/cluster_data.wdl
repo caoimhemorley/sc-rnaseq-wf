@@ -67,7 +67,7 @@ workflow cluster_data {
 		File scvi_model_tar_gz = integrate_sample_data.scvi_model_tar_gz #!FileCoercion
 		File labeled_cells_adata_object = assign_remaining_cells.labeled_cells_adata_object
 		File scanvi_model_tar_gz = assign_remaining_cells.scanvi_model_tar_gz #!FileCoercion
-		File scanvi_cell_types_parquet_gzip = assign_remaining_cells.scanvi_cell_types_parquet_gzip #!FileCoercion
+		File scanvi_cell_types_parquet = assign_remaining_cells.scanvi_cell_types_parquet #!FileCoercion
 		File umap_clustered_adata_object = cluster_cells.umap_clustered_adata_object
 	}
 }
@@ -166,7 +166,7 @@ task assign_remaining_cells {
 			--scvi-outputs-dir "~{cohort_id}_scvi_model" \
 			--adata-output ~{cohort_id}.scanvi_labeled.h5ad \
 			--output-scanvi-dir ~{cohort_id}_scanvi_model \
-			--output-cell-types-file "~{cohort_id}.scanvi_cell_types.parquet.gzip"
+			--output-cell-types-file "~{cohort_id}.scanvi_cell_types.parquet"
 
 		# Model name cannot be changed because scvi models serialization expects a path containing a model.pt object
 		tar -czvf "~{cohort_id}.scanvi_model.tar.gz" "~{cohort_id}_scanvi_model"
@@ -176,13 +176,13 @@ task assign_remaining_cells {
 			-d ~{raw_data_path} \
 			-i ~{write_tsv(workflow_info)} \
 			-o "~{cohort_id}.scanvi_model.tar.gz" \
-			-o "~{cohort_id}.scanvi_cell_types.parquet.gzip"
+			-o "~{cohort_id}.scanvi_cell_types.parquet"
 	>>>
 
 	output {
 		File labeled_cells_adata_object = "~{cohort_id}.scanvi_labeled.h5ad"
 		String scanvi_model_tar_gz = "~{raw_data_path}/~{cohort_id}.scanvi_model.tar.gz"
-		String scanvi_cell_types_parquet_gzip = "~{raw_data_path}/~{cohort_id}.scanvi_cell_types.parquet.gzip"
+		String scanvi_cell_types_parquet = "~{raw_data_path}/~{cohort_id}.scanvi_cell_types.parquet"
 	}
 
 	runtime {
