@@ -19,14 +19,14 @@ workflow pmdbs_sc_rnaseq_analysis {
 		# Filtering parameters
 		Int pct_counts_mt_max = 10
 		Float doublet_score_max = 0.2
-    	Array[Int] total_counts_limits = [100, 100000]
-    	Array[Int] n_genes_by_counts_limits = [100, 10000]
+		Array[Int] total_counts_limits = [100, 100000]
+		Array[Int] n_genes_by_counts_limits = [100, 10000]
 
-    	# Allen Institute's Map My Cells
-    	File allen_mtg_precomputed_stats
+		# Allen Institute's Map My Cells
+		File allen_mtg_precomputed_stats
 
-    	# Normalization parameters
-    	Int norm_target_sum = 10000
+		# Normalization parameters
+		Int norm_target_sum = 10000
 		Int n_top_genes = 3000
 		Int n_comps = 30
 
@@ -280,8 +280,8 @@ workflow pmdbs_sc_rnaseq_analysis {
 		cellbender_fpr: {help: "Cellbender false positive rate. [0.0]"}
 		pct_counts_mt_max: {help: "Maximum percentage of mitochondrial gene counts allowed per cell. [10]"}
 		doublet_score_max: {help: "Maximum doublet detection score threshold. [0.2]"}
-    	total_counts_limits: {help: "Minimum and maximum total UMI (unique molecular identifier) counts per cell. [100, 100000]"}
-    	n_genes_by_counts_limits: {help: "Minimum and maximum number of genes detected per cell (genes with at least one count). [100, 10000]"}
+		total_counts_limits: {help: "Minimum and maximum total UMI (unique molecular identifier) counts per cell. [100, 100000]"}
+		n_genes_by_counts_limits: {help: "Minimum and maximum number of genes detected per cell (genes with at least one count). [100, 10000]"}
 		allen_mtg_precomputed_stats: {help: "A precomputed statistics file from the Allen Brain Cell Atlas - Seattle Alzheimer’s Disease Brain Cell Atlas (SEA-AD) consortium containing reference statistics for the middle temporal gyrus (MTG) brain region."}
 		norm_target_sum: {help: "The total count value that each cell will be normalized to. [10000]"}
 		n_top_genes: {help: "Number of HVG genes to keep. [8000]"}

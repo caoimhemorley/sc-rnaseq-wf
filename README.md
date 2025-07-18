@@ -29,7 +29,7 @@ The workflow is broken up into two main chunks:
 1. [Preprocessing](#preprocessing)
 2. [Cohort analysis](#cohort-analysis)
 
-> Note: The details of the cohort analysis are described in the [scvi docker README](docker/scvi/scripts/README.md).
+> Note: The details of the cohort analysis are described in the [sc_tools docker README](docker/sc_tools/scripts/README.md).
 
 ## Preprocessing
 
@@ -47,7 +47,7 @@ An input template file can be found at [workflows/inputs.json](workflows/inputs.
 | :- | :- | :- |
 | String | cohort_id | Name of the cohort; used to name output files during cross-team cohort analysis. |
 | Array[[Project](#project)] | projects | The project ID, set of samples and their associated reads and metadata, output bucket locations, and whether or not to run project-level cohort analysis. |
-| File | cellranger_reference_data | Cellranger transcriptome reference data; see https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest. |
+| File | cellranger_reference_data | Cellranger transcriptome reference data; see https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions. |
 | Float? | cellbender_fpr | Cellbender false positive rate for signal removal. [0.0] |
 | Float? | pct_counts_mt_max | Maximum percentage of mitochondrial gene counts allowed per cell. [10] |
 | Int? | doublet_score_max | Maximum doublet detection score threshold. [0.2] |
@@ -97,7 +97,7 @@ An input template file can be found at [workflows/inputs.json](workflows/inputs.
 
 ## Generating the inputs JSON
 
-The inputs JSON may be generated manually, however when running a large number of samples, this can become unwieldly. The `generate_inputs` utility script may be used to automatically generate the inputs JSON. The script requires the libraries outlined in [the requirements.txt file](https://github.com/ASAP-CRN/wf-common/blob/main/util/requirements.txt) and the following inputs:
+The inputs JSON may be generated manually, however when running a large number of samples, this can become unwieldly. The [`generate_inputs` utility script](https://github.com/ASAP-CRN/wf-common/blob/main/util/generate_inputs) may be used to automatically generate the inputs JSON and sample list. The script requires the libraries outlined in [the requirements.txt file](https://github.com/ASAP-CRN/wf-common/blob/main/util/requirements.txt) and the following inputs:
 
 - `project-tsv`: One or more project TSVs with one row per sample and columns team_id, sample_id, batch, fastq_path. All samples from all projects may be included in the same project TSV, or multiple project TSVs may be provided.
     - `team_id`: A unique identifier for the team from which the sample(s) arose
@@ -110,7 +110,6 @@ The inputs JSON may be generated manually, however when running a large number o
 - `run-project-cohort-analysis`: Optionally run project-level cohort analysis for provided projects. This value will apply to all projects. [false]
 - `workflow_name`: WDL workflow name.
 - `cohort-dataset`: Dataset name in cohort bucket name (e.g. 'sc-rnaseq').
-- `output-file-prefix`: Optional output file prefix name. [inputs.{cohort_staging_bucket_type}.{source}-{cohort_dataset}.{date}.json]
 
 Example usage:
 
@@ -119,10 +118,13 @@ Example usage:
     --project-tsv metadata.tsv \
     --inputs-template workflows/inputs.json \
     --run-project-cohort-analysis \
-    --workflow-name pmdbs_bulk_rnaseq_analysis \
-    --cohort-dataset sc-rnaseq \
-    --output-file inputs.harmonized_sc_rnaseq_workflow.json
+    --workflow-name pmdbs_sc_rnaseq_analysis \
+    --cohort-dataset sc-rnaseq
 ```
+
+The output files will be named accordingly:
+- Inputs JSON: `inputs.{staging_env}.{source}-{cohort_dataset}.{date}.json`
+- Sample list TSV: `{team}.{source}-{cohort_dataset}.sample_list.{date}.tsv`
 
 # Outputs
 
@@ -131,13 +133,13 @@ Example usage:
 - `cohort_id`: either the `team_id` for project-level cohort analysis, or the `cohort_id` for the full cohort
 - `workflow_run_timestamp`: format: `%Y-%m-%dT%H-%M-%SZ`
 - The list of samples used to generate the cohort analysis will be output alongside other cohort analysis outputs in the staging data bucket (`${cohort_id}.sample_list.tsv`)
-- The MANIFEST.tsv file in the staging data bucket describes the file name, md5 hash, timestamp, workflow version, workflow name, and workflow release for the run used to generate each file in that directory
+- The `MANIFEST.tsv` file in the staging data bucket describes the file name, md5 hash, timestamp, workflow version, workflow name, and workflow release for the run used to generate each file in that directory
 
 ### Raw data (intermediate files and final outputs for all runs of the workflow)
 
 The raw data bucket will contain *some* artifacts generated as part of workflow execution. Following successful workflow execution, the artifacts will also be copied into the staging bucket as final outputs.
 
-In the workflow, task outputs are either specified as `String` (final outputs, which will be copied in order to live in raw data buckets and staging buckets) or `File` (intermediate outputs that are periodically cleaned up, which will live in the cromwell-output bucket). This was implemented to reduce storage costs. Preprocess final outputs are defined in the workflow at [main.wdl](workflows/main.wdl#L68-L82) and cohort analysis final outputs are defined at [cohort_analysis.wdl](workflows/cohort_analysis/cohort_analysis.wdl#L133-L161).
+In the workflow, task outputs are either specified as `String` (final outputs, which will be copied in order to live in raw data buckets and staging buckets) or `File` (intermediate outputs that are periodically cleaned up, which will live in the cromwell-output bucket). This was implemented to reduce storage costs. Preprocess final outputs are defined in the workflow at [main.wdl](workflows/main.wdl#L85-L99) and cohort analysis final outputs are defined at [cohort_analysis.wdl](workflows/cohort_analysis/cohort_analysis.wdl#L200-L237).
 
 ```bash
 asap-raw-{cohort,team-xxyy}-{source}-{dataset}
@@ -262,7 +264,6 @@ The script defaults to a dry run, printing out the files that would be copied or
 -d  Space-delimited dataset name(s) in team bucket name, must follow the same order as {team}
 -w  Workflow name used as a directory in bucket
 -p  Promote data. If this option is not selected, data that would be copied or deleted is printed out, but files are not actually changed (dry run)
--e  Staging bucket type; options are 'uat' or 'dev' ['uat']
 ```
 
 ### Usage
@@ -275,7 +276,7 @@ The script defaults to a dry run, printing out the files that would be copied or
 ./wf-common/util/promote_staging_data -t team-hafler team-lee cohort -s pmdbs -d sc-rnaseq -w pmdbs_sc_rnaseq
 
 # Promote data for team-scherzer, team-sulzer, and cohort
-./wf-common/util/promote_staging_data -t team-scherzer team-sulzer cohort -s pmdbs -d sc-rnaseq -w pmdbs_sc_rnaseq -p -e dev
+./wf-common/util/promote_staging_data -t team-scherzer team-sulzer cohort -s pmdbs -d sc-rnaseq -w pmdbs_sc_rnaseq -p
 ```
 
 # Docker images
@@ -341,10 +342,10 @@ In general, `wdl-ci` will use inputs provided in the [wdl-ci.config.json](./wdl-
 
 # Notes
 
-## DEPRECATED - Cell type marker table
+## DEPRECATED - Cell type marker table [July 2025]
 The reference taxonomy for inference of cell types via [CellAssign](https://docs.scvi-tools.org/en/1.1.0/user_guide/models/cellassign.html) are sourced from https://github.com/NIH-CARD/brain-taxonomy/blob/main/markers/cellassign_card_markers.csv.
 
-## `harmonized-wf-dev`→`pmdbs-sc-rna-seq`
+## `harmonized-wf-dev`→`pmdbs-sc-rna-seq` [Dec 2024]
 This repo and work was originally developed under the name `harmonized-wf-dev`.
 
 This workflow was initally set up to implement the [Harmony RNA snakemake workflow](https://github.com/shahrozeabbas/Harmony-RNA-Workflow) in WDL. The WDL version of the workflow aims to maintain backwards compatibility with the snakemake scripts. Scripts used by the WDL workflow were modified from the Harmony RNA snakemake repo; originals may be found [here](https://github.com/shahrozeabbas/Harmony-RNA-Workflow/tree/5384b546f02b6e68f154f77d25667fed03759870/scripts), and their modified R versions in [the docker/multiome/scripts directory](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/cohort-analysis-v1.0.0/docker/multiome/scripts). Eventually snakemake support was deprecated and the workflows were migrated to Python. Initial version [here](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/harmonized_pmdbs_analysis-v1.1.0_1.0.0_2.1.0).

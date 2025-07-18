@@ -18,14 +18,14 @@ workflow cohort_analysis {
 		# Filtering parameters
 		Int pct_counts_mt_max
 		Float doublet_score_max
-    	Array[Int] total_counts_limits
-    	Array[Int] n_genes_by_counts_limits
+		Array[Int] total_counts_limits
+		Array[Int] n_genes_by_counts_limits
 
-    	# Allen Institute's Map My Cells
-    	File allen_mtg_precomputed_stats
+		# Allen Institute's Map My Cells
+		File allen_mtg_precomputed_stats
 
-    	# Normalization parameters
-    	Int norm_target_sum
+		# Normalization parameters
+		Int norm_target_sum
 		Int n_top_genes
 		Int n_comps
 
@@ -366,8 +366,8 @@ task filter {
 
 		Int pct_counts_mt_max
 		Float doublet_score_max
-    	Array[Int] total_counts_limits
-    	Array[Int] n_genes_by_counts_limits
+		Array[Int] total_counts_limits
+		Array[Int] n_genes_by_counts_limits
 
 		String container_registry
 		String zones
