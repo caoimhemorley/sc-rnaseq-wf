@@ -252,7 +252,7 @@
         },
         "artifact_metrics": {
           "key": "artifact_metrics",
-          "digest": "i6rlbrmelah7jia5p5k3c476cyvg2rpq",
+          "digest": "2wd5mijfnwykg4f7rjivwqzdm54ate4q",
           "tests": [
             {
               "inputs": {
