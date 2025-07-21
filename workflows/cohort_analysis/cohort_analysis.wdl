@@ -641,8 +641,6 @@ task artifact_metrics {
 	command <<<
 		set -euo pipefail
 
-		nvidia-smi
-
 		artifact_metrics \
 			--predictions-key ~{scanvi_predictions_key} \
 			--batch-key ~{batch_key} \
