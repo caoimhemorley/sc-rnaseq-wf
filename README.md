@@ -1,4 +1,4 @@
-# pmdbs-sc-rna-seq
+# pmdbs-sc-rnaseq-wf
 
 Repo for testing and developing a common postmortem-derived brain sequencing (PMDBS) workflow harmonized across ASAP with human sc/sn RNA sequencing data.
 
@@ -190,8 +190,8 @@ asap-dev-{cohort,team-xxyy}-{source}-{dataset}
     │   ├── ${cohort_id}.scanvi_cell_types.parquet
     │   ├── ${cohort_id}.final.h5ad
     │   ├── ${cohort_id}.final_metadata.csv
-    │   ├── ${team_id}.scib_report.csv
-    │   ├── ${team_id}.scib_results.svg
+    │   ├── ${cohort_id}.scib_report.csv
+    │   ├── ${cohort_id}.scib_results.svg
     │   ├── ${cohort_id}.features.umap.png
     │   ├── ${cohort_id}.groups.umap.png
     │   └── MANIFEST.tsv
@@ -250,13 +250,13 @@ This script compiles bucket and file information for both the initial (staging) 
 
 If data integrity tests pass, this script will upload a combined MANIFEST.tsv and the data promotion Markdown report under a metadata/{timestamp} directory in the staging bucket. Previous manifest files and reports will be kept. Next, it will rsync all files in the staging bucket to the curated bucket's preprocess, cohort_analysis, and metadata directories. **Exercise caution when using this script**; files that are not present in the source (staging) bucket will be deleted at the destination (curated) bucket.
 
-If data integrity tests fail, staging data cannot be promoted. The combined MANFIEST.tsv, Markdown report, and promote_staging_data_script.log will be locally available.
+If data integrity tests fail, staging data cannot be promoted. The combined `MANIFEST.tsv`, Markdown report, and `promote_staging_data_script.log` will be locally available.
 
 The script defaults to a dry run, printing out the files that would be copied or deleted for each selected team.
 
 ### Options
 
-```bash
+```
 -h  Display this message and exit
 -t  Space-delimited team(s) to promote data for
 -l  List available teams
