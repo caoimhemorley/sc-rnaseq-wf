@@ -1,5 +1,5 @@
 ARG CELLBENDER_VERSION
-FROM us-central1-docker.pkg.dev/dnastack-asap-parkinsons/workflow-images/util:1.1.1 as scripts
+FROM us-central1-docker.pkg.dev/dnastack-asap-parkinsons/workflow-images/util:1.2.0 as scripts
 FROM us.gcr.io/broad-dsde-methods/cellbender:${CELLBENDER_VERSION}
 ENV CELLBENDER_VERSION "${CELLBENDER_VERSION}"
 
@@ -19,10 +19,12 @@ ENV MINICONDA_VERSION "${MINICONDA_VERSION}"
 ARG CUDA_VERSION
 ENV CUDA_VERSION "${CUDA_VERSION}"
 
-RUN apt-get -qq update && \
-	apt-get -qq install \
+RUN apt-get -qq update \
+	&& apt-get -qq install \
 		time \
 		xxd
+
+RUN ln -s $(which python3) /usr/bin/python3
 
 COPY --from=scripts /opt/scripts /opt/scripts
 ENV PATH "${PATH}:/opt/scripts"

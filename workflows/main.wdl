@@ -12,24 +12,41 @@ workflow pmdbs_sc_rnaseq_analysis {
 		String cohort_id
 		Array[Project] projects
 
-		File cellranger_reference_data
-
 		# Preprocess
+		File cellranger_reference_data
 		Float cellbender_fpr = 0.0
+
+		# Filtering parameters
+		Int pct_counts_mt_max = 10
+		Float doublet_score_max = 0.2
+		Array[Int] total_counts_limits = [100, 100000]
+		Array[Int] n_genes_by_counts_limits = [100, 10000]
+
+		# Allen Institute's Map My Cells
+		File allen_mtg_precomputed_stats
+
+		# Normalization parameters
+		Int norm_target_sum = 10000
+		Int n_top_genes = 3000
+		Int n_comps = 30
+
+		# Sample integration
+		String scvi_latent_key = "X_scVI"
+		String scanvi_latent_key = "X_scANVI"
+		String scanvi_predictions_key = "C_scANVI"
+		String batch_key = "batch_id"
+
+		# Clustering parameters
+		Int n_neighbors = 15
+		Array[Float] leiden_res = [0.05, 0.1, 0.2, 0.4]
+
+		Array[String] groups = ["sample", "batch", "cell_type", "leiden_res_0.05", "leiden_res_0.10", "leiden_res_0.20", "leiden_res_0.40"]
+		Array[String] features = ["n_genes_by_counts", "total_counts", "pct_counts_mt", "pct_counts_rb", "doublet_score", "S_score", "G2M_score"]
 
 		# Cohort analysis
 		Boolean run_cross_team_cohort_analysis = false
 		String cohort_raw_data_bucket
 		Array[String] cohort_staging_data_buckets
-
-		Int n_top_genes = 3000
-		String scvi_latent_key = "X_scvi"
-		String batch_key = "batch_id"
-		String label_key = "cell_type"
-		File cell_type_markers_list
-
-		Array[String] groups = ["sample", "batch", "cell_type", "leiden_res_0.05", "leiden_res_0.10", "leiden_res_0.20", "leiden_res_0.40"]
-		Array[String] features = ["n_genes_by_counts", "total_counts", "pct_counts_mt", "pct_counts_rb", "doublet_score", "S_score", "G2M_score"]
 
 		String container_registry
 		String zones = "us-central1-c us-central1-f"
@@ -37,7 +54,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 
 	String workflow_execution_path = "workflow_execution"
 	String workflow_name = "pmdbs_sc_rnaseq"
-	String workflow_version = "v2.2.0"
+	String workflow_version = "v3.0.0"
 	String workflow_release = "https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/releases/tag/pmdbs_sc_rnaseq_analysis-~{workflow_version}"
 
 	call GetWorkflowMetadata.get_workflow_metadata {
@@ -78,7 +95,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 			preprocess.log,
 			preprocess.metrics_csv,
 			preprocess.posterior_probability,
-			preprocess.adata_object
+			preprocess.initial_adata_object
 		]) #!StringCoercion
 
 		if (project.run_project_cohort_analysis) {
@@ -86,14 +103,22 @@ workflow pmdbs_sc_rnaseq_analysis {
 				input:
 					cohort_id = project.team_id,
 					project_sample_ids = preprocess.project_sample_ids,
-					preprocessed_adata_objects = preprocess.adata_object,
+					preprocessed_adata_objects = preprocess.initial_adata_object,
 					preprocessing_output_file_paths = preprocessing_output_file_paths,
-					project_cohort_analysis = true,
+					pct_counts_mt_max = pct_counts_mt_max,
+					doublet_score_max = doublet_score_max,
+					total_counts_limits = total_counts_limits,
+					n_genes_by_counts_limits = n_genes_by_counts_limits,
+					allen_mtg_precomputed_stats = allen_mtg_precomputed_stats,
+					norm_target_sum = norm_target_sum,
 					n_top_genes = n_top_genes,
-					scvi_latent_key =scvi_latent_key,
+					n_comps = n_comps,
+					scvi_latent_key = scvi_latent_key,
+					scanvi_latent_key = scanvi_latent_key,
+					scanvi_predictions_key = scanvi_predictions_key,
 					batch_key = batch_key,
-					label_key = label_key,
-					cell_type_markers_list = cell_type_markers_list,
+					n_neighbors = n_neighbors,
+					leiden_res = leiden_res,
 					groups = groups,
 					features = features,
 					workflow_name = workflow_name,
@@ -116,14 +141,22 @@ workflow pmdbs_sc_rnaseq_analysis {
 			input:
 				cohort_id = cohort_id,
 				project_sample_ids = flatten(preprocess.project_sample_ids),
-				preprocessed_adata_objects = flatten(preprocess.adata_object),
+				preprocessed_adata_objects = flatten(preprocess.initial_adata_object),
 				preprocessing_output_file_paths = flatten(preprocessing_output_file_paths),
-				project_cohort_analysis = false,
+				pct_counts_mt_max = pct_counts_mt_max,
+				doublet_score_max = doublet_score_max,
+				total_counts_limits = total_counts_limits,
+				n_genes_by_counts_limits = n_genes_by_counts_limits,
+				allen_mtg_precomputed_stats = allen_mtg_precomputed_stats,
+				norm_target_sum = norm_target_sum,
 				n_top_genes = n_top_genes,
+				n_comps = n_comps,
 				scvi_latent_key =scvi_latent_key,
+				scanvi_latent_key = scanvi_latent_key,
+				scanvi_predictions_key = scanvi_predictions_key,
 				batch_key = batch_key,
-				label_key = label_key,
-				cell_type_markers_list = cell_type_markers_list,
+				n_neighbors = n_neighbors,
+				leiden_res = leiden_res,
 				groups = groups,
 				features = features,
 				workflow_name = workflow_name,
@@ -158,28 +191,32 @@ workflow pmdbs_sc_rnaseq_analysis {
 		Array[Array[File]] cellbender_log = preprocess.log
 		Array[Array[File]] cellbender_metrics_csv = preprocess.metrics_csv
 		Array[Array[File]] cellbender_posterior_probability = preprocess.posterior_probability
-		Array[Array[File]] adata_object = preprocess.adata_object
+		Array[Array[File]] initial_adata_object = preprocess.initial_adata_object
 
 		# Project cohort analysis outputs
 		## List of samples included in the cohort
 		Array[File?] project_cohort_sample_list = project_cohort_analysis.cohort_sample_list
 
-		# Merged adata objects, filtered and normalized adata objects, QC plots
+		# Merged adata objects, QC plots, filtered adata objects, MMC results, normalized adata objects
 		Array[File?] project_merged_adata_object = project_cohort_analysis.merged_adata_object
-		Array[File?] project_qc_initial_metadata_csv = project_cohort_analysis.qc_initial_metadata_csv
 		Array[Array[File]?] project_qc_plots_png = project_cohort_analysis.qc_plots_png
 		Array[File?] project_filtered_adata_object = project_cohort_analysis.filtered_adata_object
+		Array[File?] project_mmc_extended_results_json = project_cohort_analysis.mmc_extended_results_json
+		Array[File?] project_mmc_results_csv = project_cohort_analysis.mmc_results_csv
+		Array[File?] project_mmc_log_txt = project_cohort_analysis.mmc_log_txt
 		Array[File?] project_normalized_adata_object = project_cohort_analysis.normalized_adata_object
+		Array[File?] project_mmc_adata_object = project_cohort_analysis.mmc_adata_object
+		Array[File?] project_mmc_results_parquet = project_cohort_analysis.mmc_results_parquet
 		Array[File?] project_all_genes_csv = project_cohort_analysis.all_genes_csv
 		Array[File?] project_hvg_genes_csv = project_cohort_analysis.hvg_genes_csv
-		Array[File?] project_final_validation_metrics = project_cohort_analysis.final_validation_metrics
 
 		# Clustering outputs
 		Array[File?] project_integrated_adata_object = project_cohort_analysis.integrated_adata_object
 		Array[File?] project_scvi_model_tar_gz = project_cohort_analysis.scvi_model_tar_gz
-		Array[File?] project_umap_cluster_adata_object = project_cohort_analysis.umap_cluster_adata_object
-		Array[File?] project_cell_annotated_adata_object = project_cohort_analysis.cell_annotated_adata_object
-		Array[File?] project_cell_types_csv = project_cohort_analysis.cell_types_csv
+		Array[File?] project_labeled_cells_adata_object = project_cohort_analysis.labeled_cells_adata_object
+		Array[File?] project_scanvi_model_tar_gz = project_cohort_analysis.scanvi_model_tar_gz
+		Array[File?] project_scanvi_cell_types_parquet = project_cohort_analysis.scanvi_cell_types_parquet
+		Array[File?] project_umap_clustered_adata_object = project_cohort_analysis.umap_clustered_adata_object
 
 		# PCA and Harmony integrated adata objects and artifact metrics
 		Array[File?] project_final_adata_object = project_cohort_analysis.final_adata_object
@@ -198,22 +235,26 @@ workflow pmdbs_sc_rnaseq_analysis {
 		## List of samples included in the cohort
 		File? cohort_sample_list = cross_team_cohort_analysis.cohort_sample_list
 
-		# Merged adata objects, filtered and normalized adata objects, QC plots
+		# Merged adata objects, QC plots, filtered adata objects, MMC results, normalized adata objects
 		File? cohort_merged_adata_object = cross_team_cohort_analysis.merged_adata_object
-		File? cohort_qc_initial_metadata_csv = cross_team_cohort_analysis.qc_initial_metadata_csv
 		Array[File]? cohort_qc_plots_png = cross_team_cohort_analysis.qc_plots_png
 		File? cohort_filtered_adata_object = cross_team_cohort_analysis.filtered_adata_object
+		File? cohort_mmc_extended_results_json = cross_team_cohort_analysis.mmc_extended_results_json
+		File? cohort_mmc_results_csv = cross_team_cohort_analysis.mmc_results_csv
+		File? cohort_mmc_log_txt = cross_team_cohort_analysis.mmc_log_txt
 		File? cohort_normalized_adata_object = cross_team_cohort_analysis.normalized_adata_object
+		File? cohort_mmc_adata_object = cross_team_cohort_analysis.mmc_adata_object
+		File? cohort_mmc_results_parquet = cross_team_cohort_analysis.mmc_results_parquet
 		File? cohort_all_genes_csv = cross_team_cohort_analysis.all_genes_csv
 		File? cohort_hvg_genes_csv = cross_team_cohort_analysis.hvg_genes_csv
-		File? cohort_final_validation_metrics = cross_team_cohort_analysis.final_validation_metrics
 
 		# Clustering outputs
 		File? cohort_integrated_adata_object = cross_team_cohort_analysis.integrated_adata_object
 		File? cohort_scvi_model_tar_gz = cross_team_cohort_analysis.scvi_model_tar_gz
-		File? cohort_umap_cluster_adata_object = cross_team_cohort_analysis.umap_cluster_adata_object
-		File? cohort_cell_annotated_adata_object = cross_team_cohort_analysis.cell_annotated_adata_object
-		File? cohort_cell_types_csv = cross_team_cohort_analysis.cell_types_csv
+		File? cohort_labeled_cells_adata_object = cross_team_cohort_analysis.labeled_cells_adata_object
+		File? cohort_scanvi_model_tar_gz = cross_team_cohort_analysis.scanvi_model_tar_gz
+		File? cohort_scanvi_cell_types_parquet = cross_team_cohort_analysis.scanvi_cell_types_parquet
+		File? cohort_umap_clustered_adata_object = cross_team_cohort_analysis.umap_clustered_adata_object
 
 		# PCA and Harmony integrated adata objects and artifact metrics
 		File? cohort_final_adata_object = cross_team_cohort_analysis.final_adata_object
@@ -236,17 +277,26 @@ workflow pmdbs_sc_rnaseq_analysis {
 		cohort_id: {help: "Name of the cohort; used to name output files during cross-team cohort analysis."}
 		projects: {help: "The project ID, set of samples and their associated reads and metadata, output bucket locations, and whether or not to run project-level cohort analysis."}
 		cellranger_reference_data: {help: "Cellranger transcriptome reference data; see https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest."}
-		cellbender_fpr :{help: "Cellbender false positive rate. [0.0]"}
+		cellbender_fpr: {help: "Cellbender false positive rate. [0.0]"}
+		pct_counts_mt_max: {help: "Maximum percentage of mitochondrial gene counts allowed per cell. [10]"}
+		doublet_score_max: {help: "Maximum doublet detection score threshold. [0.2]"}
+		total_counts_limits: {help: "Minimum and maximum total UMI (unique molecular identifier) counts per cell. [100, 100000]"}
+		n_genes_by_counts_limits: {help: "Minimum and maximum number of genes detected per cell (genes with at least one count). [100, 10000]"}
+		allen_mtg_precomputed_stats: {help: "A precomputed statistics file from the Allen Brain Cell Atlas - Seattle Alzheimer’s Disease Brain Cell Atlas (SEA-AD) consortium containing reference statistics for the middle temporal gyrus (MTG) brain region."}
+		norm_target_sum: {help: "The total count value that each cell will be normalized to. [10000]"}
+		n_top_genes: {help: "Number of HVG genes to keep. [8000]"}
+		n_comps: {help: "Number of principal components to compute. [30]"}
+		scvi_latent_key: {help: "Latent key to save the scVI latent to. ['X_scVI']"}
+		scanvi_latent_key: {help: "Latent key to save the scANVI latent to. ['X_scANVI']"}
+		scanvi_predictions_key: {help: "scANVI cell type predictions column name. ['C_scANVI']"}
+		batch_key: {help: "Key in AnnData object for batch information. ['batch_id']"}
+		n_neighbors: {help: "The size of local neighborhood (in terms of number of neighboring data points) used for manifold approximation. [15]"}
+		leiden_res: {help: "Leiden resolutions which are the parameter values controlling the coarseness of the clustering. [0.05, 0.1, 0.2, 0.4]"}
+		groups: {help: "Groups to produce umap plots for. ['sample', 'batch', 'cell_type', 'leiden_res_0.05', 'leiden_res_0.10', 'leiden_res_0.20', 'leiden_res_0.40']"}
+		features: {help: "Features to produce umap plots for. ['n_genes_by_counts', 'total_counts', 'pct_counts_mt', 'pct_counts_rb', 'doublet_score', 'S_score', 'G2M_score']"}
 		run_cross_team_cohort_analysis: {help: "Whether to run downstream harmonization steps on all samples across projects. If set to false, only preprocessing steps (cellranger and generating the initial adata object(s)) will run for samples. [false]"}
 		cohort_raw_data_bucket: {help: "Bucket to upload cross-team cohort intermediate files to."}
 		cohort_staging_data_buckets: {help: "Set of buckets to stage cross-team cohort analysis outputs in."}
-		n_top_genes: {help: "Number of HVG genes to keep. [8000]"}
-		scvi_latent_key: {help: "Latent key to save the scVI latent to. ['X_scvi']"}
-		batch_key: {help: "Key in AnnData object for batch information. ['batch_id']"}
-		label_key : {help: "Key to reference 'cell_type' labels. ['cell_type']"}
-		cell_type_markers_list: {help: "CSV file containing a list of major cell type markers; used to annotate clusters."}
-		groups: {help: "Groups to produce umap plots for. ['sample', 'batch', 'cell_type', 'leiden_res_0.05', 'leiden_res_0.10', 'leiden_res_0.20', 'leiden_res_0.40']"}
-		features: {help: "Features to produce umap plots for. ['n_genes_by_counts', 'total_counts', 'pct_counts_mt', 'pct_counts_rb', 'doublet_score', 'S_score', 'G2M_score']"}
 		container_registry: {help: "Container registry where workflow Docker images are hosted."}
 		zones: {help: "Space-delimited set of GCP zones to spin up compute in."}
 	}

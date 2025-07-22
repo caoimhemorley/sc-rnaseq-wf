@@ -7,4 +7,12 @@ inputs.test_data*.json
 .wdltest.changes.json
 .wdltest.submission.json
 
+# Jupyer Notebook files
+ipynb_checkpoints/*
+*.ipynb
 
+# Python files
+__pycache__/*
+
+# Env files
+**/.env

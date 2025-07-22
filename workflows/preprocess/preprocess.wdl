@@ -11,7 +11,6 @@ workflow preprocess {
 		Array[Sample] samples
 
 		File cellranger_reference_data
-
 		Float cellbender_fpr
 
 		String workflow_name
@@ -40,15 +39,15 @@ workflow preprocess {
 	scatter (sample_object in samples) {
 		String cellranger_count_output = "~{cellranger_raw_data_path}/~{sample_object.sample_id}.raw_feature_bc_matrix.h5"
 		String cellbender_count_output = "~{cellbender_raw_data_path}/~{sample_object.sample_id}.cellbender.h5"
-		String adata_object_output = "~{adata_raw_data_path}/~{sample_object.sample_id}.adata_object.h5ad"
+		String initial_adata_object_output = "~{adata_raw_data_path}/~{sample_object.sample_id}.cleaned_unfiltered.h5ad"
 	}
 
-	# For each sample, outputs an array of true/false: [cellranger_counts_complete, remove_technical_artifacts_complete]
+	# For each sample, outputs an array of true/false: [cellranger_counts_complete, remove_technical_artifacts_complete, initial_adata_object_complete]
 	call check_output_files_exist {
 		input:
 			cellranger_count_output_files = cellranger_count_output,
 			remove_technical_artifacts_output_files = cellbender_count_output,
-			adata_object_output_files = adata_object_output,
+			initial_adata_object_output_files = initial_adata_object_output,
 			billing_project = billing_project,
 			zones = zones
 	}
@@ -60,7 +59,7 @@ workflow preprocess {
 
 		String cellranger_count_complete = check_output_files_exist.sample_preprocessing_complete[index][0]
 		String cellbender_remove_background_complete = check_output_files_exist.sample_preprocessing_complete[index][1]
-		String adata_object_complete = check_output_files_exist.sample_preprocessing_complete[index][2]
+		String initial_adata_object_complete = check_output_files_exist.sample_preprocessing_complete[index][2]
 
 		String cellranger_raw_counts = "~{cellranger_raw_data_path}/~{sample.sample_id}.raw_feature_bc_matrix.h5"
 		String cellranger_filtered_counts = "~{cellranger_raw_data_path}/~{sample.sample_id}.filtered_feature_bc_matrix.h5"
@@ -121,9 +120,9 @@ workflow preprocess {
 		File metrics_csv_output = select_first([remove_technical_artifacts.metrics_csv, cellbender_metrics_csv]) #!FileCoercion
 		File posterior_probability_output = select_first([remove_technical_artifacts.posterior_probability, cellbender_posterior_probability]) #!FileCoercion
 
-		String preprocessed_adata_object = "~{adata_raw_data_path}/~{sample.sample_id}.adata_object.h5ad"
+		String preprocessed_adata_object = "~{adata_raw_data_path}/~{sample.sample_id}.cleaned_unfiltered.h5ad"
 
-		if (adata_object_complete == "false") {
+		if (initial_adata_object_complete == "false") {
 			call counts_to_adata {
 				input:
 					sample_id = sample.sample_id,
@@ -139,7 +138,7 @@ workflow preprocess {
 			}
 		}
 
-		File preprocessed_adata_object_output = select_first([counts_to_adata.adata_object, preprocessed_adata_object]) #!FileCoercion
+		File preprocessed_adata_object_output = select_first([counts_to_adata.initial_adata_object, preprocessed_adata_object]) #!FileCoercion
 	}
 
 	output {
@@ -163,7 +162,7 @@ workflow preprocess {
 		Array[File] posterior_probability = posterior_probability_output #!FileCoercion
 
 		# AnnData counts
-		Array[File] adata_object = preprocessed_adata_object_output #!FileCoercion
+		Array[File] initial_adata_object = preprocessed_adata_object_output #!FileCoercion
 	}
 }
 
@@ -171,7 +170,7 @@ task check_output_files_exist {
 	input {
 		Array[String] cellranger_count_output_files
 		Array[String] remove_technical_artifacts_output_files
-		Array[String] adata_object_output_files
+		Array[String] initial_adata_object_output_files
 
 		String billing_project
 		String zones
@@ -183,11 +182,11 @@ task check_output_files_exist {
 		while read -r output_files || [[ -n "${output_files}" ]]; do
 			cellranger_counts_file=$(echo "${output_files}" | cut -f 1)
 			cellbender_counts_file=$(echo "${output_files}" | cut -f 2)
-			adata_object_file=$(echo "${output_files}" | cut -f 3)
+			initial_adata_object_file=$(echo "${output_files}" | cut -f 3)
 
 			if gsutil -u ~{billing_project} ls "${cellranger_counts_file}"; then
 				if gsutil -u ~{billing_project} ls "${cellbender_counts_file}"; then
-					if gsutil -u ~{billing_project} ls "${adata_object_file}"; then
+					if gsutil -u ~{billing_project} ls "${initial_adata_object_file}"; then
 						# If we find all outputs, don't rerun anything
 						echo -e "true\ttrue\ttrue" >> sample_preprocessing_complete.tsv
 					else
@@ -202,7 +201,7 @@ task check_output_files_exist {
 				# If we don't find cellranger output, we must also need to run (or rerun) preprocessing
 				echo -e "false\tfalse\tfalse" >> sample_preprocessing_complete.tsv
 			fi
-		done < <(paste ~{write_lines(cellranger_count_output_files)} ~{write_lines(remove_technical_artifacts_output_files)} ~{write_lines(adata_object_output_files)})
+		done < <(paste ~{write_lines(cellranger_count_output_files)} ~{write_lines(remove_technical_artifacts_output_files)} ~{write_lines(initial_adata_object_output_files)})
 	>>>
 
 	output {
@@ -215,6 +214,7 @@ task check_output_files_exist {
 		memory: "4 GB"
 		disks: "local-disk 20 HDD"
 		preemptible: 3
+		maxRetries: 2
 		zones: zones
 	}
 }
@@ -308,6 +308,7 @@ task cellranger_count {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
+		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}
@@ -374,6 +375,7 @@ task remove_technical_artifacts {
 		memory: "64 GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
+		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 		gpuType: "nvidia-tesla-t4"
@@ -403,31 +405,32 @@ task counts_to_adata {
 	command <<<
 		set -euo pipefail
 
-		python3 /opt/scripts/main/prep_metadata.py \
+		prep_metadata \
 			--adata-input ~{cellbender_counts} \
 			--sample-id ~{sample_id} \
 			--batch ~{batch} \
 			--team ~{team_id} \
 			--dataset ~{dataset_id} \
-			--adata-output ~{sample_id}.adata_object.h5ad
+			--adata-output ~{sample_id}.cleaned_unfiltered.h5ad
 
 		upload_outputs \
 			-b ~{billing_project} \
 			-d ~{raw_data_path} \
 			-i ~{write_tsv(workflow_info)} \
-			-o "~{sample_id}.adata_object.h5ad"
+			-o "~{sample_id}.cleaned_unfiltered.h5ad"
 	>>>
 
 	output {
-		String adata_object = "~{raw_data_path}/~{sample_id}.adata_object.h5ad"
+		String initial_adata_object = "~{raw_data_path}/~{sample_id}.cleaned_unfiltered.h5ad"
 	}
 
 	runtime {
-		docker: "~{container_registry}/scvi:1.2.0_1"
+		docker: "~{container_registry}/sc_tools:1.0.0"
 		cpu: 2
 		memory: "16 GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
+		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}

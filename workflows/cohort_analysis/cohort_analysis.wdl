@@ -15,15 +15,29 @@ workflow cohort_analysis {
 		# If provided, these files will be uploaded to the staging bucket alongside other intermediate files made by this workflow
 		Array[String] preprocessing_output_file_paths = []
 
-		Boolean project_cohort_analysis
+		# Filtering parameters
+		Int pct_counts_mt_max
+		Float doublet_score_max
+		Array[Int] total_counts_limits
+		Array[Int] n_genes_by_counts_limits
 
+		# Allen Institute's Map My Cells
+		File allen_mtg_precomputed_stats
+
+		# Normalization parameters
+		Int norm_target_sum
 		Int n_top_genes
+		Int n_comps
 
+		# Sample integration
 		String scvi_latent_key
+		String scanvi_latent_key 
+		String scanvi_predictions_key
 		String batch_key
-		String label_key
 
-		File cell_type_markers_list
+		# Clustering parameters
+		Int n_neighbors
+		Array[Float] leiden_res
 
 		Array[String] groups
 		Array[String] features
@@ -40,7 +54,7 @@ workflow cohort_analysis {
 	}
 
 	String sub_workflow_name = "cohort_analysis"
-	String sub_workflow_version = "2.2.0"
+	String sub_workflow_version = "3.0.0"
 
 	Array[Array[String]] workflow_info = [[run_timestamp, workflow_name, workflow_version, workflow_release]]
 
@@ -68,14 +82,50 @@ workflow cohort_analysis {
 			zones = zones
 	}
 
-	call filter_and_normalize {
+	call filter {
 		input:
 			cohort_id = cohort_id,
 			merged_adata_object = merge_and_plot_qc_metrics.merged_adata_object, #!FileCoercion
-			qc_validation_metrics_csv = merge_and_plot_qc_metrics.qc_validation_metrics_csv,
+			pct_counts_mt_max = pct_counts_mt_max,
+			doublet_score_max = doublet_score_max,
+			total_counts_limits = total_counts_limits,
+			n_genes_by_counts_limits = n_genes_by_counts_limits,
+			container_registry = container_registry,
+			zones = zones
+	}
+
+	call map_cell_types {
+		input:
+			cohort_id = cohort_id,
+			filtered_adata_object = filter.filtered_adata_object,
+			allen_mtg_precomputed_stats = allen_mtg_precomputed_stats,
+			raw_data_path = raw_data_path,
+			workflow_info = workflow_info,
+			billing_project = billing_project,
+			container_registry = container_registry,
+			zones = zones
+	}
+
+	call normalize {
+		input:
+			cohort_id = cohort_id,
+			filtered_adata_object = filter.filtered_adata_object,
+			norm_target_sum = norm_target_sum,
 			n_top_genes = n_top_genes,
+			n_comps = n_comps,
 			batch_key = batch_key,
-			cell_type_markers_list = cell_type_markers_list,
+			raw_data_path = raw_data_path,
+			workflow_info = workflow_info,
+			billing_project = billing_project,
+			container_registry = container_registry,
+			zones = zones
+	}
+
+	call add_mapped_cell_types {
+		input:
+			cohort_id = cohort_id,
+			normalized_adata_object = normalize.normalized_adata_object,
+			mmc_results_csv = map_cell_types.mmc_results_csv, #!FileCoercion
 			raw_data_path = raw_data_path,
 			workflow_info = workflow_info,
 			billing_project = billing_project,
@@ -86,10 +136,13 @@ workflow cohort_analysis {
 	call ClusterData.cluster_data {
 		input:
 			cohort_id = cohort_id,
-			normalized_adata_object = select_first([filter_and_normalize.normalized_adata_object]), #!FileCoercion
+			mmc_adata_object = add_mapped_cell_types.mmc_adata_object,
 			scvi_latent_key = scvi_latent_key,
+			scanvi_latent_key = scanvi_latent_key,
+			scanvi_predictions_key = scanvi_predictions_key,
 			batch_key = batch_key,
-			cell_type_markers_list = cell_type_markers_list,
+			n_neighbors = n_neighbors,
+			leiden_res = leiden_res,
 			raw_data_path = raw_data_path,
 			workflow_info = workflow_info,
 			billing_project = billing_project,
@@ -100,7 +153,7 @@ workflow cohort_analysis {
 	call integrate_harmony {
 		input:
 			cohort_id = cohort_id,
-			cell_annotated_adata_object = cluster_data.cell_annotated_adata_object,
+			umap_clustered_adata_object = cluster_data.umap_clustered_adata_object,
 			batch_key = batch_key,
 			raw_data_path = raw_data_path,
 			workflow_info = workflow_info,
@@ -109,19 +162,17 @@ workflow cohort_analysis {
 			zones = zones
 	}
 
-	if (project_cohort_analysis) {
-		call artifact_metrics {
-			input:
-				cohort_id = cohort_id,
-				final_adata_object = integrate_harmony.final_adata_object, #!FileCoercion
-				batch_key = batch_key,
-				label_key = label_key,
-				raw_data_path = raw_data_path,
-				workflow_info = workflow_info,
-				billing_project = billing_project,
-				container_registry = container_registry,
-				zones = zones
-		}
+	call artifact_metrics {
+		input:
+			cohort_id = cohort_id,
+			final_adata_object = integrate_harmony.final_adata_object, #!FileCoercion
+			scanvi_predictions_key = scanvi_predictions_key,
+			batch_key = batch_key,
+			raw_data_path = raw_data_path,
+			workflow_info = workflow_info,
+			billing_project = billing_project,
+			container_registry = container_registry,
+			zones = zones
 	}
 
 	call plot_groups_and_features {
@@ -151,27 +202,34 @@ workflow cohort_analysis {
 			write_cohort_sample_list.cohort_sample_list
 		],
 		[
-			merge_and_plot_qc_metrics.merged_adata_object,
-			merge_and_plot_qc_metrics.qc_initial_metadata_csv
+			merge_and_plot_qc_metrics.merged_adata_object
 		],
 		merge_and_plot_qc_metrics.qc_plots_png,
-		select_all([
-			filter_and_normalize.final_validation_metrics,
-			filter_and_normalize.all_genes_csv,
-			filter_and_normalize.hvg_genes_csv
-		]),
+		[
+			map_cell_types.mmc_extended_results_json,
+			map_cell_types.mmc_results_csv,
+			map_cell_types.mmc_log_txt
+		],
+		[
+			normalize.all_genes_csv,
+			normalize.hvg_genes_csv
+		],
+		[
+			add_mapped_cell_types.mmc_results_parquet
+		],
 		[
 			cluster_data.scvi_model_tar_gz,
-			cluster_data.cell_types_csv
+			cluster_data.scanvi_model_tar_gz,
+			cluster_data.scanvi_cell_types_parquet
 		],
 		[
 			integrate_harmony.final_adata_object,
 			integrate_harmony.final_metadata_csv,
 		],
-		select_all([
+		[
 			artifact_metrics.scib_report_results_csv,
 			artifact_metrics.scib_report_results_svg
-		]),
+		],
 		[
 			plot_groups_and_features.groups_umap_plot_png,
 			plot_groups_and_features.features_umap_plot_png
@@ -190,30 +248,34 @@ workflow cohort_analysis {
 	output {
 		File cohort_sample_list = write_cohort_sample_list.cohort_sample_list #!FileCoercion
 
-		# Merged adata objects, filtered and normalized adata objects, QC plots
+		# Merged adata objects, QC plots, filtered adata objects, MMC results, normalized adata objects
 		File merged_adata_object = merge_and_plot_qc_metrics.merged_adata_object #!FileCoercion
-		File qc_initial_metadata_csv = merge_and_plot_qc_metrics.qc_initial_metadata_csv #!FileCoercion
 		Array[File] qc_plots_png = merge_and_plot_qc_metrics.qc_plots_png #!FileCoercion
-		File? filtered_adata_object = filter_and_normalize.filtered_adata_object
-		File? normalized_adata_object = filter_and_normalize.normalized_adata_object
-		File? all_genes_csv = filter_and_normalize.all_genes_csv #!FileCoercion
-		File? hvg_genes_csv = filter_and_normalize.hvg_genes_csv #!FileCoercion
-		File? final_validation_metrics = filter_and_normalize.final_validation_metrics #!FileCoercion
+		File filtered_adata_object = filter.filtered_adata_object
+		File mmc_extended_results_json = map_cell_types.mmc_extended_results_json #!FileCoercion
+		File mmc_results_csv = map_cell_types.mmc_results_csv #!FileCoercion
+		File mmc_log_txt = map_cell_types.mmc_log_txt #!FileCoercion
+		File normalized_adata_object = normalize.normalized_adata_object
+		File mmc_adata_object = add_mapped_cell_types.mmc_adata_object
+		File mmc_results_parquet = add_mapped_cell_types.mmc_results_parquet #!FileCoercion
+		File all_genes_csv = normalize.all_genes_csv #!FileCoercion
+		File hvg_genes_csv = normalize.hvg_genes_csv #!FileCoercion
 
 		# Clustering output
 		File integrated_adata_object = cluster_data.integrated_adata_object
 		File scvi_model_tar_gz = cluster_data.scvi_model_tar_gz
-		File umap_cluster_adata_object = cluster_data.umap_cluster_adata_object
-		File cell_annotated_adata_object = cluster_data.cell_annotated_adata_object
-		File cell_types_csv = cluster_data.cell_types_csv
+		File labeled_cells_adata_object = cluster_data.labeled_cells_adata_object
+		File scanvi_model_tar_gz = cluster_data.scanvi_model_tar_gz
+		File scanvi_cell_types_parquet = cluster_data.scanvi_cell_types_parquet
+		File umap_clustered_adata_object = cluster_data.umap_clustered_adata_object
 
 		# PCA and Harmony integrated adata objects
 		File final_adata_object = integrate_harmony.final_adata_object #!FileCoercion
 		File final_metadata_csv = integrate_harmony.final_metadata_csv #!FileCoercion
 
 		# Artifact metrics
-		File? scib_report_results_csv = artifact_metrics.scib_report_results_csv #!FileCoercion
-		File? scib_report_results_svg = artifact_metrics.scib_report_results_svg #!FileCoercion
+		File scib_report_results_csv = artifact_metrics.scib_report_results_csv #!FileCoercion
+		File scib_report_results_svg = artifact_metrics.scib_report_results_svg #!FileCoercion
 
 		# Groups and features plots
 		File groups_umap_plot_png = plot_groups_and_features.groups_umap_plot_png #!FileCoercion
@@ -248,11 +310,10 @@ task merge_and_plot_qc_metrics {
 			echo -e "${sample}\t${adata_path}" >> adata_samples_paths.tsv
 		done < ~{write_lines(preprocessed_adata_objects)}
 
-		python3 /opt/scripts/main/merge_and_plot_qc.py \
+		merge_and_plot_qc \
 			--adata-objects-fofn adata_samples_paths.tsv \
-			--adata-output ~{cohort_id}.merged_adata_object.h5ad \
-			--output-metadata-file ~{cohort_id}.initial_metadata.csv \
-			--output-validation-file ~{cohort_id}.validation_metrics.csv
+			--adata-output ~{cohort_id}.merged_cleaned_unfiltered.h5ad \
+			--output-metadata-file ~{cohort_id}.initial_metadata.csv
 
 		mv "plots/violin_n_genes_by_counts.png" "plots/~{cohort_id}.n_genes_by_counts.violin.png"
 		mv "plots/violin_total_counts.png" "plots/~{cohort_id}.total_counts.violin.png"
@@ -264,7 +325,7 @@ task merge_and_plot_qc_metrics {
 			-b ~{billing_project} \
 			-d ~{raw_data_path} \
 			-i ~{write_tsv(workflow_info)} \
-			-o "~{cohort_id}.merged_adata_object.h5ad" \
+			-o "~{cohort_id}.merged_cleaned_unfiltered.h5ad" \
 			-o "~{cohort_id}.initial_metadata.csv" \
 			-o plots/"~{cohort_id}.n_genes_by_counts.violin.png" \
 			-o plots/"~{cohort_id}.total_counts.violin.png" \
@@ -274,9 +335,8 @@ task merge_and_plot_qc_metrics {
 	>>>
 
 	output {
-		String merged_adata_object = "~{raw_data_path}/~{cohort_id}.merged_adata_object.h5ad"
+		String merged_adata_object = "~{raw_data_path}/~{cohort_id}.merged_cleaned_unfiltered.h5ad"
 		String qc_initial_metadata_csv = "~{raw_data_path}/~{cohort_id}.initial_metadata.csv"
-		File qc_validation_metrics_csv = "~{cohort_id}.validation_metrics.csv"
 
 		Array[String] qc_plots_png = [
 			"~{raw_data_path}/~{cohort_id}.n_genes_by_counts.violin.png",
@@ -288,92 +348,217 @@ task merge_and_plot_qc_metrics {
 	}
 
 	runtime {
-		docker: "~{container_registry}/scvi:1.2.0_1"
+		docker: "~{container_registry}/sc_tools:1.0.0"
 		cpu: 2
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
+		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}
 }
 
-task filter_and_normalize {
+task filter {
 	input {
 		String cohort_id
 		File merged_adata_object
-		File qc_validation_metrics_csv
 
-		Int n_top_genes
-		String batch_key
-		File cell_type_markers_list
+		Int pct_counts_mt_max
+		Float doublet_score_max
+		Array[Int] total_counts_limits
+		Array[Int] n_genes_by_counts_limits
 
-		String raw_data_path
-		Array[Array[String]] workflow_info
-		String billing_project
 		String container_registry
 		String zones
-
-		# Purposefully unset
-		String? my_none
 	}
 
-	String merged_adata_object_basename = basename(merged_adata_object, ".h5ad")
 	Int mem_gb = ceil(size(merged_adata_object, "GB") * 18 + 20)
 	Int disk_size = ceil(size(merged_adata_object, "GB") * 4 + 20)
 
 	command <<<
 		set -euo pipefail
 
-		# The validation metrics file is overwritten with updated validation metrics
-		python3 /opt/scripts/main/filter.py \
+		filter \
 			--adata-input ~{merged_adata_object} \
-			--adata-output ~{merged_adata_object_basename}_filtered.h5ad \
-			--output-validation-file ~{qc_validation_metrics_csv}
-
-		# TODO see whether this is still required given the change to python
-		# If any cells remain after filtering, the data is normalized and variable genes are identified
-		if [[ -s "~{merged_adata_object_basename}_filtered.h5ad" ]]; then
-			python3 /opt/scripts/main/process.py \
-				--adata-input ~{merged_adata_object_basename}_filtered.h5ad \
-				--batch-key ~{batch_key} \
-				--adata-output ~{merged_adata_object_basename}_filtered_normalized.h5ad \
-				--n-top-genes ~{n_top_genes} \
-				--marker-genes ~{cell_type_markers_list} \
-				--output-all-genes ~{cohort_id}.all_genes.csv \
-				--output-hvg-genes ~{cohort_id}.hvg_genes.csv \
-				--output-validation-file ~{qc_validation_metrics_csv}
-
-			mv "~{qc_validation_metrics_csv}" "~{cohort_id}.final_validation_metrics.csv"
-
-			upload_outputs \
-				-b ~{billing_project} \
-				-d ~{raw_data_path} \
-				-i ~{write_tsv(workflow_info)} \
-				-o "~{cohort_id}.all_genes.csv" \
-				-o "~{cohort_id}.hvg_genes.csv" \
-				-o "~{cohort_id}.final_validation_metrics.csv"
-
-			echo true > cells_remaining_post_filter.txt
-		else
-			echo false > cells_remaining_post_filter.txt
-		fi
+			--pct-counts-mt-max ~{pct_counts_mt_max} \
+			--doublet-score-max ~{doublet_score_max} \
+			--total-counts-limits ~{sep=' ' total_counts_limits} \
+			--n-genes-by-counts-limits ~{sep=' ' n_genes_by_counts_limits} \
+			--adata-output ~{cohort_id}.filtered.h5ad
 	>>>
 
 	output {
-		File? filtered_adata_object = if read_boolean("cells_remaining_post_filter.txt") then "~{merged_adata_object_basename}_filtered.h5ad" else my_none
-		File? normalized_adata_object = if read_boolean("cells_remaining_post_filter.txt") then "~{merged_adata_object_basename}_filtered_normalized.h5ad" else my_none
-		String? all_genes_csv = if read_boolean("cells_remaining_post_filter.txt") then "~{raw_data_path}/~{cohort_id}.all_genes.csv" else my_none
-		String? hvg_genes_csv = if read_boolean("cells_remaining_post_filter.txt") then "~{raw_data_path}/~{cohort_id}.hvg_genes.csv" else my_none
-		String? final_validation_metrics = if read_boolean("cells_remaining_post_filter.txt") then "~{raw_data_path}/~{cohort_id}.final_validation_metrics.csv" else my_none
+		File filtered_adata_object = "~{cohort_id}.filtered.h5ad"
 	}
 
 	runtime {
-		docker: "~{container_registry}/scvi:1.2.0_1"
+		docker: "~{container_registry}/sc_tools:1.0.0"
 		cpu: 4
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
+		maxRetries: 2
+		bootDiskSizeGb: 40
+		zones: zones
+	}
+}
+
+task map_cell_types {
+	input {
+		String cohort_id
+		File filtered_adata_object
+
+		File allen_mtg_precomputed_stats
+
+		String raw_data_path
+		Array[Array[String]] workflow_info
+		String billing_project
+		String container_registry
+		String zones
+	}
+
+	Int mem_gb = ceil(size([filtered_adata_object, allen_mtg_precomputed_stats], "GB") * 18 + 20)
+	Int disk_size = ceil(size([filtered_adata_object, allen_mtg_precomputed_stats], "GB") * 4 + 20)
+
+	command <<<
+		set -euo pipefail
+
+		mmc \
+			--adata-input ~{filtered_adata_object} \
+			--mmc-taxonomy-path ~{allen_mtg_precomputed_stats} \
+			--output-prefix ~{cohort_id}.mmc_otf_mapping.SEAAD
+
+		upload_outputs \
+			-b ~{billing_project} \
+			-d ~{raw_data_path} \
+			-i ~{write_tsv(workflow_info)} \
+			-o "~{cohort_id}.mmc_otf_mapping.SEAAD.extended_results.json" \
+			-o "~{cohort_id}.mmc_otf_mapping.SEAAD.results.csv" \
+			-o "~{cohort_id}.mmc_otf_mapping.SEAAD.log.txt"
+	>>>
+
+	output {
+		String mmc_extended_results_json = "~{raw_data_path}/~{cohort_id}.mmc_otf_mapping.SEAAD.extended_results.json"
+		String mmc_results_csv = "~{raw_data_path}/~{cohort_id}.mmc_otf_mapping.SEAAD.results.csv"
+		String mmc_log_txt = "~{raw_data_path}/~{cohort_id}.mmc_otf_mapping.SEAAD.log.txt"
+	}
+
+	runtime {
+		docker: "~{container_registry}/sc_tools:1.0.0"
+		cpu: 4
+		memory: "~{mem_gb} GB"
+		disks: "local-disk ~{disk_size} HDD"
+		preemptible: 3
+		maxRetries: 2
+		bootDiskSizeGb: 40
+		zones: zones
+	}
+}
+
+task normalize {
+	input {
+		String cohort_id
+		File filtered_adata_object
+
+		Int norm_target_sum
+		Int n_top_genes
+		Int n_comps
+		String batch_key
+
+		String raw_data_path
+		Array[Array[String]] workflow_info
+		String billing_project
+		String container_registry
+		String zones
+	}
+
+	Int mem_gb = ceil(size(filtered_adata_object, "GB") * 18 + 20)
+	Int disk_size = ceil(size(filtered_adata_object, "GB") * 4 + 20)
+
+	command <<<
+		set -euo pipefail
+
+		process \
+			--adata-input ~{filtered_adata_object} \
+			--batch-key ~{batch_key} \
+			--norm-target-sum ~{norm_target_sum} \
+			--n-top-genes ~{n_top_genes} \
+			--n-comps ~{n_comps} \
+			--adata-output ~{cohort_id}.normalized.h5ad \
+			--output-all-genes ~{cohort_id}.all_genes.csv \
+			--output-hvg-genes ~{cohort_id}.hvg_genes.csv
+
+		upload_outputs \
+			-b ~{billing_project} \
+			-d ~{raw_data_path} \
+			-i ~{write_tsv(workflow_info)} \
+			-o "~{cohort_id}.all_genes.csv" \
+			-o "~{cohort_id}.hvg_genes.csv"
+	>>>
+
+	output {
+		File normalized_adata_object = "~{cohort_id}.normalized.h5ad"
+		String all_genes_csv = "~{raw_data_path}/~{cohort_id}.all_genes.csv"
+		String hvg_genes_csv = "~{raw_data_path}/~{cohort_id}.hvg_genes.csv"
+	}
+
+	runtime {
+		docker: "~{container_registry}/sc_tools:1.0.0"
+		cpu: 4
+		memory: "~{mem_gb} GB"
+		disks: "local-disk ~{disk_size} HDD"
+		preemptible: 3
+		maxRetries: 2
+		bootDiskSizeGb: 40
+		zones: zones
+	}
+}
+
+task add_mapped_cell_types {
+	input {
+		String cohort_id
+		File normalized_adata_object
+		File mmc_results_csv
+
+		String raw_data_path
+		Array[Array[String]] workflow_info
+		String billing_project
+		String container_registry
+		String zones
+	}
+
+	Int mem_gb = ceil(size(normalized_adata_object, "GB") * 18 + 20)
+	Int disk_size = ceil(size(normalized_adata_object, "GB") * 4 + 20)
+
+	command <<<
+		set -euo pipefail
+
+		transcriptional_phenotype \
+			--adata-input ~{normalized_adata_object} \
+			--mmc-results ~{mmc_results_csv} \
+			--adata-output ~{cohort_id}.mmc.h5ad \
+			--output-cell-types-file ~{cohort_id}.mmc_results.parquet
+
+		upload_outputs \
+			-b ~{billing_project} \
+			-d ~{raw_data_path} \
+			-i ~{write_tsv(workflow_info)} \
+			-o "~{cohort_id}.mmc_results.parquet"
+	>>>
+
+	output {
+		File mmc_adata_object = "~{cohort_id}.mmc.h5ad"
+		String mmc_results_parquet = "~{raw_data_path}/~{cohort_id}.mmc_results.parquet"
+	}
+
+	runtime {
+		docker: "~{container_registry}/sc_tools:1.0.0"
+		cpu: 4
+		memory: "~{mem_gb} GB"
+		disks: "local-disk ~{disk_size} HDD"
+		preemptible: 3
+		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}
@@ -382,7 +567,7 @@ task filter_and_normalize {
 task integrate_harmony {
 	input {
 		String cohort_id
-		File cell_annotated_adata_object
+		File umap_clustered_adata_object
 
 		String batch_key
 
@@ -393,39 +578,40 @@ task integrate_harmony {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(cell_annotated_adata_object, "GB") * 8 + 20)
-	Int disk_size = ceil(size(cell_annotated_adata_object, "GB") * 4 + 20)
+	Int mem_gb = ceil(size(umap_clustered_adata_object, "GB") * 8 + 20)
+	Int disk_size = ceil(size(umap_clustered_adata_object, "GB") * 4 + 20)
 
 	command <<<
 		set -euo pipefail
 
 		nvidia-smi
 
-		python3 /opt/scripts/main/add_harmony.py \
+		add_harmony \
 			--batch-key ~{batch_key} \
-			--adata-input ~{cell_annotated_adata_object} \
-			--adata-output ~{cohort_id}.final_adata.h5ad \
+			--adata-input ~{umap_clustered_adata_object} \
+			--adata-output ~{cohort_id}.final.h5ad \
 			--output-metadata-file ~{cohort_id}.final_metadata.csv
 
 		upload_outputs \
 			-b ~{billing_project} \
 			-d ~{raw_data_path} \
 			-i ~{write_tsv(workflow_info)} \
-			-o "~{cohort_id}.final_adata.h5ad" \
+			-o "~{cohort_id}.final.h5ad" \
 			-o "~{cohort_id}.final_metadata.csv"
 	>>>
 
 	output {
-		String final_adata_object = "~{raw_data_path}/~{cohort_id}.final_adata.h5ad"
+		String final_adata_object = "~{raw_data_path}/~{cohort_id}.final.h5ad"
 		String final_metadata_csv = "~{raw_data_path}/~{cohort_id}.final_metadata.csv"
 	}
 
 	runtime {
-		docker: "~{container_registry}/scvi:1.2.0_1"
+		docker: "~{container_registry}/sc_tools:1.0.0"
 		cpu: 8
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
+		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 		gpuType: "nvidia-tesla-t4"
@@ -439,8 +625,8 @@ task artifact_metrics {
 		String cohort_id
 		File final_adata_object
 
+		String scanvi_predictions_key
 		String batch_key
-		String label_key
 
 		String raw_data_path
 		Array[Array[String]] workflow_info
@@ -455,11 +641,9 @@ task artifact_metrics {
 	command <<<
 		set -euo pipefail
 
-		nvidia-smi
-
-		python3 /opt/scripts/main/artifact_metrics.py \
+		artifact_metrics \
+			--predictions-key ~{scanvi_predictions_key} \
 			--batch-key ~{batch_key} \
-			--label-key ~{label_key} \
 			--adata-input ~{final_adata_object} \
 			--output-report-dir scib_report_dir
 
@@ -480,16 +664,14 @@ task artifact_metrics {
 	}
 
 	runtime {
-		docker: "~{container_registry}/scvi:1.2.0_1"
+		docker: "~{container_registry}/sc_tools:1.0.0"
 		cpu: 16
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
+		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
-		gpuType: "nvidia-tesla-t4"
-		gpuCount: 1
-		nvidiaDriverVersion: "545.23.08" #!UnknownRuntimeKey
 	}
 }
 
@@ -514,11 +696,11 @@ task plot_groups_and_features {
 	command <<<
 		set -euo pipefail
 
-		python3 /opt/scripts/main/plot_feats_and_groups.py \
+		plot_groups_and_feats \
 			--adata-input ~{final_adata_object} \
-			--group ~{sep=',' groups} \
+			--groups ~{sep=',' groups} \
 			--output-group-umap-plot-prefix "~{cohort_id}" \
-			--feature ~{sep=',' features} \
+			--features ~{sep=',' features} \
 			--output-feature-umap-plot-prefix "~{cohort_id}"
 
 		mv "plots/umap~{cohort_id}_groups_umap.png" "plots/~{cohort_id}.groups.umap.png"
@@ -538,11 +720,12 @@ task plot_groups_and_features {
 	}
 
 	runtime {
-		docker: "~{container_registry}/scvi:1.2.0_1"
+		docker: "~{container_registry}/sc_tools:1.0.0"
 		cpu: 2
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
+		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}

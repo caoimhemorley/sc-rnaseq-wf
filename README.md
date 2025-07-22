@@ -1,4 +1,4 @@
-# pmdbs-sc-rna-seq
+# pmdbs-sc-rnaseq-wf
 
 Repo for testing and developing a common postmortem-derived brain sequencing (PMDBS) workflow harmonized across ASAP with human sc/sn RNA sequencing data.
 
@@ -16,7 +16,7 @@ Common workflows, tasks, utility scripts, and docker images reused across harmon
 
 # Workflows
 
-Worfklows are defined in [the `workflows` directory](workflows). The python scripts which process the data at each stage can be found [the docker/scvi/scripts directory](docker/scvi/scripts).
+Worfklows are defined in [the `workflows` directory](workflows). The python scripts which process the data at each stage can be found [the docker/sc_tools/scripts directory](docker/sc_tools/scripts).
 
 ![Workflow diagram](workflows/workflow_diagram.svg "Workflow diagram")
 
@@ -29,7 +29,7 @@ The workflow is broken up into two main chunks:
 1. [Preprocessing](#preprocessing)
 2. [Cohort analysis](#cohort-analysis)
 
-> Note: The details of the cohort analysis are described in the [scvi docker README](docker/scvi/scripts/README.md).
+> Note: The details of the cohort analysis are described in the [sc_tools docker README](docker/sc_tools/scripts/README.md).
 
 ## Preprocessing
 
@@ -47,18 +47,27 @@ An input template file can be found at [workflows/inputs.json](workflows/inputs.
 | :- | :- | :- |
 | String | cohort_id | Name of the cohort; used to name output files during cross-team cohort analysis. |
 | Array[[Project](#project)] | projects | The project ID, set of samples and their associated reads and metadata, output bucket locations, and whether or not to run project-level cohort analysis. |
-| File | cellranger_reference_data | Cellranger transcriptome reference data; see https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest. |
+| File | cellranger_reference_data | Cellranger transcriptome reference data; see https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions. |
 | Float? | cellbender_fpr | Cellbender false positive rate for signal removal. [0.0] |
+| Float? | pct_counts_mt_max | Maximum percentage of mitochondrial gene counts allowed per cell. [10] |
+| Int? | doublet_score_max | Maximum doublet detection score threshold. [0.2] |
+| Array[Int]? | total_counts_limits | Minimum and maximum total UMI (unique molecular identifier) counts per cell. [100, 100000] |
+| Array[Int]? | n_genes_by_counts_limits | Minimum and maximum number of genes detected per cell (genes with at least one count). [100, 10000] |
+| File? | allen_mtg_precomputed_stats| This is a precomputed statistics file from the [Allen Brain Cell Atlas - Seattle Alzheimer’s Disease Brain Cell Atlas (SEA-AD) consortium](https://portal.brain-map.org/atlases-and-data/bkp/mapmycells) containing reference statistics for the middle temporal gyrus (MTG) brain region sourced from https://allen-brain-cell-atlas.s3-us-west-2.amazonaws.com/mapmycells/SEAAD/20240831/precomputed_stats.20231120.sea_ad.MTG.h5. |
+| Int? | norm_target_sum | The total count value that each cell will be normalized to. [10000] |
+| Int? | n_top_genes | Number of HVG genes to keep. [3000] |
+| Int? | n_comps | Number of principal components to compute. [30] |
+| String? | scvi_latent_key | Latent key to save the scVI latent to. ['X_scVI'] |
+| String? | scanvi_latent_key | Latent key to save the scANVI latent to. ['X_scANVI'] |
+| String? | scanvi_predictions_key | scANVI cell type predictions column name. ['C_scANVI'] |
+| String? | batch_key | Key in AnnData object for batch information. ['batch_id'] |
+| Int? | n_neighbors | The size of local neighborhood (in terms of number of neighboring data points) used for manifold approximation. [15] |
+| Array[Float]? | leiden_res | Leiden resolutions which are the parameter values controlling the coarseness of the clustering. [0.05, 0.1, 0.2, 0.4] |
+| Array[String]? | groups | Groups to produce umap plots for. ['sample', 'batch', 'cell_type', 'leiden_res_0.05', 'leiden_res_0.10', 'leiden_res_0.20', 'leiden_res_0.40'] |
+| Array[String]? | features | Features to produce umap plots for. ['n_genes_by_counts', 'total_counts', 'pct_counts_mt', 'pct_counts_rb', 'doublet_score', 'S_score', 'G2M_score'] |
 | Boolean? | run_cross_team_cohort_analysis | Whether to run downstream harmonization steps on all samples across projects. If set to false, only preprocessing steps (cellranger and generating the initial adata object(s)) will run for samples. [false] |
 | String | cohort_raw_data_bucket | Bucket to upload cross-team cohort intermediate files to. |
 | Array[String] | cohort_staging_data_buckets | Buckets to upload cross-team cohort analysis outputs to. |
-| Int? | n_top_genes | Number of HVG genes to keep. [3000] |
-| String? | scvi_latent_key | Latent key to save the scVI latent to. ['X_scvi'] |
-| String? | batch_key | Key in AnnData object for batch information. ['batch_id'] |
-| String? | label_key | Key to reference 'cell_type' labels. ['cell_type'] |
-| File | cell_type_markers_list | CSV file containing a list of major cell type markers; used to annotate cells. |
-| Array[String]? | groups | Groups to produce umap plots for. ['sample', 'batch', 'cell_type', 'leiden_res_0.05', 'leiden_res_0.10', 'leiden_res_0.20', 'leiden_res_0.40'] |
-| Array[String]? | features | Features to produce umap plots for. ['n_genes_by_counts', 'total_counts', 'pct_counts_mt', 'pct_counts_rb', 'doublet_score', 'S_score', 'G2M_score'] |
 | String | container_registry | Container registry where workflow Docker images are hosted. |
 | String? | zones | GCP zones where compute will take place. ['us-central1-c us-central1-f'] |
 
@@ -71,8 +80,6 @@ An input template file can be found at [workflows/inputs.json](workflows/inputs.
 | String | team_id | Unique identifier for team; used for naming output files |
 | String | dataset_id | Unique identifier for dataset; used for metadata |
 | Array[[Sample](#sample)] | samples | The set of samples associated with this project |
-| File? | project_sample_metadata_csv | CSV containing all sample information including batch, condition, etc. This is required for the bulk RNAseq pipeline. For the `batch` column, there must be at least two distinct values. |
-| File? | project_condition_metadata_csv | CSV containing condition and intervention IDs used to categorize conditions into broader groups for DESeq2 pairwise condition ('Case', 'Control', and 'Other'). This is required for the bulk RNAseq pipeline. |
 | Boolean | run_project_cohort_analysis | Whether or not to run cohort analysis within the project |
 | String | raw_data_bucket | Raw data bucket; intermediate output files that are not final workflow outputs are stored here |
 | String | staging_data_bucket | Staging data bucket; final project-level outputs are stored here |
@@ -90,7 +97,7 @@ An input template file can be found at [workflows/inputs.json](workflows/inputs.
 
 ## Generating the inputs JSON
 
-The inputs JSON may be generated manually, however when running a large number of samples, this can become unwieldly. The `generate_inputs` utility script may be used to automatically generate the inputs JSON. The script requires the libraries outlined in [the requirements.txt file](https://github.com/ASAP-CRN/wf-common/blob/main/util/requirements.txt) and the following inputs:
+The inputs JSON may be generated manually, however when running a large number of samples, this can become unwieldly. The [`generate_inputs` utility script](https://github.com/ASAP-CRN/wf-common/blob/main/util/generate_inputs) may be used to automatically generate the inputs JSON and sample list. The script requires the libraries outlined in [the requirements.txt file](https://github.com/ASAP-CRN/wf-common/blob/main/util/requirements.txt) and the following inputs:
 
 - `project-tsv`: One or more project TSVs with one row per sample and columns team_id, sample_id, batch, fastq_path. All samples from all projects may be included in the same project TSV, or multiple project TSVs may be provided.
     - `team_id`: A unique identifier for the team from which the sample(s) arose
@@ -103,7 +110,6 @@ The inputs JSON may be generated manually, however when running a large number o
 - `run-project-cohort-analysis`: Optionally run project-level cohort analysis for provided projects. This value will apply to all projects. [false]
 - `workflow_name`: WDL workflow name.
 - `cohort-dataset`: Dataset name in cohort bucket name (e.g. 'sc-rnaseq').
-- `output-file-prefix`: Optional output file prefix name. [inputs.{cohort_staging_bucket_type}.{source}-{cohort_dataset}.{date}.json]
 
 Example usage:
 
@@ -112,10 +118,13 @@ Example usage:
     --project-tsv metadata.tsv \
     --inputs-template workflows/inputs.json \
     --run-project-cohort-analysis \
-    --workflow-name pmdbs_bulk_rnaseq_analysis \
-    --cohort-dataset sc-rnaseq \
-    --output-file inputs.harmonized_sc_rnaseq_workflow.json
+    --workflow-name pmdbs_sc_rnaseq_analysis \
+    --cohort-dataset sc-rnaseq
 ```
+
+The output files will be named accordingly:
+- Inputs JSON: `inputs.{staging_env}.{source}-{cohort_dataset}.{date}.json`
+- Sample list TSV: `{team}.{source}-{cohort_dataset}.sample_list.{date}.tsv`
 
 # Outputs
 
@@ -124,13 +133,13 @@ Example usage:
 - `cohort_id`: either the `team_id` for project-level cohort analysis, or the `cohort_id` for the full cohort
 - `workflow_run_timestamp`: format: `%Y-%m-%dT%H-%M-%SZ`
 - The list of samples used to generate the cohort analysis will be output alongside other cohort analysis outputs in the staging data bucket (`${cohort_id}.sample_list.tsv`)
-- The MANIFEST.tsv file in the staging data bucket describes the file name, md5 hash, timestamp, workflow version, workflow name, and workflow release for the run used to generate each file in that directory
+- The `MANIFEST.tsv` file in the staging data bucket describes the file name, md5 hash, timestamp, workflow version, workflow name, and workflow release for the run used to generate each file in that directory
 
 ### Raw data (intermediate files and final outputs for all runs of the workflow)
 
 The raw data bucket will contain *some* artifacts generated as part of workflow execution. Following successful workflow execution, the artifacts will also be copied into the staging bucket as final outputs.
 
-In the workflow, task outputs are either specified as `String` (final outputs, which will be copied in order to live in raw data buckets and staging buckets) or `File` (intermediate outputs that are periodically cleaned up, which will live in the cromwell-output bucket). This was implemented to reduce storage costs. Preprocess final outputs are defined in the workflow at [main.wdl](workflows/main.wdl#L68-L82) and cohort analysis final outputs are defined at [cohort_analysis.wdl](workflows/cohort_analysis/cohort_analysis.wdl#L133-L161).
+In the workflow, task outputs are either specified as `String` (final outputs, which will be copied in order to live in raw data buckets and staging buckets) or `File` (intermediate outputs that are periodically cleaned up, which will live in the cromwell-output bucket). This was implemented to reduce storage costs. Preprocess final outputs are defined in the workflow at [main.wdl](workflows/main.wdl#L85-L99) and cohort analysis final outputs are defined at [cohort_analysis.wdl](workflows/cohort_analysis/cohort_analysis.wdl#L200-L237).
 
 ```bash
 asap-raw-{cohort,team-xxyy}-{source}-{dataset}
@@ -163,22 +172,26 @@ asap-dev-{cohort,team-xxyy}-{source}-{dataset}
 └── pmdbs_sc_rnaseq
     ├── cohort_analysis
     │   ├── ${cohort_id}.sample_list.tsv
-    │   ├── ${cohort_id}.merged_adata_object.h5ad
+    │   ├── ${cohort_id}.merged_cleaned_unfiltered.h5ad
     │   ├── ${cohort_id}.initial_metadata.csv
     │   ├── ${cohort_id}.doublet_score.violin.png
     │   ├── ${cohort_id}.n_genes_by_counts.violin.png
     │   ├── ${cohort_id}.pct_counts_mt.violin.png
     │   ├── ${cohort_id}.pct_counts_rb.violin.png
     │   ├── ${cohort_id}.total_counts.violin.png
+    │   ├── ${cohort_id}.mmc_otf_mapping.SEAAD.extended_results.json
+    │   ├── ${cohort_id}.mmc_otf_mapping.SEAAD.results.csv
+    │   ├── ${cohort_id}.mmc_otf_mapping.SEAAD.log.txt 
     │   ├── ${cohort_id}.all_genes.csv
     │   ├── ${cohort_id}.hvg_genes.csv
-    │   ├── ${cohort_id}.final_validation_metrics.csv
-    │   ├── ${cohort_id}_scvi_model.tar.gz
-    │   ├── ${cohort_id}.cell_types.csv
-    │   ├── ${cohort_id}.final_adata.h5ad
+    │   ├── ${cohort_id}.mmc_results.parquet
+    │   ├── ${cohort_id}.scvi_model.tar.gz
+    │   ├── ${cohort_id}.scanvi_model.tar.gz
+    │   ├── ${cohort_id}.scanvi_cell_types.parquet
+    │   ├── ${cohort_id}.final.h5ad
     │   ├── ${cohort_id}.final_metadata.csv
-    │   ├── ${team_id}.scib_report.csv
-    │   ├── ${team_id}.scib_results.svg
+    │   ├── ${cohort_id}.scib_report.csv
+    │   ├── ${cohort_id}.scib_results.svg
     │   ├── ${cohort_id}.features.umap.png
     │   ├── ${cohort_id}.groups.umap.png
     │   └── MANIFEST.tsv
@@ -196,7 +209,7 @@ asap-dev-{cohort,team-xxyy}-{source}-{dataset}
         ├── ${sampleA_id}.cellbender.log
         ├── ${sampleA_id}.cellbender.h5
         ├── ${sampleA_id}.cellbend_posterior.h5
-        ├── ${sampleA_id}.adata_object.h5ad
+        ├── ${sampleA_id}.cleaned_unfiltered.h5ad
         ├── ${sampleB_id}.filtered_feature_bc_matrix.h5
         ├── ${sampleB_id}.metrics_summary.csv
         ├── ${sampleB_id}.molecule_info.h5
@@ -210,7 +223,7 @@ asap-dev-{cohort,team-xxyy}-{source}-{dataset}
         ├── ${sampleB_id}.cellbender.log
         ├── ${sampleB_id}.cellbender.h5
         ├── ${sampleB_id}.cellbend_posterior.h5
-        ├── ${sampleB_id}.adata_object.h5ad
+        ├── ${sampleB_id}.cleaned_unfiltered.h5ad
         ├── ...
         ├── ${sampleN_id}.filtered_feature_bc_matrix.h5
         ├── ${sampleN_id}.metrics_summary.csv
@@ -225,7 +238,7 @@ asap-dev-{cohort,team-xxyy}-{source}-{dataset}
         ├── ${sampleN_id}.cellbender.log
         ├── ${sampleN_id}.cellbender.h5
         ├── ${sampleN_id}.cellbend_posterior.h5
-        ├── ${sampleN_id}.adata_object.h5ad
+        ├── ${sampleN_id}.cleaned_unfiltered.h5ad
         └── MANIFEST.tsv
 ```
 
@@ -237,13 +250,13 @@ This script compiles bucket and file information for both the initial (staging) 
 
 If data integrity tests pass, this script will upload a combined MANIFEST.tsv and the data promotion Markdown report under a metadata/{timestamp} directory in the staging bucket. Previous manifest files and reports will be kept. Next, it will rsync all files in the staging bucket to the curated bucket's preprocess, cohort_analysis, and metadata directories. **Exercise caution when using this script**; files that are not present in the source (staging) bucket will be deleted at the destination (curated) bucket.
 
-If data integrity tests fail, staging data cannot be promoted. The combined MANFIEST.tsv, Markdown report, and promote_staging_data_script.log will be locally available.
+If data integrity tests fail, staging data cannot be promoted. The combined `MANIFEST.tsv`, Markdown report, and `promote_staging_data_script.log` will be locally available.
 
 The script defaults to a dry run, printing out the files that would be copied or deleted for each selected team.
 
 ### Options
 
-```bash
+```
 -h  Display this message and exit
 -t  Space-delimited team(s) to promote data for
 -l  List available teams
@@ -251,7 +264,6 @@ The script defaults to a dry run, printing out the files that would be copied or
 -d  Space-delimited dataset name(s) in team bucket name, must follow the same order as {team}
 -w  Workflow name used as a directory in bucket
 -p  Promote data. If this option is not selected, data that would be copied or deleted is printed out, but files are not actually changed (dry run)
--e  Staging bucket type; options are 'uat' or 'dev' ['uat']
 ```
 
 ### Usage
@@ -264,7 +276,7 @@ The script defaults to a dry run, printing out the files that would be copied or
 ./wf-common/util/promote_staging_data -t team-hafler team-lee cohort -s pmdbs -d sc-rnaseq -w pmdbs_sc_rnaseq
 
 # Promote data for team-scherzer, team-sulzer, and cohort
-./wf-common/util/promote_staging_data -t team-scherzer team-sulzer cohort -s pmdbs -d sc-rnaseq -w pmdbs_sc_rnaseq -p -e dev
+./wf-common/util/promote_staging_data -t team-scherzer team-sulzer cohort -s pmdbs -d sc-rnaseq -w pmdbs_sc_rnaseq -p
 ```
 
 # Docker images
@@ -274,10 +286,13 @@ Docker images are defined in [the `docker` directory](docker). Each image must m
 Example directory structure:
 ```bash
 docker
-├── scvi
+├── sc_tools
 │   ├── build.env
-│   └── Dockerfile
-└── samtools
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   └── scripts
+│       └── ...
+└── cellbender
     ├── build.env
     └── Dockerfile
 ```
@@ -299,7 +314,7 @@ Docker images can be build using the [`build_docker_images`](https://github.com/
 
 ```bash
 # Build a single image
-./build_docker_images -d docker/scvi
+./build_docker_images -d docker/sc_tools
 
 # Build all images in the `docker` directory
 ./build_docker_images -d docker
@@ -313,11 +328,10 @@ Docker images can be build using the [`build_docker_images`](https://github.com/
 | Image | Major tool versions | Links |
 | :- | :- | :- |
 | cellbender | <ul><li>[cellbender v0.3.0](https://github.com/broadinstitute/CellBender/releases/tag/v0.3.0)</li><li>[google-cloud-cli 397.0.0](https://cloud.google.com/sdk/docs/release-notes#39700_2022-08-09)</li><li>[python 3.7.16](https://www.python.org/downloads/release/python-3716/)</li><li>[miniconda 23.1.0](https://docs.anaconda.com/miniconda/miniconda-release-notes/)</li><li>[cuda 11.4.0](https://developer.nvidia.com/cuda-11-4-0-download-archive)</li></ul> | [Dockerfile](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/main/docker/cellbender) |
-| cellranger | <ul><li>[cellranger v7.1.0](https://www.10xgenomics.com/support/software/cell-ranger/latest/release-notes/cr-release-notes#v7-1-0)</li><li>[google-cloud-cli 444.0.0](https://cloud.google.com/sdk/docs/release-notes#44400_2023-08-22)</li></ul> | [Dockerfile](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/main/docker/cellranger) |
-| scvi | <ul><li>[google-cloud-cli 444.0.0](https://cloud.google.com/sdk/docs/release-notes#44400_2023-08-22)</li><li>[python 3.10.12](https://www.python.org/downloads/release/python-31012/)</li><li>[cuda 12.3.0](https://developer.nvidia.com/cuda-12-3-0-download-archive)</li><li>[cuda 11.4.0](https://developer.nvidia.com/cuda-11-4-0-download-archive)</li></ul> Python libraries: <ul><li>[scvi-tools 1.2.0](https://github.com/scverse/scvi-tools/releases/tag/1.2.0)</li><li>argparse 1.4.0</li><li>[scanpy 1.9.8](https://scanpy.readthedocs.io/en/stable/release-notes/index.html#id5)</li><li>muon 0.1.5</li><li>pathlib 1.0.1</li><li>tables 3.9.2</li><li>scrublet 0.2.3</li><li>pymde 0.1.18</li><li>[scikit-misc 0.3.1](https://github.com/has2k1/scikit-misc/releases/tag/v0.3.1)</li><li>leidenalg 0.10.2</li><li>[harmonypy 0.0.9](https://github.com/slowkow/harmonypy/releases/tag/v0.0.9)</li><li>faiss-gpu 1.7.2</li><li>[scib-metrics 0.5.1](https://github.com/YosefLab/scib-metrics/releases/tag/v0.5.1)</li></ul>| [Dockerfile](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/main/docker/scvi) |
-| multiome | <ul><li>[google-cloud-cli 444.0.0](https://cloud.google.com/sdk/docs/release-notes#44400_2023-08-22)</li><li>[multiome seuratv4 environment](https://github.com/shahrozeabbas/Multiome-SeuratV4/tree/main)</li><li>[R scripts](https://github.com/shahrozeabbas/Harmony-RNA-Workflow/tree/main/scripts)</li></ul> | [Dockerfile](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/main/docker/multiome) |
-| util | <ul><li>[google-cloud-cli 444.0.0-slim](https://cloud.google.com/sdk/docs/release-notes#44400_2023-08-22)</li></ul> | [Dockerfile](https://github.com/ASAP-CRN/wf-common/tree/main/docker/util) |
-
+| cellranger | <ul><li>[cellranger v7.1.0](https://www.10xgenomics.com/support/software/cell-ranger/latest/release-notes/cr-release-notes#v7-1-0)</li><li>[google-cloud-cli 524.0.0](https://cloud.google.com/sdk/docs/release-notes#52400_2025-05-28)</li></ul> | [Dockerfile](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/main/docker/cellranger) |
+| sc_tools | <ul><li>[google-cloud-cli 524.0.0](https://cloud.google.com/sdk/docs/release-notes#52400_2025-05-28)</li><li>[python 3.10.12](https://www.python.org/downloads/release/python-31012/)</li><li>[torch 2.6.0](https://github.com/pytorch/pytorch/releases/tag/v2.6.0)</li></ul> Python libraries: <ul><li>[scvi-tools 1.3.2](https://github.com/scverse/scvi-tools/releases/tag/1.3.2)</li><li>argparse 1.4.0</li><li>[scanpy 1.11.3](https://scanpy.readthedocs.io/en/stable/release-notes/index.html#v1-11-3)</li><li>muon 0.1.7</li><li>tables 3.10.1</li><li>scrublet 0.2.3</li><li>[scikit-learn 1.7.0](https://github.com/scikit-learn/scikit-learn/releases/tag/1.7.0)</li><li>[harmonypy 0.0.10](https://github.com/slowkow/harmonypy/releases/tag/v0.0.10)</li><li>[scib-metrics 0.5.6](https://github.com/YosefLab/scib-metrics/releases/tag/v0.5.6)</li><li>[cell_type_mapper 1.5.3](https://github.com/AllenInstitute/cell_type_mapper/releases/tag/v1.5.3)</li></ul>| [Dockerfile](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/main/docker/sc_tools) |
+| util | <ul><li>[google-cloud-cli 524.0.0](https://cloud.google.com/sdk/docs/release-notes#52400_2025-05-28)</li></ul> | [Dockerfile](https://github.com/ASAP-CRN/wf-common/tree/main/docker/util) |
+| DEPRECATED - multiome | <ul><li>[google-cloud-cli 444.0.0](https://cloud.google.com/sdk/docs/release-notes#44400_2023-08-22)</li><li>[multiome seuratv4 environment](https://github.com/shahrozeabbas/Multiome-SeuratV4/tree/main)</li><li>[R scripts](https://github.com/shahrozeabbas/Harmony-RNA-Workflow/tree/main/scripts)</li></ul> | [Dockerfile](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/main/docker/multiome) |
 
 # wdl-ci
 
@@ -327,11 +341,11 @@ In general, `wdl-ci` will use inputs provided in the [wdl-ci.config.json](./wdl-
 
 
 # Notes
-## Cell type marker table
+
+## DEPRECATED - Cell type marker table [July 2025]
 The reference taxonomy for inference of cell types via [CellAssign](https://docs.scvi-tools.org/en/1.1.0/user_guide/models/cellassign.html) are sourced from https://github.com/NIH-CARD/brain-taxonomy/blob/main/markers/cellassign_card_markers.csv.
 
-
-## `harmonized-wf-dev`→`pmdbs-sc-rna-seq`
+## `harmonized-wf-dev`→`pmdbs-sc-rna-seq` [Dec 2024]
 This repo and work was originally developed under the name `harmonized-wf-dev`.
 
-This workflow was initally set up to implement the [Harmony RNA snakemake workflow](https://github.com/shahrozeabbas/Harmony-RNA-Workflow) in WDL. The WDL version of the workflow aims to maintain backwards compatibility with the snakemake scripts. Scripts used by the WDL workflow were modified from the Harmony RNA snakemake repo; originals may be found [here](https://github.com/shahrozeabbas/Harmony-RNA-Workflow/tree/5384b546f02b6e68f154f77d25667fed03759870/scripts), and their modified R versions in [the docker/multiome/scripts directory](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/cohort-analysis-v1.0.0/docker/multiome/scripts). Eventually snakemake support was depricated and the workflows were migrated to Python. Initial version [here](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/harmonized_pmdbs_analysis-v1.1.0_1.0.0_2.1.0).
+This workflow was initally set up to implement the [Harmony RNA snakemake workflow](https://github.com/shahrozeabbas/Harmony-RNA-Workflow) in WDL. The WDL version of the workflow aims to maintain backwards compatibility with the snakemake scripts. Scripts used by the WDL workflow were modified from the Harmony RNA snakemake repo; originals may be found [here](https://github.com/shahrozeabbas/Harmony-RNA-Workflow/tree/5384b546f02b6e68f154f77d25667fed03759870/scripts), and their modified R versions in [the docker/multiome/scripts directory](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/cohort-analysis-v1.0.0/docker/multiome/scripts). Eventually snakemake support was deprecated and the workflows were migrated to Python. Initial version [here](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/harmonized_pmdbs_analysis-v1.1.0_1.0.0_2.1.0).
