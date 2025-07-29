@@ -214,7 +214,6 @@ task check_output_files_exist {
 		memory: "4 GB"
 		disks: "local-disk 20 HDD"
 		preemptible: 3
-		maxRetries: 2
 		zones: zones
 	}
 }
@@ -308,7 +307,6 @@ task cellranger_count {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}
@@ -375,7 +373,6 @@ task remove_technical_artifacts {
 		memory: "64 GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 		gpuType: "nvidia-tesla-t4"
@@ -430,7 +427,6 @@ task counts_to_adata {
 		memory: "16 GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}

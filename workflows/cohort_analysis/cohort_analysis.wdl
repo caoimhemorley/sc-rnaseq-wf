@@ -353,7 +353,6 @@ task merge_and_plot_qc_metrics {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}
@@ -398,7 +397,6 @@ task filter {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}
@@ -450,7 +448,6 @@ task map_cell_types {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}
@@ -509,7 +506,6 @@ task normalize {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}
@@ -558,7 +554,6 @@ task add_mapped_cell_types {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}
@@ -611,7 +606,6 @@ task integrate_harmony {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 		gpuType: "nvidia-tesla-t4"
@@ -669,7 +663,6 @@ task artifact_metrics {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}
@@ -725,7 +718,6 @@ task plot_groups_and_features {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}

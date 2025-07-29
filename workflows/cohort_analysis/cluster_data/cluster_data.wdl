@@ -123,7 +123,6 @@ task integrate_sample_data {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 		gpuType: "nvidia-tesla-t4"
@@ -191,7 +190,6 @@ task assign_remaining_cells {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 		gpuType: "nvidia-tesla-t4"
@@ -238,7 +236,6 @@ task cluster_cells {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}
