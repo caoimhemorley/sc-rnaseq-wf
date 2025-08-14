@@ -62,7 +62,8 @@ def integrate_with_scvi(
 
 def main(args: argparse.Namespace):
     # Set the number of data loader workers
-    # scvi.settings.dl_num_workers = 2 # Or a value appropriate for your system
+    scvi.settings.dl_num_workers = max(1, os.cpu_count() - 1)
+    print(f"Using {scvi.settings.dl_num_workers} workers")
 
     # 0. Load data
     adata = ad.read_h5ad(args.adata_input)  # type: ignore
