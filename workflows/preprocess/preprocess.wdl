@@ -8,6 +8,7 @@ workflow preprocess {
 	input {
 		String team_id
 		String dataset_id
+		String dataset_doi_url
 		Array[Sample] samples
 
 		File cellranger_reference_data

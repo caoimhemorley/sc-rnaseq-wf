@@ -69,6 +69,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 			input:
 				team_id = project.team_id,
 				dataset_id = project.dataset_id,
+				dataset_doi_url = project.dataset_doi_url,
 				samples = project.samples,
 				cellranger_reference_data = cellranger_reference_data,
 				cellbender_fpr = cellbender_fpr,
