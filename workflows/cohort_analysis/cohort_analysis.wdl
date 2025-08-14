@@ -470,7 +470,7 @@ task normalize {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(filtered_adata_object, "GB") * 18 + 20)
+	Int mem_gb = ceil(size(filtered_adata_object, "GB") * 20 + 30)
 	Int disk_size = ceil(size(filtered_adata_object, "GB") * 4 + 20)
 
 	command <<<
@@ -502,7 +502,7 @@ task normalize {
 
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.0.0"
-		cpu: 4
+		cpu: 8
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3

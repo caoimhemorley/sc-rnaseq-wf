@@ -55,7 +55,7 @@ workflow preprocess {
 	scatter (index in range(length(samples))) {
 		Sample sample = samples[index]
 
-		Array[String] project_sample_id = [team_id, sample.sample_id]
+		Array[String] project_sample_id = [team_id, sample.sample_id, dataset_doi_url]
 
 		String cellranger_count_complete = check_output_files_exist.sample_preprocessing_complete[index][0]
 		String cellbender_remove_background_complete = check_output_files_exist.sample_preprocessing_complete[index][1]
