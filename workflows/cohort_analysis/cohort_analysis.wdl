@@ -470,7 +470,7 @@ task normalize {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(filtered_adata_object, "GB") * 20 + 30)
+	Int mem_gb = ceil(size(filtered_adata_object, "GB") * 40 + 150)
 	Int disk_size = ceil(size(filtered_adata_object, "GB") * 4 + 20)
 
 	command <<<
