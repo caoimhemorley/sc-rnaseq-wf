@@ -119,7 +119,7 @@ task integrate_sample_data {
 
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.0.0"
-		cpu: 2
+		cpu: 8
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
@@ -186,7 +186,7 @@ task assign_remaining_cells {
 
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.0.0"
-		cpu: 2
+		cpu: 8
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
