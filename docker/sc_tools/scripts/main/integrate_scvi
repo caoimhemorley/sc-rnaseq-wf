@@ -51,7 +51,6 @@ def integrate_with_scvi(
         early_stopping=early_stopping,
         early_stopping_patience=early_stopping_patience,
         accelerator=accelerator,
-        # early_stopping_patience=early_stopping_patience,
         # plan_kwargs=plan_kwargs,
     )
 
