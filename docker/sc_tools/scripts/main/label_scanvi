@@ -39,7 +39,7 @@ def label_with_scanvi(
         max_epochs=scanvi_epochs,
         early_stopping=early_stopping,
         early_stopping_patience=early_stopping_patience,
-        dataloader_kwargs={"num_workers": num_workers},
+        datasplitter_kwargs={"num_workers": num_workers},
     )
 
     print("Generating scANVI latents and predictions")
