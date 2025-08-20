@@ -147,7 +147,7 @@ task assign_remaining_cells {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(integrated_adata_object, "GB") * 10 + 20)
+	Int mem_gb = ceil(size(integrated_adata_object, "GB") * 12 + 50)
 	Int disk_size = ceil(size(integrated_adata_object, "GB") * 3 + 50)
 
 	command <<<
