@@ -119,7 +119,7 @@ task integrate_sample_data {
 
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.0.0"
-		cpu: 8
+		cpu: 4
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
@@ -147,7 +147,7 @@ task assign_remaining_cells {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(integrated_adata_object, "GB") * 12 + 50)
+	Int mem_gb = ceil(size(integrated_adata_object, "GB") * 12 + 30)
 	Int disk_size = ceil(size(integrated_adata_object, "GB") * 3 + 50)
 
 	command <<<
@@ -186,7 +186,7 @@ task assign_remaining_cells {
 
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.0.0"
-		cpu: 8
+		cpu: 4
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
