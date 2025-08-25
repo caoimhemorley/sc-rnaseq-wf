@@ -7,11 +7,15 @@ import scvi
 
 
 def label_with_scanvi(
-    adata: ad.AnnData, model: scvi.model.SCVI
+    adata: ad.AnnData,
+    model: scvi.model.SCVI,
+    num_workers: int,
 ) -> tuple[ad.AnnData, scvi.model.SCANVI]:
     """
     Fit scANVI model to AnnData object
     """
+    
+    # Fixed parameters
     scanvi_epochs = 300
     batch_size = 1024
     accelerator = "gpu"
@@ -35,6 +39,7 @@ def label_with_scanvi(
         max_epochs=scanvi_epochs,
         early_stopping=early_stopping,
         early_stopping_patience=early_stopping_patience,
+        datasplitter_kwargs={"num_workers": num_workers},
     )
 
     print("Generating scANVI latents and predictions")
@@ -46,7 +51,9 @@ def label_with_scanvi(
 
 def main(args: argparse.Namespace):
     # Set the number of data loader workers
-    # scvi.settings.dl_num_workers = 2 # Or a value appropriate for your system
+    num_workers = max(1, os.cpu_count() - 1)
+    scvi.settings.dl_num_workers = num_workers
+    print(f"Using {scvi.settings.dl_num_workers} workers")
 
     # 0. Load data
     adata = ad.read_h5ad(args.adata_input)  # type: ignore
@@ -56,7 +63,7 @@ def main(args: argparse.Namespace):
         adata=adata,
     )
     # 4. Get scANVI model
-    adata, scanvi_model = label_with_scanvi(adata, model)
+    adata, scanvi_model = label_with_scanvi(adata, model, num_workers)
     # 5. Save the integrated adata and scANVI model
     scanvi_model.save(args.output_scanvi_dir, overwrite=True)
     # 6. Save the latent space

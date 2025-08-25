@@ -353,7 +353,6 @@ task merge_and_plot_qc_metrics {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}
@@ -398,7 +397,6 @@ task filter {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}
@@ -450,7 +448,6 @@ task map_cell_types {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}
@@ -473,7 +470,7 @@ task normalize {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(filtered_adata_object, "GB") * 18 + 20)
+	Int mem_gb = ceil(size(filtered_adata_object, "GB") * 20 + 150)
 	Int disk_size = ceil(size(filtered_adata_object, "GB") * 4 + 20)
 
 	command <<<
@@ -505,11 +502,10 @@ task normalize {
 
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.0.0"
-		cpu: 4
+		cpu: 8
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}
@@ -558,7 +554,6 @@ task add_mapped_cell_types {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}
@@ -611,7 +606,6 @@ task integrate_harmony {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 		gpuType: "nvidia-tesla-t4"
@@ -668,8 +662,6 @@ task artifact_metrics {
 		cpu: 16
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
-		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}
@@ -725,7 +717,6 @@ task plot_groups_and_features {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}

@@ -79,6 +79,7 @@ An input template file can be found at [workflows/inputs.json](workflows/inputs.
 | :- | :- | :- |
 | String | team_id | Unique identifier for team; used for naming output files |
 | String | dataset_id | Unique identifier for dataset; used for metadata |
+| String | dataset_doi_url | Generated Zenodo DOI URL referencing the dataset. |
 | Array[[Sample](#sample)] | samples | The set of samples associated with this project |
 | Boolean | run_project_cohort_analysis | Whether or not to run cohort analysis within the project |
 | String | raw_data_bucket | Raw data bucket; intermediate output files that are not final workflow outputs are stored here |
@@ -97,7 +98,7 @@ An input template file can be found at [workflows/inputs.json](workflows/inputs.
 
 ## Generating the inputs JSON
 
-The inputs JSON may be generated manually, however when running a large number of samples, this can become unwieldly. The [`generate_inputs` utility script](https://github.com/ASAP-CRN/wf-common/blob/main/util/generate_inputs) may be used to automatically generate the inputs JSON and sample list. The script requires the libraries outlined in [the requirements.txt file](https://github.com/ASAP-CRN/wf-common/blob/main/util/requirements.txt) and the following inputs:
+The inputs JSON may be generated manually, however when running a large number of samples, this can become unwieldly. The [`generate_inputs` utility script](https://github.com/ASAP-CRN/wf-common/blob/main/util/generate_inputs) may be used to automatically generate the inputs JSON (`inputs.{staging_env}.{source}-{cohort_dataset}.{date}.json`) and a sample list TSV (`{team_id}.{source}-{cohort_dataset}.sample_list.{date}.tsv`); same as the one generated in [the write_cohort_sample_list task](https://github.com/ASAP-CRN/wf-common/wdl/tasks/write_cohort_sample_list.wdl)). The script requires the libraries outlined in [the requirements.txt file](https://github.com/ASAP-CRN/wf-common/util/requirements.txt) and the following inputs:
 
 - `project-tsv`: One or more project TSVs with one row per sample and columns team_id, sample_id, batch, fastq_path. All samples from all projects may be included in the same project TSV, or multiple project TSVs may be provided.
     - `team_id`: A unique identifier for the team from which the sample(s) arose
@@ -122,10 +123,6 @@ Example usage:
     --cohort-dataset sc-rnaseq
 ```
 
-The output files will be named accordingly:
-- Inputs JSON: `inputs.{staging_env}.{source}-{cohort_dataset}.{date}.json`
-- Sample list TSV: `{team}.{source}-{cohort_dataset}.sample_list.{date}.tsv`
-
 # Outputs
 
 ## Output structure
@@ -139,7 +136,7 @@ The output files will be named accordingly:
 
 The raw data bucket will contain *some* artifacts generated as part of workflow execution. Following successful workflow execution, the artifacts will also be copied into the staging bucket as final outputs.
 
-In the workflow, task outputs are either specified as `String` (final outputs, which will be copied in order to live in raw data buckets and staging buckets) or `File` (intermediate outputs that are periodically cleaned up, which will live in the cromwell-output bucket). This was implemented to reduce storage costs. Preprocess final outputs are defined in the workflow at [main.wdl](workflows/main.wdl#L85-L99) and cohort analysis final outputs are defined at [cohort_analysis.wdl](workflows/cohort_analysis/cohort_analysis.wdl#L200-L237).
+In the workflow, task outputs are either specified as `String` (final outputs, which will be copied in order to live in raw data buckets and staging buckets) or `File` (intermediate outputs that are periodically cleaned up, which will live in the cromwell-output bucket). This was implemented to reduce storage costs.
 
 ```bash
 asap-raw-{cohort,team-xxyy}-{source}-{dataset}
@@ -224,6 +221,7 @@ asap-dev-{cohort,team-xxyy}-{source}-{dataset}
         ├── ${sampleB_id}.cellbender.h5
         ├── ${sampleB_id}.cellbend_posterior.h5
         ├── ${sampleB_id}.cleaned_unfiltered.h5ad
+        ├── MANIFEST.tsv
         ├── ...
         ├── ${sampleN_id}.filtered_feature_bc_matrix.h5
         ├── ${sampleN_id}.metrics_summary.csv

@@ -8,9 +8,9 @@ import argparse
 
 # Works best on CPU
 # os.environ["AIBS_BKP_USE_TORCH"] = "false"
-# os.environ["NUMEXPR_NUM_THREADS"] = "1"
-# os.environ["MKL_NUM_THREADS"] = "1"
-# os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["OMP_NUM_THREADS"] = "1"
 
 # These were some initial defaults
 CHUNK_SIZE = 40000

@@ -8,6 +8,7 @@ workflow preprocess {
 	input {
 		String team_id
 		String dataset_id
+		String dataset_doi_url
 		Array[Sample] samples
 
 		File cellranger_reference_data
@@ -55,7 +56,7 @@ workflow preprocess {
 	scatter (index in range(length(samples))) {
 		Sample sample = samples[index]
 
-		Array[String] project_sample_id = [team_id, sample.sample_id]
+		Array[String] project_sample_id = [team_id, sample.sample_id, dataset_doi_url]
 
 		String cellranger_count_complete = check_output_files_exist.sample_preprocessing_complete[index][0]
 		String cellbender_remove_background_complete = check_output_files_exist.sample_preprocessing_complete[index][1]
@@ -209,12 +210,11 @@ task check_output_files_exist {
 	}
 
 	runtime {
-		docker: "gcr.io/google.com/cloudsdktool/google-cloud-cli:444.0.0-slim"
+		docker: "gcr.io/google.com/cloudsdktool/google-cloud-cli:524.0.0-slim"
 		cpu: 2
 		memory: "4 GB"
 		disks: "local-disk 20 HDD"
 		preemptible: 3
-		maxRetries: 2
 		zones: zones
 	}
 }
@@ -308,7 +308,6 @@ task cellranger_count {
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}
@@ -375,7 +374,6 @@ task remove_technical_artifacts {
 		memory: "64 GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 		gpuType: "nvidia-tesla-t4"
@@ -426,11 +424,10 @@ task counts_to_adata {
 
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.0.0"
-		cpu: 2
-		memory: "16 GB"
+		cpu: 4
+		memory: "32 GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
-		maxRetries: 2
 		bootDiskSizeGb: 40
 		zones: zones
 	}
