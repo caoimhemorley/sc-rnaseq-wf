@@ -7,7 +7,7 @@
       "tasks": {
         "merge_and_plot_qc_metrics": {
           "key": "merge_and_plot_qc_metrics",
-          "digest": "oxndp5i6mfoirwljraxmkqvn6z2bcfeo",
+          "digest": "cjjj5amcq5pjmkomjpxjklzsto2nv4wq",
           "tests": [
             {
               "inputs": {
@@ -65,7 +65,7 @@
         },
         "filter": {
           "key": "filter",
-          "digest": "5kapgsz5zzyki5j4oc6nc32d2ecqjbve",
+          "digest": "nsv5otybgnika6xrxt2cetogb3w3sr2p",
           "tests": [
             {
               "inputs": {
@@ -92,7 +92,7 @@
         },
         "map_cell_types": {
           "key": "map_cell_types",
-          "digest": "b57fq2q24qfzie3ecuch6c2lszl3piml",
+          "digest": "3ukgg6t2iyxv3avq4lnisxkkcgs5itiz",
           "tests": [
             {
               "inputs": {
@@ -134,7 +134,7 @@
         },
         "normalize": {
           "key": "normalize",
-          "digest": "ar4ghqctoshmkldx37jipz53ej2adykb",
+          "digest": "b5n4vh5cdtb4jszpr4fwqvfxieopucll",
           "tests": [
             {
               "inputs": {
@@ -182,7 +182,7 @@
         },
         "add_mapped_cell_types": {
           "key": "add_mapped_cell_types",
-          "digest": "lk5tfxsxylnjxvtobfurh2zgueobvh7w",
+          "digest": "gn7nbhgpwieccvfrgnddduozsdteupaf",
           "tests": [
             {
               "inputs": {
@@ -216,7 +216,7 @@
         },
         "integrate_harmony": {
           "key": "integrate_harmony",
-          "digest": "isbnmp4zrvep3g6web6uofdr53jwp3hi",
+          "digest": "xjs4n3pcv42abnr3n24zcdo7hoxlkujy",
           "tests": [
             {
               "inputs": {
@@ -252,7 +252,7 @@
         },
         "artifact_metrics": {
           "key": "artifact_metrics",
-          "digest": "2wd5mijfnwykg4f7rjivwqzdm54ate4q",
+          "digest": "ypptuxhgedtmv5zjc6fbgqivfdiutlk6",
           "tests": [
             {
               "inputs": {
@@ -289,7 +289,7 @@
         },
         "plot_groups_and_features": {
           "key": "plot_groups_and_features",
-          "digest": "sg5rlabnz2c53ioakw5w4c6quaqgf75v",
+          "digest": "fpdg6po2bhbrhqtnmfogngagroqe6xec",
           "tests": [
             {
               "inputs": {
@@ -333,7 +333,7 @@
       "tasks": {
         "integrate_sample_data": {
           "key": "integrate_sample_data",
-          "digest": "lgemiugczkj46nl4sb447xvtvqnq7kzn",
+          "digest": "ydguuotbcqr4rkiw3wrtlh4iaxebmeah",
           "tests": [
             {
               "inputs": {
@@ -368,7 +368,7 @@
         },
         "assign_remaining_cells": {
           "key": "assign_remaining_cells",
-          "digest": "t6zpftqv4vxzwy42zrx5hpjp4rakoeay",
+          "digest": "catwc3naujqeatfnfazepsu4kpvkuqlg",
           "tests": [
             {
               "inputs": {
@@ -411,7 +411,7 @@
         },
         "cluster_cells": {
           "key": "cluster_cells",
-          "digest": "iz6jx2zqm6qxfesujrj2gj2mjy3n6ajj",
+          "digest": "t4wq7omb2ksg6y4zzg4c2jioqzrlnhko",
           "tests": [
             {
               "inputs": {
@@ -449,7 +449,7 @@
         },
         "cellranger_count": {
           "key": "cellranger_count",
-          "digest": "zs74mp72bww55ceppln46kdd3t35fx6y",
+          "digest": "hhcgqklxaklkzbikxpbp7gpwfalqc2as",
           "tests": [
             {
               "inputs": {
@@ -506,7 +506,7 @@
         },
         "remove_technical_artifacts": {
           "key": "remove_technical_artifacts",
-          "digest": "65aygqojmtwgqy5syt37ryhyh7adgqh2",
+          "digest": "f2ulwvwgf67cd7hgpjjxtly47tqhppgf",
           "tests": [
             {
               "inputs": {
@@ -584,7 +584,7 @@
         },
         "counts_to_adata": {
           "key": "counts_to_adata",
-          "digest": "vqunk63reu4yvtlpbjtx6barg5sezveq",
+          "digest": "noqjkv56v6s4b26fxuzfpr2whxnrf5bu",
           "tests": [
             {
               "inputs": {
@@ -638,7 +638,7 @@
       "tasks": {
         "write_cohort_sample_list": {
           "key": "write_cohort_sample_list",
-          "digest": "cn33tbof6zcgr72pzjgzqplvbtzg47bk",
+          "digest": "mytn7yq4gcwvwv56sbd4b67ccbooalf6",
           "tests": [
             {
               "inputs": {
