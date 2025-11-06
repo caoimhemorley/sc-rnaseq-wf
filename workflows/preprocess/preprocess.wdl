@@ -187,9 +187,9 @@ task check_output_files_exist {
 			cellbender_counts_file=$(echo "${output_files}" | cut -f 2)
 			initial_adata_object_file=$(echo "${output_files}" | cut -f 3)
 
-			if gsutil -u ~{billing_project} ls "${cellranger_counts_file}"; then
-				if gsutil -u ~{billing_project} ls "${cellbender_counts_file}"; then
-					if gsutil -u ~{billing_project} ls "${initial_adata_object_file}"; then
+			if gcloud storage ls --billing-project=~{billing_project} "${cellranger_counts_file}"; then
+				if gcloud storage ls --billing-project=~{billing_project} "${cellbender_counts_file}"; then
+					if gcloud storage ls --billing-project=~{billing_project} "${initial_adata_object_file}"; then
 						# If we find all outputs, don't rerun anything
 						echo -e "true\ttrue\ttrue" >> sample_preprocessing_complete.tsv
 					else
