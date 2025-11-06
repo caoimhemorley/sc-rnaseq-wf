@@ -11,6 +11,7 @@ workflow preprocess {
 		String dataset_doi_url
 		Array[Sample] samples
 
+		Boolean multimodal_sc_data
 		File cellranger_reference_data
 		Float cellbender_fpr
 
@@ -75,6 +76,7 @@ workflow preprocess {
 					fastq_R2s = sample.fastq_R2s,
 					fastq_I1s = sample.fastq_I1s,
 					fastq_I2s = sample.fastq_I2s,
+					multimodal_sc_data = multimodal_sc_data,
 					cellranger_reference_data = cellranger_reference_data,
 					raw_data_path = cellranger_raw_data_path,
 					workflow_info = workflow_info,
@@ -228,6 +230,7 @@ task cellranger_count {
 		Array[File] fastq_I1s
 		Array[File] fastq_I2s
 
+		Boolean multimodal_sc_data
 		File cellranger_reference_data
 
 		String raw_data_path
@@ -236,6 +239,8 @@ task cellranger_count {
 		String container_registry
 		String zones
 	}
+
+	String cellranger_arc_chemistry_flag = if multimodal_sc_data then "--chemistry=ARC-v1" else ""
 
 	Int threads = 16
 	Int mem_gb = 24
@@ -277,7 +282,8 @@ task cellranger_count {
 			--transcriptome="$(pwd)/cellranger_refdata" \
 			--fastqs="$(pwd)/fastqs" \
 			--localcores ~{threads} \
-			--localmem ~{mem_gb - 4}
+			--localmem ~{mem_gb - 4} \
+			~{cellranger_arc_chemistry_flag}
 
 		# Rename outputs to include sample ID
 		mv ~{sample_id}/outs/raw_feature_bc_matrix.h5 ~{sample_id}.raw_feature_bc_matrix.h5
