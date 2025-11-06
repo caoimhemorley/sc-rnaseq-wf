@@ -462,6 +462,7 @@
                 ],
                 "fastq_I1s": [],
                 "fastq_I2s": [],
+                "multimodal_sc_data": false,
                 "cellranger_reference_data": "${input_file_path}/refdata-gex-GRCh38-2020-A.tar.gz",
                 "raw_data_path": "${cellranger_raw_data_path}",
                 "workflow_info": "${workflow_info}",
