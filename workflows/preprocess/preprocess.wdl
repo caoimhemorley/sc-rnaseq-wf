@@ -244,7 +244,7 @@ task cellranger_count {
 
 	Int threads = 16
 	Int mem_gb = 24
-	Int disk_size = ceil((size(fastq_R1s, "GB") + size(fastq_R2s, "GB") + size(fastq_I1s, "GB") + size(fastq_I2s, "GB") + size(cellranger_reference_data, "GB")) * 4 + 50)
+	Int disk_size = ceil((size(cellranger_reference_data, "GB") + size(flatten([fastq_R1s, fastq_R2s, fastq_I1s, fastq_I2s]), "GB")) * 4 + 50)
 
 	command <<<
 		set -euo pipefail
