@@ -629,12 +629,13 @@ task artifact_metrics {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(final_adata_object, "GB") * 8 + 20)
-	Int disk_size = ceil(size(final_adata_object, "GB") * 4 + 20)
+	Int mem_gb = ceil(size(final_adata_object, "GB") * 8 + 40)
+	Int disk_size = ceil(size(final_adata_object, "GB") * 4 + 40)
 
 	command <<<
 		set -euo pipefail
 
+		/usr/bin/time \
 		artifact_metrics \
 			--predictions-key ~{scanvi_predictions_key} \
 			--batch-key ~{batch_key} \
