@@ -67,6 +67,7 @@ RUN git clone --branch v${CELL_TYPE_MAPPER_VERSION} https://github.com/AllenInst
 	&& python3 -m pip install -e .
 
 COPY ./requirements.txt /opt/requirements.txt
+RUN python3 -m pip cache purge
 RUN python3 -m pip install -r /opt/requirements.txt
 
 # CUDA-enabled jaxlib is needed
