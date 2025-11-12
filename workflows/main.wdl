@@ -1,13 +1,13 @@
 version 1.0
 
-# Harmonized human PMDBS sc/sn RNAseq workflow entrypoint
+# Harmonized human PMDBS and non-human (mouse) brain sc/sn RNAseq workflow entrypoint
 
 import "../wf-common/wdl/structs.wdl"
 import "../wf-common/wdl/tasks/get_workflow_metadata.wdl" as GetWorkflowMetadata
 import "preprocess/preprocess.wdl" as Preprocess
 import "cohort_analysis/cohort_analysis.wdl" as CohortAnalysis
 
-workflow pmdbs_sc_rnaseq_analysis {
+workflow sc_rnaseq_analysis {
 	input {
 		String cohort_id
 		Array[Project] projects
@@ -53,9 +53,11 @@ workflow pmdbs_sc_rnaseq_analysis {
 	}
 
 	String workflow_execution_path = "workflow_execution"
-	String workflow_name = "pmdbs_sc_rnaseq"
-	String workflow_version = "v3.0.0"
-	String workflow_release = "https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/releases/tag/pmdbs_sc_rnaseq_analysis-~{workflow_version}"
+	String workflow_name = "pmdbs_sc_rnaseq" #TODO
+	# String workflow_name = "pmdbs_multimodal_sc_rnaseq"
+	# String workflow_name = "mouse_sc_rnaseq"
+	String workflow_version = "v4.0.0"
+	String workflow_release = "https://github.com/ASAP-CRN/sc-rnaseq-wf/releases/tag/sc_rnaseq_analysis-~{workflow_version}"
 
 	call GetWorkflowMetadata.get_workflow_metadata {
 		input:
@@ -271,7 +273,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 	}
 
 	meta {
-		description: "Harmonized human postmortem-derived brain sequencing (PMDBS) sc/sn RNA-seq workflow"
+		description: "Harmonized human postmortem-derived brain sequencing (PMDBS) and non-human (mouse) brain sc/sn RNA-seq workflow"
 	}
 
 	parameter_meta {

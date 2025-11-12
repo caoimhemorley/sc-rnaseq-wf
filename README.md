@@ -1,6 +1,6 @@
 # pmdbs-sc-rnaseq-wf
 
-Repo for testing and developing a common postmortem-derived brain sequencing (PMDBS) workflow harmonized across ASAP with human sc/sn RNA sequencing data.
+Repo for testing and developing a common postmortem-derived brain sequencing (PMDBS) workflow harmonized across ASAP with human and non-human (mouse) sc/sn RNA sequencing data.
 
 Common workflows, tasks, utility scripts, and docker images reused across harmonized ASAP workflows are defined in [the wf-common repository](https://github.com/ASAP-CRN/wf-common).
 
@@ -340,10 +340,21 @@ In general, `wdl-ci` will use inputs provided in the [wdl-ci.config.json](./wdl-
 
 # Notes
 
+## References
+
+### Cell Ranger references
+
+| Genome | Cell Ranger reference | Link |
+| :- | :- | :- |
+| Human GRCh38 (GENCODE v32/Ensembl98 annotations) | 2020-A | https://www.10xgenomics.com/support/software/cell-ranger/latest/release-notes/cr-reference-release-notes#2020-a |
+| Mouse GRCm39 (GENCODE vM33/Ensembl110 annotations) | 2024-A | https://www.10xgenomics.com/support/software/cell-ranger/latest/release-notes/cr-reference-release-notes#2024-a |
+
 ## DEPRECATED - Cell type marker table [July 2025]
+
 The reference taxonomy for inference of cell types via [CellAssign](https://docs.scvi-tools.org/en/1.1.0/user_guide/models/cellassign.html) are sourced from https://github.com/NIH-CARD/brain-taxonomy/blob/main/markers/cellassign_card_markers.csv.
 
 ## `harmonized-wf-dev`→`pmdbs-sc-rna-seq` [Dec 2024]
+
 This repo and work was originally developed under the name `harmonized-wf-dev`.
 
 This workflow was initally set up to implement the [Harmony RNA snakemake workflow](https://github.com/shahrozeabbas/Harmony-RNA-Workflow) in WDL. The WDL version of the workflow aims to maintain backwards compatibility with the snakemake scripts. Scripts used by the WDL workflow were modified from the Harmony RNA snakemake repo; originals may be found [here](https://github.com/shahrozeabbas/Harmony-RNA-Workflow/tree/5384b546f02b6e68f154f77d25667fed03759870/scripts), and their modified R versions in [the docker/multiome/scripts directory](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/cohort-analysis-v1.0.0/docker/multiome/scripts). Eventually snakemake support was deprecated and the workflows were migrated to Python. Initial version [here](https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/tree/harmonized_pmdbs_analysis-v1.1.0_1.0.0_2.1.0).
