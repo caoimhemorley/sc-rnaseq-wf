@@ -11,8 +11,9 @@ from helpers import score_cell_cycle, update_validation_metrics
 
 
 def process_adata(
-    adata: AnnData, 
-    # markers: pd.DataFrame, 
+    adata: AnnData,
+    source: str,
+    # markers: pd.DataFrame,
     batch_key: str
 ) -> tuple[AnnData, pd.DataFrame, pd.DataFrame]:
     """
@@ -25,7 +26,7 @@ def process_adata(
     sc.pp.normalize_total(adata, target_sum=args.norm_target_sum)
     sc.pp.log1p(adata)
 
-    score_cell_cycle(adata, organism="human")
+    score_cell_cycle(adata, organism=source)
 
     # ### MAKE SURE MARKER GENES ARE KEPT
     # # defensive
@@ -87,7 +88,7 @@ def main(args: argparse.Namespace):
 
     # 2. Process data
     # adata, full_features, hvg_features = process_adata(adata, markers, args.batch_key)
-    adata, full_features, hvg_features = process_adata(adata, args.batch_key)
+    adata, full_features, hvg_features = process_adata(adata, args.source, args.batch_key)
 
     # 3. Save the filtered adata
     adata.write_h5ad(filename=args.adata_output, compression="gzip")
@@ -112,6 +113,12 @@ if __name__ == "__main__":
         type=str,
         required=True,
         help="AnnData object for a dataset",
+    )
+    parser.add_argument(
+        "--source",
+        type=str,
+        required=True,
+        help="Sample source. Options are 'human' or 'mouse'",
     )
     parser.add_argument(
         "--batch-key",

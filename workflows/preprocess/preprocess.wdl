@@ -423,7 +423,7 @@ task counts_to_adata {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.0"
+		docker: "~{container_registry}/sc_tools:1.1.0"
 		cpu: 4
 		memory: "32 GB"
 		disks: "local-disk ~{disk_size} HDD"
