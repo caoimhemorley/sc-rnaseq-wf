@@ -3,12 +3,14 @@ version 1.0
 # Harmonized human PMDBS and non-human (mouse) brain sc/sn RNAseq workflow entrypoint
 
 import "../wf-common/wdl/structs.wdl"
+import "../wf-common/wdl/tasks/validate_workflow_name.wdl" as ValidateWorkflowName
 import "../wf-common/wdl/tasks/get_workflow_metadata.wdl" as GetWorkflowMetadata
 import "preprocess/preprocess.wdl" as Preprocess
 import "cohort_analysis/cohort_analysis.wdl" as CohortAnalysis
 
 workflow sc_rnaseq_analysis {
 	input {
+		String workflow_name
 		String cohort_id
 		Array[Project] projects
 
@@ -53,11 +55,14 @@ workflow sc_rnaseq_analysis {
 	}
 
 	String workflow_execution_path = "workflow_execution"
-	String workflow_name = "pmdbs_sc_rnaseq" #TODO
-	# String workflow_name = "pmdbs_multimodal_sc_rnaseq"
-	# String workflow_name = "mouse_sc_rnaseq"
 	String workflow_version = "v4.0.0"
 	String workflow_release = "https://github.com/ASAP-CRN/sc-rnaseq-wf/releases/tag/sc_rnaseq_analysis-~{workflow_version}"
+
+	call ValidateWorkflowName.validate_workflow_name {
+		input:
+			workflow_name = workflow_name,
+			zones = zones
+	}
 
 	call GetWorkflowMetadata.get_workflow_metadata {
 		input:
