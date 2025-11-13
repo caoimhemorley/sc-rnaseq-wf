@@ -95,6 +95,7 @@ task integrate_sample_data {
 
 		nvidia-smi
 
+		/usr/bin/time \
 		integrate_scvi \
 			--latent-key ~{scvi_latent_key} \
 			--batch-key ~{batch_key} \
@@ -147,8 +148,8 @@ task assign_remaining_cells {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(integrated_adata_object, "GB") * 20 + 50)
-	Int disk_size = ceil(size(integrated_adata_object, "GB") * 3 + 50)
+	Int mem_gb = ceil(size(integrated_adata_object, "GB") * 20 + 100)
+	Int disk_size = ceil(size(integrated_adata_object, "GB") * 4 + 50)
 
 	command <<<
 		set -euo pipefail
@@ -158,6 +159,7 @@ task assign_remaining_cells {
 		mkdir -p "~{cohort_id}_scvi_model"
 		tar -xzvf ~{scvi_model_tar_gz} -C "~{cohort_id}_scvi_model" --strip-components=1
 
+		/usr/bin/time \
 		label_scanvi \
 			--latent-key ~{scanvi_latent_key} \
 			--predictions-key ~{scanvi_predictions_key} \
@@ -186,7 +188,7 @@ task assign_remaining_cells {
 
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.0.1"
-		cpu: 4
+		cpu: 16
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
