@@ -147,7 +147,7 @@ task assign_remaining_cells {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(integrated_adata_object, "GB") * 12 + 30)
+	Int mem_gb = ceil(size(integrated_adata_object, "GB") * 20 + 50)
 	Int disk_size = ceil(size(integrated_adata_object, "GB") * 3 + 50)
 
 	command <<<
@@ -212,7 +212,7 @@ task cluster_cells {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(labeled_cells_adata_object, "GB") * 8.7 + 20)
+	Int mem_gb = ceil(size(labeled_cells_adata_object, "GB") * 10 + 20)
 	Int disk_size = ceil(size([labeled_cells_adata_object], "GB") * 6 + 50)
 
 	command <<<

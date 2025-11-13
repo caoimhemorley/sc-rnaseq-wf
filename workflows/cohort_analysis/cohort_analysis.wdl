@@ -629,8 +629,8 @@ task artifact_metrics {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(final_adata_object, "GB") * 8 + 40)
-	Int disk_size = ceil(size(final_adata_object, "GB") * 4 + 40)
+	Int mem_gb = ceil(size(final_adata_object, "GB") * 20 + 100)
+	Int disk_size = ceil(size(final_adata_object, "GB") * 4 + 50)
 
 	command <<<
 		set -euo pipefail
