@@ -51,7 +51,8 @@ def label_with_scanvi(
 
 def main(args: argparse.Namespace):
     # Set the number of data loader workers
-    num_workers = max(1, os.cpu_count() - 1)
+    #num_workers = max(1, os.cpu_count() - 1)
+    num_workers = 0 # Pytorch bug unable to mmap solution https://github.com/pytorch/pytorch/issues/92134
     scvi.settings.dl_num_workers = num_workers
     print(f"Using {scvi.settings.dl_num_workers} workers")
 
