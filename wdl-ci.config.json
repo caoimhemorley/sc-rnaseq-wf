@@ -333,7 +333,7 @@
       "tasks": {
         "integrate_sample_data": {
           "key": "integrate_sample_data",
-          "digest": "xnx44nrjanym467cqu6avd5h2v5zorws",
+          "digest": "olqke3jzuavs4cv3xi7roqvam2cnizji",
           "tests": [
             {
               "inputs": {
