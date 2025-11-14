@@ -12,7 +12,7 @@ from helpers import score_cell_cycle, update_validation_metrics
 
 def process_adata(
     adata: AnnData,
-    source: str,
+    workflow_name: str,
     # markers: pd.DataFrame,
     batch_key: str
 ) -> tuple[AnnData, pd.DataFrame, pd.DataFrame]:
@@ -25,6 +25,14 @@ def process_adata(
 
     sc.pp.normalize_total(adata, target_sum=args.norm_target_sum)
     sc.pp.log1p(adata)
+
+    # Detect sample source from workflow name
+    if "pmdbs" in workflow_name:
+        source = "human"
+    elif "mouse" in workflow_name:
+        source = "mouse"
+    else:
+        raise ValueError(f"[ERROR] Source cannot be detected from workflow name: [{workflow_name}]")
 
     score_cell_cycle(adata, organism=source)
 
@@ -88,7 +96,7 @@ def main(args: argparse.Namespace):
 
     # 2. Process data
     # adata, full_features, hvg_features = process_adata(adata, markers, args.batch_key)
-    adata, full_features, hvg_features = process_adata(adata, args.source, args.batch_key)
+    adata, full_features, hvg_features = process_adata(adata, args.workflow_name, args.batch_key)
 
     # 3. Save the filtered adata
     adata.write_h5ad(filename=args.adata_output, compression="gzip")
@@ -115,10 +123,10 @@ if __name__ == "__main__":
         help="AnnData object for a dataset",
     )
     parser.add_argument(
-        "--source",
+        "--workflow-name",
         type=str,
         required=True,
-        help="Sample source. Options are 'human' or 'mouse'",
+        help="Workflow name to detect sample source. Options for source are 'human' or 'mouse'",
     )
     parser.add_argument(
         "--batch-key",

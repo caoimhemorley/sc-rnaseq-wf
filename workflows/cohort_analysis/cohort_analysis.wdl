@@ -115,6 +115,7 @@ workflow cohort_analysis {
 			n_comps = n_comps,
 			batch_key = batch_key,
 			raw_data_path = raw_data_path,
+			workflow_name = workflow_name,
 			workflow_info = workflow_info,
 			billing_project = billing_project,
 			container_registry = container_registry,
@@ -464,6 +465,7 @@ task normalize {
 		String batch_key
 
 		String raw_data_path
+		String workflow_name
 		Array[Array[String]] workflow_info
 		String billing_project
 		String container_registry
@@ -478,6 +480,7 @@ task normalize {
 
 		process \
 			--adata-input ~{filtered_adata_object} \
+			--workflow-name ~{workflow_name} \
 			--batch-key ~{batch_key} \
 			--norm-target-sum ~{norm_target_sum} \
 			--n-top-genes ~{n_top_genes} \
