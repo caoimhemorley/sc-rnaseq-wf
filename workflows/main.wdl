@@ -2,7 +2,7 @@ version 1.0
 
 # Harmonized human PMDBS sc/sn RNAseq workflow entrypoint
 
-import "../wf-common/wdl/structs.wdl"
+import "structs.wdl"
 import "../wf-common/wdl/tasks/get_workflow_metadata.wdl" as GetWorkflowMetadata
 import "preprocess/preprocess.wdl" as Preprocess
 import "cohort_analysis/cohort_analysis.wdl" as CohortAnalysis
@@ -13,7 +13,6 @@ workflow pmdbs_sc_rnaseq_analysis {
 		Array[Project] projects
 
 		# Preprocess
-		Boolean multimodal_sc_data = false
 		File cellranger_reference_data
 		Float cellbender_fpr = 0.0
 
@@ -72,7 +71,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 				dataset_id = project.dataset_id,
 				dataset_doi_url = project.dataset_doi_url,
 				samples = project.samples,
-				multimodal_sc_data = multimodal_sc_data,
+				multimodal_sc_data = project.multimodal_sc_data,
 				cellranger_reference_data = cellranger_reference_data,
 				cellbender_fpr = cellbender_fpr,
 				workflow_name = workflow_name,
@@ -278,8 +277,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 
 	parameter_meta {
 		cohort_id: {help: "Name of the cohort; used to name output files during cross-team cohort analysis."}
-		projects: {help: "The project ID, set of samples and their associated reads and metadata, output bucket locations, and whether or not to run project-level cohort analysis."}
-		multimodal_sc_data: {help: "Whether or not the sc/sn RNAseq is from multimodal data. [false]"}
+		projects: {help: "The project ID, set of samples and their associated reads and metadata, output bucket locations, sc data type, and whether or not to run project-level cohort analysis."}
 		cellranger_reference_data: {help: "Cellranger transcriptome reference data; see https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest."}
 		cellbender_fpr: {help: "Cellbender false positive rate. [0.0]"}
 		pct_counts_mt_max: {help: "Maximum percentage of mitochondrial gene counts allowed per cell. [10]"}
