@@ -64,9 +64,11 @@ workflow sc_rnaseq_analysis {
 			zones = zones
 	}
 
-	call GetWorkflowMetadata.get_workflow_metadata {
-		input:
-			zones = zones
+	if (validate_workflow_name.workflow_name_validated) {
+		call GetWorkflowMetadata.get_workflow_metadata {
+			input:
+				zones = zones
+		}
 	}
 
 	scatter (project in projects) {
@@ -83,9 +85,9 @@ workflow sc_rnaseq_analysis {
 				workflow_name = workflow_name,
 				workflow_version = workflow_version,
 				workflow_release = workflow_release,
-				run_timestamp = get_workflow_metadata.timestamp,
+				run_timestamp = select_first([get_workflow_metadata.timestamp]),
 				raw_data_path_prefix = project_raw_data_path_prefix,
-				billing_project = get_workflow_metadata.billing_project,
+				billing_project = select_first([get_workflow_metadata.billing_project]),
 				container_registry = container_registry,
 				zones = zones
 		}
@@ -132,10 +134,10 @@ workflow sc_rnaseq_analysis {
 					workflow_name = workflow_name,
 					workflow_version = workflow_version,
 					workflow_release = workflow_release,
-					run_timestamp = get_workflow_metadata.timestamp,
+					run_timestamp = select_first([get_workflow_metadata.timestamp]),
 					raw_data_path_prefix = project_raw_data_path_prefix,
 					staging_data_buckets = project.staging_data_buckets,
-					billing_project = get_workflow_metadata.billing_project,
+					billing_project = select_first([get_workflow_metadata.billing_project]),
 					container_registry = container_registry,
 					zones = zones
 			}
@@ -170,10 +172,10 @@ workflow sc_rnaseq_analysis {
 				workflow_name = workflow_name,
 				workflow_version = workflow_version,
 				workflow_release = workflow_release,
-				run_timestamp = get_workflow_metadata.timestamp,
+				run_timestamp = select_first([get_workflow_metadata.timestamp]),
 				raw_data_path_prefix = cohort_raw_data_path_prefix,
 				staging_data_buckets = cohort_staging_data_buckets,
-				billing_project = get_workflow_metadata.billing_project,
+				billing_project = select_first([get_workflow_metadata.billing_project]),
 				container_registry = container_registry,
 				zones = zones
 		}
