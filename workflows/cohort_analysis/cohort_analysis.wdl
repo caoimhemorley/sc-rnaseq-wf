@@ -372,7 +372,7 @@ task filter {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(merged_adata_object, "GB") * 20 + 50)
+	Int mem_gb = ceil(size(merged_adata_object, "GB") * 18 + 20)
 	Int disk_size = ceil(size(merged_adata_object, "GB") * 4 + 50)
 
 	command <<<
@@ -416,7 +416,7 @@ task map_cell_types {
 		String zones
 	}
 
-	Int mem_gb = ceil(size([filtered_adata_object, allen_mtg_precomputed_stats], "GB") * 20 + 50)
+	Int mem_gb = ceil(size([filtered_adata_object, allen_mtg_precomputed_stats], "GB") * 18 + 20)
 	Int disk_size = ceil(size([filtered_adata_object, allen_mtg_precomputed_stats], "GB") * 4 + 50)
 
 	command <<<
@@ -470,7 +470,7 @@ task normalize {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(filtered_adata_object, "GB") * 20 + 150)
+	Int mem_gb = ceil(size(filtered_adata_object, "GB") * 10 + 150)
 	Int disk_size = ceil(size(filtered_adata_object, "GB") * 4 + 50)
 
 	command <<<
@@ -524,7 +524,7 @@ task add_mapped_cell_types {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(normalized_adata_object, "GB") * 20 + 50)
+	Int mem_gb = ceil(size(normalized_adata_object, "GB") * 18 + 50)
 	Int disk_size = ceil(size(normalized_adata_object, "GB") * 4 + 50)
 
 	command <<<
@@ -629,7 +629,7 @@ task artifact_metrics {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(final_adata_object, "GB") * 20 + 100)
+	Int mem_gb = ceil(size(final_adata_object, "GB") * 10 + 100)
 	Int disk_size = ceil(size(final_adata_object, "GB") * 4 + 50)
 
 	command <<<
