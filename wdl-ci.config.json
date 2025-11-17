@@ -65,7 +65,7 @@
         },
         "filter": {
           "key": "filter",
-          "digest": "5vtrqjdiff2i22wtyfnha46bca2mufev",
+          "digest": "hqnrv35oprpck25ejuwd5csijpvflpc5",
           "tests": [
             {
               "inputs": {
@@ -92,7 +92,7 @@
         },
         "map_cell_types": {
           "key": "map_cell_types",
-          "digest": "he7id4bocintd3zngzz6tkns2vseqogs",
+          "digest": "7ksert3bxdvs56vbfhhserjeilj2uhfg",
           "tests": [
             {
               "inputs": {
@@ -134,7 +134,7 @@
         },
         "normalize": {
           "key": "normalize",
-          "digest": "5gae4ipnmepmlp5nfeqacng62oclz742",
+          "digest": "ubxlgcwjfjxrlcr4xjeckd5szfb7khvn",
           "tests": [
             {
               "inputs": {
@@ -182,7 +182,7 @@
         },
         "add_mapped_cell_types": {
           "key": "add_mapped_cell_types",
-          "digest": "75hloddozcxsvvjf4mby6crg4muhfm3v",
+          "digest": "5op5f5ndep6wlqwpfjjez3tcgakzuisq",
           "tests": [
             {
               "inputs": {
@@ -252,7 +252,7 @@
         },
         "artifact_metrics": {
           "key": "artifact_metrics",
-          "digest": "ih6ntjyipw6wg2rqtet6htpqyhbd4uco",
+          "digest": "hilshovucdrslhbmkywrwnajdujkcpgo",
           "tests": [
             {
               "inputs": {
@@ -368,7 +368,7 @@
         },
         "assign_remaining_cells": {
           "key": "assign_remaining_cells",
-          "digest": "gkxbvszho4efjxbdbhwcj5x464knacgz",
+          "digest": "4crsmbtslhntzhpgcflfmhdzwwtnzfrx",
           "tests": [
             {
               "inputs": {
