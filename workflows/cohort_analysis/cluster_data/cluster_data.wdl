@@ -219,6 +219,7 @@ task cluster_cells {
 	command <<<
 		set -euo pipefail
 
+		/usr/bin/time \
 		clustering_umap \
 			--latent-key ~{scvi_latent_key} \
 			--n-neighbors ~{n_neighbors} \
