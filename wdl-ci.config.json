@@ -7,7 +7,7 @@
       "tasks": {
         "merge_and_plot_qc_metrics": {
           "key": "merge_and_plot_qc_metrics",
-          "digest": "tgbbnc4hnm5fdtquzzfo3gsekhwbq2ar",
+          "digest": "tq3ugermgepvat4d5dayeimiqwqpmfev",
           "tests": [
             {
               "inputs": {
@@ -65,7 +65,7 @@
         },
         "filter": {
           "key": "filter",
-          "digest": "nts3xpwwty6qk33wn4j7qes5wvv5r73x",
+          "digest": "5vtrqjdiff2i22wtyfnha46bca2mufev",
           "tests": [
             {
               "inputs": {
@@ -92,7 +92,7 @@
         },
         "map_cell_types": {
           "key": "map_cell_types",
-          "digest": "dix63k6tgnalhgtwzgnlyii7sih7ifcj",
+          "digest": "he7id4bocintd3zngzz6tkns2vseqogs",
           "tests": [
             {
               "inputs": {
@@ -134,7 +134,7 @@
         },
         "normalize": {
           "key": "normalize",
-          "digest": "witrbxekuy4tbycrmpzcodzz5ytt5gbx",
+          "digest": "5gae4ipnmepmlp5nfeqacng62oclz742",
           "tests": [
             {
               "inputs": {
@@ -182,7 +182,7 @@
         },
         "add_mapped_cell_types": {
           "key": "add_mapped_cell_types",
-          "digest": "rnb5swkjlzu76l7vzfsibtjytlietqnf",
+          "digest": "75hloddozcxsvvjf4mby6crg4muhfm3v",
           "tests": [
             {
               "inputs": {
@@ -216,7 +216,7 @@
         },
         "integrate_harmony": {
           "key": "integrate_harmony",
-          "digest": "tuj2npr4qqdbfaykfbk5f3rpqsifgtha",
+          "digest": "wfdcvhyq3a2qmefxhsavhidhz7zwiwct",
           "tests": [
             {
               "inputs": {
@@ -333,7 +333,7 @@
       "tasks": {
         "integrate_sample_data": {
           "key": "integrate_sample_data",
-          "digest": "olqke3jzuavs4cv3xi7roqvam2cnizji",
+          "digest": "cfkllfhlgilyromjctmig2bwot3vrheq",
           "tests": [
             {
               "inputs": {
@@ -411,7 +411,7 @@
         },
         "cluster_cells": {
           "key": "cluster_cells",
-          "digest": "7y2yeqeasjyxpfaa2sz3kn72br64xks2",
+          "digest": "5ppo7uztz6dyfa3l7g2ag7yga7j6s6wq",
           "tests": [
             {
               "inputs": {
@@ -444,7 +444,7 @@
       "tasks": {
         "check_output_files_exist": {
           "key": "check_output_files_exist",
-          "digest": "",
+          "digest": "46jbhyjmiy4vs3fzvdgeojwdtxmwraag",
           "tests": []
         },
         "cellranger_count": {
@@ -627,7 +627,7 @@
       "tasks": {
         "upload_final_outputs": {
           "key": "upload_final_outputs",
-          "digest": "",
+          "digest": "feihjsneaq5czgmso2cfouf4rmq5qmhv",
           "tests": []
         }
       }
@@ -674,7 +674,7 @@
       "tasks": {
         "get_workflow_metadata": {
           "key": "get_workflow_metadata",
-          "digest": "",
+          "digest": "xlrigezj3ohrqa2s5xe4n2obfplscjm3",
           "tests": []
         }
       }
@@ -686,7 +686,7 @@
       "tasks": {
         "image_validator": {
           "key": "image_validator",
-          "digest": "",
+          "digest": "gnolkzxnd3l7eee7rr3eurqdnvfpggq7",
           "tests": []
         }
       }
@@ -698,7 +698,7 @@
       "tasks": {
         "multiqc": {
           "key": "multiqc",
-          "digest": "",
+          "digest": "xm3g3yutexl22ojt5hr556ppn7srqgqo",
           "tests": []
         }
       }
@@ -710,13 +710,31 @@
       "tasks": {
         "fastqc": {
           "key": "fastqc",
-          "digest": "",
+          "digest": "mvp4xorur2jniwnv44pdvi6fbiwfbhjj",
           "tests": []
         }
       }
     },
     "workflows/main.wdl": {
       "key": "workflows/main.wdl",
+      "name": "",
+      "description": "",
+      "tasks": {}
+    },
+    "pmdbs-sc-rnaseq-wdl-ci-custom-test-dir/check_parquet.wdl": {
+      "key": "pmdbs-sc-rnaseq-wdl-ci-custom-test-dir/check_parquet.wdl",
+      "name": "",
+      "description": "",
+      "tasks": {
+        "check_parquet": {
+          "key": "check_parquet",
+          "digest": "iboioyf6nol6ynz67euvdofsqk2d2pi7",
+          "tests": []
+        }
+      }
+    },
+    "workflows/structs.wdl": {
+      "key": "workflows/structs.wdl",
       "name": "",
       "description": "",
       "tasks": {}
