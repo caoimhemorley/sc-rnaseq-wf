@@ -87,8 +87,8 @@ task integrate_sample_data {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(mmc_adata_object, "GB") * 5 + 20)
-	Int disk_size = ceil(size(mmc_adata_object, "GB") * 3 + 50)
+	Int mem_gb = ceil(size(mmc_adata_object, "GB") * 10 + 50)
+	Int disk_size = ceil(size(mmc_adata_object, "GB") * 4 + 50)
 
 	command <<<
 		set -euo pipefail
@@ -213,7 +213,7 @@ task cluster_cells {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(labeled_cells_adata_object, "GB") * 10 + 20)
+	Int mem_gb = ceil(size(labeled_cells_adata_object, "GB") * 10 + 50)
 	Int disk_size = ceil(size([labeled_cells_adata_object], "GB") * 6 + 50)
 
 	command <<<
