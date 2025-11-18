@@ -298,7 +298,7 @@ task merge_and_plot_qc_metrics {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(preprocessed_adata_objects, "GB") * 3 + 20)
+	Int mem_gb = ceil(size(preprocessed_adata_objects, "GB") * 2.4 + 20)
 	Int disk_size = ceil(size(preprocessed_adata_objects, "GB") * 3 + 50)
 
 	command <<<
@@ -373,7 +373,7 @@ task filter {
 	}
 
 	Int mem_gb = ceil(size(merged_adata_object, "GB") * 18 + 20)
-	Int disk_size = ceil(size(merged_adata_object, "GB") * 4 + 50)
+	Int disk_size = ceil(size(merged_adata_object, "GB") * 4 + 20)
 
 	command <<<
 		set -euo pipefail
@@ -393,7 +393,7 @@ task filter {
 
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.0.1"
-		cpu: 16
+		cpu: 4
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
@@ -417,7 +417,7 @@ task map_cell_types {
 	}
 
 	Int mem_gb = ceil(size([filtered_adata_object, allen_mtg_precomputed_stats], "GB") * 18 + 20)
-	Int disk_size = ceil(size([filtered_adata_object, allen_mtg_precomputed_stats], "GB") * 4 + 50)
+	Int disk_size = ceil(size([filtered_adata_object, allen_mtg_precomputed_stats], "GB") * 4 + 20)
 
 	command <<<
 		set -euo pipefail
@@ -524,8 +524,8 @@ task add_mapped_cell_types {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(normalized_adata_object, "GB") * 18 + 50)
-	Int disk_size = ceil(size(normalized_adata_object, "GB") * 4 + 50)
+	Int mem_gb = ceil(size(normalized_adata_object, "GB") * 18 + 20)
+	Int disk_size = ceil(size(normalized_adata_object, "GB") * 4 + 20)
 
 	command <<<
 		set -euo pipefail
@@ -573,8 +573,8 @@ task integrate_harmony {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(umap_clustered_adata_object, "GB") * 8 + 50)
-	Int disk_size = ceil(size(umap_clustered_adata_object, "GB") * 4 + 50)
+	Int mem_gb = ceil(size(umap_clustered_adata_object, "GB") * 8 + 20)
+	Int disk_size = ceil(size(umap_clustered_adata_object, "GB") * 4 + 20)
 
 	command <<<
 		set -euo pipefail
@@ -629,8 +629,8 @@ task artifact_metrics {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(final_adata_object, "GB") * 10 + 100)
-	Int disk_size = ceil(size(final_adata_object, "GB") * 4 + 50)
+	Int mem_gb = ceil(size(final_adata_object, "GB") * 8 + 40)
+	Int disk_size = ceil(size(final_adata_object, "GB") * 4 + 40)
 
 	command <<<
 		set -euo pipefail
