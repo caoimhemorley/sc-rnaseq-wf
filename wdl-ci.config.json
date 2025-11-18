@@ -7,7 +7,7 @@
       "tasks": {
         "merge_and_plot_qc_metrics": {
           "key": "merge_and_plot_qc_metrics",
-          "digest": "tq3ugermgepvat4d5dayeimiqwqpmfev",
+          "digest": "pw42j7ztwyyouiz7azjewuj74ohf4rj6",
           "tests": [
             {
               "inputs": {
@@ -65,7 +65,7 @@
         },
         "filter": {
           "key": "filter",
-          "digest": "hqnrv35oprpck25ejuwd5csijpvflpc5",
+          "digest": "nts3xpwwty6qk33wn4j7qes5wvv5r73x",
           "tests": [
             {
               "inputs": {
@@ -92,7 +92,7 @@
         },
         "map_cell_types": {
           "key": "map_cell_types",
-          "digest": "7ksert3bxdvs56vbfhhserjeilj2uhfg",
+          "digest": "dix63k6tgnalhgtwzgnlyii7sih7ifcj",
           "tests": [
             {
               "inputs": {
@@ -182,7 +182,7 @@
         },
         "add_mapped_cell_types": {
           "key": "add_mapped_cell_types",
-          "digest": "5op5f5ndep6wlqwpfjjez3tcgakzuisq",
+          "digest": "rnb5swkjlzu76l7vzfsibtjytlietqnf",
           "tests": [
             {
               "inputs": {
@@ -216,7 +216,7 @@
         },
         "integrate_harmony": {
           "key": "integrate_harmony",
-          "digest": "wfdcvhyq3a2qmefxhsavhidhz7zwiwct",
+          "digest": "tuj2npr4qqdbfaykfbk5f3rpqsifgtha",
           "tests": [
             {
               "inputs": {
@@ -252,7 +252,7 @@
         },
         "artifact_metrics": {
           "key": "artifact_metrics",
-          "digest": "hilshovucdrslhbmkywrwnajdujkcpgo",
+          "digest": "iqhcdehmhs6togoqabhlsakmunluh5jx",
           "tests": [
             {
               "inputs": {
@@ -333,7 +333,7 @@
       "tasks": {
         "integrate_sample_data": {
           "key": "integrate_sample_data",
-          "digest": "cfkllfhlgilyromjctmig2bwot3vrheq",
+          "digest": "olqke3jzuavs4cv3xi7roqvam2cnizji",
           "tests": [
             {
               "inputs": {
@@ -368,7 +368,7 @@
         },
         "assign_remaining_cells": {
           "key": "assign_remaining_cells",
-          "digest": "4crsmbtslhntzhpgcflfmhdzwwtnzfrx",
+          "digest": "7gs2tln2uu3bumlxv3ogdutg3vahx53k",
           "tests": [
             {
               "inputs": {
@@ -411,7 +411,7 @@
         },
         "cluster_cells": {
           "key": "cluster_cells",
-          "digest": "5ppo7uztz6dyfa3l7g2ag7yga7j6s6wq",
+          "digest": "urepy5wyj22fvmgypatd2bqi26mjcrli",
           "tests": [
             {
               "inputs": {
