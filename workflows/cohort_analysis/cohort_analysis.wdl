@@ -417,8 +417,7 @@ task map_cell_types {
 		String zones
 	}
 
-	Int calc_mem_gb = ceil(size([filtered_adata_object, allen_mtg_precomputed_stats], "GB") * 18 + 20)
-	Int mem_gb = if calc_mem_gb > 624 then 624 else calc_mem_gb
+	Int mem_gb = ceil(size([filtered_adata_object, allen_mtg_precomputed_stats], "GB") * 4 + 50)
 	Int disk_size = ceil(size([filtered_adata_object, allen_mtg_precomputed_stats], "GB") * 4 + 20)
 
 	command <<<
@@ -446,7 +445,7 @@ task map_cell_types {
 
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.0.1"
-		cpu: 4
+		cpu: 16
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
