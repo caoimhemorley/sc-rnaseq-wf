@@ -505,7 +505,7 @@ task normalize {
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.0.1"
 		cpu: 8
-		cpuPlatform: "Intel Cascase Lake"
+		cpuPlatform: "Intel Cascade Lake"
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
