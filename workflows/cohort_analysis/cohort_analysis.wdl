@@ -471,7 +471,7 @@ task normalize {
 		String zones
 	}
 
-	Int calc_mem_gb = ceil(size(filtered_adata_object, "GB") * 10 + 150)
+	Int calc_mem_gb = ceil(size(filtered_adata_object, "GB") * 20 + 150)
 	Int mem_gb = if calc_mem_gb > 624 then 624 else calc_mem_gb
 	Int disk_size = ceil(size(filtered_adata_object, "GB") * 4 + 50)
 
