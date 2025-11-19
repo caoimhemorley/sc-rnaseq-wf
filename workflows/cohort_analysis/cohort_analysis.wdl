@@ -472,7 +472,7 @@ task normalize {
 	}
 
 	Int calc_mem_gb = ceil(size(filtered_adata_object, "GB") * 20 + 150)
-	Int mem_gb = if calc_mem_gb > 624 then 624 else calc_mem_gb
+	Int mem_gb = if calc_mem_gb > 864 then 864 else calc_mem_gb
 	Int disk_size = ceil(size(filtered_adata_object, "GB") * 4 + 50)
 
 	command <<<
@@ -505,6 +505,7 @@ task normalize {
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.0.1"
 		cpu: 8
+		cpuPlatform: "Intel Cascase Lake"
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
