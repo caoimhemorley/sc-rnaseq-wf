@@ -471,8 +471,10 @@ task normalize {
 		String zones
 	}
 
+	# GCP N2D machine configuration for memory-extensive task
 	Int calc_mem_gb = ceil(size(filtered_adata_object, "GB") * 20 + 150)
-	Int mem_gb = if calc_mem_gb > 864 then 864 else calc_mem_gb
+	Int mem_gb = if calc_mem_gb > 768 then 768 else calc_mem_gb
+	Int cpu = if calc_mem_gb > 768 then 96 else ceil(mem_gb / 8.0)
 	Int disk_size = ceil(size(filtered_adata_object, "GB") * 4 + 50)
 
 	command <<<
@@ -504,8 +506,8 @@ task normalize {
 
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.0.1"
-		cpu: 8
-		cpuPlatform: "Intel Cascade Lake"
+		cpu: cpu
+		cpuPlatform: "AMD Rome"
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
