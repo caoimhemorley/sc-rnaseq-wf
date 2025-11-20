@@ -474,7 +474,7 @@ task normalize {
 	# GCP N2D machine configuration for memory-extensive task
 	Int calc_mem_gb = ceil(size(filtered_adata_object, "GB") * 20 + 150)
 	Int mem_gb = if calc_mem_gb > 768 then 768 else calc_mem_gb
-	Int cpu = if calc_mem_gb > 768 then 96 else ceil(mem_gb / 8.0)
+	Int threads = if calc_mem_gb > 768 then 96 else ceil(mem_gb / 8.0)
 	Int disk_size = ceil(size(filtered_adata_object, "GB") * 4 + 50)
 
 	command <<<
@@ -506,7 +506,7 @@ task normalize {
 
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.0.1"
-		cpu: cpu
+		cpu: threads
 		cpuPlatform: "AMD Rome"
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
