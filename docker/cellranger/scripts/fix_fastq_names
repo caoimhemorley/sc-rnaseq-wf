@@ -14,7 +14,7 @@ def main(args):
     )
 
     if re.search(valid_fastq_name, fastq_basename):
-        print(re.sub(valid_fastq_name, rf"{sample_id}_\1", fastq_basename))
+        renamed = re.sub(valid_fastq_name, rf"{sample_id}_\1", fastq_basename)
     else:
         # Extract what we can from the fastq name
         sample = re.search(r"[_.](S[0-9]+)[_.]", fastq_basename)
