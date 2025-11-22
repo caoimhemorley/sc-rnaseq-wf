@@ -2,11 +2,13 @@
 
 from argparse import ArgumentParser
 import re
-from os.path import basename
+from os.path import basename, dirname, join
+from glob import glob
 
 
 def main(args):
     fastq_basename = basename(args.fastq)
+    fastq_dir = dirname(args.fastq)
     sample_id = args.sample_id
 
     valid_fastq_name = re.compile(
