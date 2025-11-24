@@ -27,7 +27,7 @@ def integrate_with_scvi(
     early_stopping_patience = 20
 
     # Set parameters based on numerical instabilities
-    threshold_cells = 3.05e6 # No. of cells in current PMDBS sc cohort
+    threshold_cells = 3.05e6 # No. of cells in Sep 2025 PMDBS sc cohort (Lee, Hardy, Hafler, Jakobsson, Scherzer)
     if adata.n_obs > threshold_cells:
         plan_kwargs = {"lr": 1e-4}
         gradient_clip_val = 5.0
