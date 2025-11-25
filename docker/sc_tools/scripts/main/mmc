@@ -42,9 +42,6 @@ def main(args: argparse.Namespace):
             "chunk_size": CHUNK_SIZE,
             "n_runners_up": N_RUNNERS_UP
         },
-        "reference_markers": {
-            "log2_fold_min_th": 0.5
-        },
         "query_path": args.adata_input,
         "extended_result_path": EXTENDED_RESULTS_JSON,
         "csv_result_path": CSV_RESULTS,
@@ -55,11 +52,16 @@ def main(args: argparse.Namespace):
     }
 
     if args.mmc_marker_genes:
+        print("Running FromSpecifiedMarkersRunner")
         config["query_markers"] = {
-            "serialized_marker_lookup": args.mmc_marker_genes
+            "serialized_lookup": args.mmc_marker_genes
         }
         runner = FromSpecifiedMarkersRunner(args=[], input_data=config)
     else:
+        print("Running OnTheFlyMapper")
+        config["reference_markers"] = {
+            "log2_fold_min_th": 0.5
+        }
         config["query_markers"] = {
             "n_per_utility": 15,
             "genes_at_a_time": 1
