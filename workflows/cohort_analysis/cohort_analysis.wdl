@@ -421,7 +421,6 @@ task map_cell_types {
 	}
 
 	String mmc_output_prefix = if defined(allen_brain_mmc_marker_genes_json) then "~{cohort_id}.mmc_markers_mapping" else "~{cohort_id}.mmc_otf_mapping.SEAAD"
-	String mmc_marker_genes_flag = if defined(allen_brain_mmc_marker_genes_json) then "--mmc-marker-genes ~{allen_brain_mmc_marker_genes_json}" else ""
 
 	Int mem_gb = ceil(size([filtered_adata_object, allen_brain_mmc_precomputed_stats_h5], "GB") * 18 + 20)
 	Int disk_size = ceil(size([filtered_adata_object, allen_brain_mmc_precomputed_stats_h5], "GB") * 4 + 20)
@@ -433,7 +432,7 @@ task map_cell_types {
 			--adata-input ~{filtered_adata_object} \
 			--mmc-precomputed-stats ~{allen_brain_mmc_precomputed_stats_h5} \
 			--output-prefix ~{mmc_output_prefix} \
-			~{mmc_marker_genes_flag}
+			~{if defined(allen_brain_mmc_marker_genes_json) then "--mmc-marker-genes " + allen_brain_mmc_marker_genes_json else ""}
 
 		upload_outputs \
 			-b ~{billing_project} \
