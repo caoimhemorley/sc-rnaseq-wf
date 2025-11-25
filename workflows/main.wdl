@@ -25,7 +25,8 @@ workflow sc_rnaseq_analysis {
 		Array[Int] n_genes_by_counts_limits = [100, 10000]
 
 		# Allen Institute's Map My Cells
-		File allen_mtg_precomputed_stats
+		File allen_brain_mmc_precomputed_stats_h5
+		File? allen_brain_mmc_marker_genes_json
 
 		# Normalization parameters
 		Int norm_target_sum = 10000
@@ -119,7 +120,8 @@ workflow sc_rnaseq_analysis {
 					doublet_score_max = doublet_score_max,
 					total_counts_limits = total_counts_limits,
 					n_genes_by_counts_limits = n_genes_by_counts_limits,
-					allen_mtg_precomputed_stats = allen_mtg_precomputed_stats,
+					allen_brain_mmc_precomputed_stats_h5 = allen_brain_mmc_precomputed_stats_h5,
+					allen_brain_mmc_marker_genes_json = select_first([allen_brain_mmc_marker_genes_json]),
 					norm_target_sum = norm_target_sum,
 					n_top_genes = n_top_genes,
 					n_comps = n_comps,
@@ -157,7 +159,8 @@ workflow sc_rnaseq_analysis {
 				doublet_score_max = doublet_score_max,
 				total_counts_limits = total_counts_limits,
 				n_genes_by_counts_limits = n_genes_by_counts_limits,
-				allen_mtg_precomputed_stats = allen_mtg_precomputed_stats,
+				allen_brain_mmc_precomputed_stats_h5 = allen_brain_mmc_precomputed_stats_h5,
+				allen_brain_mmc_marker_genes_json = select_first([allen_brain_mmc_marker_genes_json]),
 				norm_target_sum = norm_target_sum,
 				n_top_genes = n_top_genes,
 				n_comps = n_comps,
@@ -292,7 +295,8 @@ workflow sc_rnaseq_analysis {
 		doublet_score_max: {help: "Maximum doublet detection score threshold. [0.2]"}
 		total_counts_limits: {help: "Minimum and maximum total UMI (unique molecular identifier) counts per cell. [100, 100000]"}
 		n_genes_by_counts_limits: {help: "Minimum and maximum number of genes detected per cell (genes with at least one count). [100, 10000]"}
-		allen_mtg_precomputed_stats: {help: "A precomputed statistics file from the Allen Brain Cell Atlas - Seattle Alzheimer’s Disease Brain Cell Atlas (SEA-AD) consortium containing reference statistics for the middle temporal gyrus (MTG) brain region."}
+		allen_brain_mmc_precomputed_stats_h5: {help: "A precomputed statistics file from the Allen Brain Cell Atlas containing reference statistics (the average gene expression profile per cell type cluster and cell type taxonomy)."}
+		allen_brain_mmc_marker_genes_json: {help: "A text file that contains the JSON serialization of a dict file from the Allen Brain Cell Atlas specifying which marker genes to use at which node in the cell type taxonomy."}
 		norm_target_sum: {help: "The total count value that each cell will be normalized to. [10000]"}
 		n_top_genes: {help: "Number of HVG genes to keep. [8000]"}
 		n_comps: {help: "Number of principal components to compute. [30]"}

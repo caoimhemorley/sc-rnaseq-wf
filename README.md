@@ -58,7 +58,8 @@ An input template file can be found at [workflows/inputs.json](workflows/inputs.
 | Int? | doublet_score_max | Maximum doublet detection score threshold. [0.2] |
 | Array[Int]? | total_counts_limits | Minimum and maximum total UMI (unique molecular identifier) counts per cell. [100, 100000] |
 | Array[Int]? | n_genes_by_counts_limits | Minimum and maximum number of genes detected per cell (genes with at least one count). [100, 10000] |
-| File? | allen_mtg_precomputed_stats| This is a precomputed statistics file from the [Allen Brain Cell Atlas - Seattle Alzheimer’s Disease Brain Cell Atlas (SEA-AD) consortium](https://portal.brain-map.org/atlases-and-data/bkp/mapmycells) containing reference statistics for the middle temporal gyrus (MTG) brain region sourced from https://allen-brain-cell-atlas.s3-us-west-2.amazonaws.com/mapmycells/SEAAD/20240831/precomputed_stats.20231120.sea_ad.MTG.h5. |
+| File? | allen_brain_mmc_precomputed_stats_h5 | A precomputed statistics file from the Allen Brain Cell Atlas containing reference statistics (the average gene expression profile per cell type cluster and cell type taxonomy).  |
+| File? | allen_brain_mmc_marker_genes_json | A text file that contains the JSON serialization of a dict file from the Allen Brain Cell Atlas specifying which marker genes to use at which node in the cell type taxonomy. |
 | Int? | norm_target_sum | The total count value that each cell will be normalized to. [10000] |
 | Int? | n_top_genes | Number of HVG genes to keep. [3000] |
 | Int? | n_comps | Number of principal components to compute. [30] |
@@ -181,9 +182,9 @@ asap-dev-{cohort,team-xxyy}-{source}-{dataset}
     │   ├── ${cohort_id}.pct_counts_mt.violin.png
     │   ├── ${cohort_id}.pct_counts_rb.violin.png
     │   ├── ${cohort_id}.total_counts.violin.png
-    │   ├── ${cohort_id}.mmc_otf_mapping.SEAAD.extended_results.json
-    │   ├── ${cohort_id}.mmc_otf_mapping.SEAAD.results.csv
-    │   ├── ${cohort_id}.mmc_otf_mapping.SEAAD.log.txt 
+    │   ├── ${cohort_id}.{mmc_otf_mapping.SEAAD,mmc_markers_mapping}.extended_results.json
+    │   ├── ${cohort_id}.{mmc_otf_mapping.SEAAD,mmc_markers_mapping}.results.csv
+    │   ├── ${cohort_id}.{mmc_otf_mapping.SEAAD,mmc_markers_mapping}.log.txt 
     │   ├── ${cohort_id}.all_genes.csv
     │   ├── ${cohort_id}.hvg_genes.csv
     │   ├── ${cohort_id}.mmc_results.parquet
@@ -356,6 +357,16 @@ In general, `wdl-ci` will use inputs provided in the [wdl-ci.config.json](./wdl-
 | :- | :- | :- |
 | Human GRCh38 (GENCODE v32/Ensembl98 annotations) | 2020-A | https://www.10xgenomics.com/support/software/cell-ranger/latest/release-notes/cr-reference-release-notes#2020-a |
 | Mouse GRCm39 (GENCODE vM33/Ensembl110 annotations) | 2024-A | https://www.10xgenomics.com/support/software/cell-ranger/latest/release-notes/cr-reference-release-notes#2024-a |
+
+### Allen Brain Institute's MapMyCells references
+
+[Overview of MapMyCells](https://brain-map.org/bkp/analyze/mapmycells) with available taxonomies.
+
+| Taxonomy | Description | Link |
+| :- | :- | :- |
+| 10x Human MTG SEA-AD taxonomy (CCN20230505) | A high-resolution transcriptomic atlas of cell types from middle temporal gyrus from the SEA-AD aged human cohort that spans the spectrum of Alzheimer’s disease. Source file used is `precomputed_stats.20231120.sea_ad.MTG.h5`. | https://allen-brain-cell-atlas.s3-us-west-2.amazonaws.com/mapmycells/SEAAD/20240831/. |
+| 10x Whole mouse brain taxonomy (CCN20230722) | A high-resolution transcriptomic and spatial atlas of cell types in the whole mouse brain. Source files used are `precomputed_stats_ABC_revision_230821.h5` and `mouse_markers_230821.json`. | https://allen-brain-cell-atlas.s3.us-west-2.amazonaws.com/index.html#mapmycells/WMB-10X/20240831/. |
+
 
 ## DEPRECATED
 

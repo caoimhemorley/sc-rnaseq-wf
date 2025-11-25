@@ -22,7 +22,8 @@ workflow cohort_analysis {
 		Array[Int] n_genes_by_counts_limits
 
 		# Allen Institute's Map My Cells
-		File allen_mtg_precomputed_stats
+		File allen_brain_mmc_precomputed_stats_h5
+		File? allen_brain_mmc_marker_genes_json
 
 		# Normalization parameters
 		Int norm_target_sum
@@ -98,7 +99,8 @@ workflow cohort_analysis {
 		input:
 			cohort_id = cohort_id,
 			filtered_adata_object = filter.filtered_adata_object,
-			allen_mtg_precomputed_stats = allen_mtg_precomputed_stats,
+			allen_brain_mmc_precomputed_stats_h5 = allen_brain_mmc_precomputed_stats_h5,
+			allen_brain_mmc_marker_genes_json = select_first([allen_brain_mmc_marker_genes_json]),
 			raw_data_path = raw_data_path,
 			workflow_info = workflow_info,
 			billing_project = billing_project,
@@ -408,7 +410,8 @@ task map_cell_types {
 		String cohort_id
 		File filtered_adata_object
 
-		File allen_mtg_precomputed_stats
+		File allen_brain_mmc_precomputed_stats_h5
+		File? allen_brain_mmc_marker_genes_json
 
 		String raw_data_path
 		Array[Array[String]] workflow_info
@@ -417,30 +420,34 @@ task map_cell_types {
 		String zones
 	}
 
-	Int mem_gb = ceil(size([filtered_adata_object, allen_mtg_precomputed_stats], "GB") * 18 + 20)
-	Int disk_size = ceil(size([filtered_adata_object, allen_mtg_precomputed_stats], "GB") * 4 + 20)
+	String mmc_output_prefix = if defined(allen_brain_mmc_marker_genes_json) then "~{cohort_id}.mmc_markers_mapping" else "~{cohort_id}.mmc_otf_mapping.SEAAD"
+	String mmc_marker_genes_flag = if defined(allen_brain_mmc_marker_genes_json) then "--mmc-marker-genes ~{allen_brain_mmc_marker_genes_json}" else ""
+
+	Int mem_gb = ceil(size([filtered_adata_object, allen_brain_mmc_precomputed_stats_h5], "GB") * 18 + 20)
+	Int disk_size = ceil(size([filtered_adata_object, allen_brain_mmc_precomputed_stats_h5], "GB") * 4 + 20)
 
 	command <<<
 		set -euo pipefail
 
 		mmc \
 			--adata-input ~{filtered_adata_object} \
-			--mmc-taxonomy-path ~{allen_mtg_precomputed_stats} \
-			--output-prefix ~{cohort_id}.mmc_otf_mapping.SEAAD
+			--mmc-precomputed-stats ~{allen_brain_mmc_precomputed_stats_h5} \
+			--output-prefix ~{mmc_output_prefix} \
+			~{mmc_marker_genes_flag}
 
 		upload_outputs \
 			-b ~{billing_project} \
 			-d ~{raw_data_path} \
 			-i ~{write_tsv(workflow_info)} \
-			-o "~{cohort_id}.mmc_otf_mapping.SEAAD.extended_results.json" \
-			-o "~{cohort_id}.mmc_otf_mapping.SEAAD.results.csv" \
-			-o "~{cohort_id}.mmc_otf_mapping.SEAAD.log.txt"
+			-o "~{mmc_output_prefix}.extended_results.json" \
+			-o "~{mmc_output_prefix}.results.csv" \
+			-o "~{mmc_output_prefix}.log.txt"
 	>>>
 
 	output {
-		String mmc_extended_results_json = "~{raw_data_path}/~{cohort_id}.mmc_otf_mapping.SEAAD.extended_results.json"
-		String mmc_results_csv = "~{raw_data_path}/~{cohort_id}.mmc_otf_mapping.SEAAD.results.csv"
-		String mmc_log_txt = "~{raw_data_path}/~{cohort_id}.mmc_otf_mapping.SEAAD.log.txt"
+		String mmc_extended_results_json = "~{raw_data_path}/~{mmc_output_prefix}.extended_results.json"
+		String mmc_results_csv = "~{raw_data_path}/~{mmc_output_prefix}.results.csv"
+		String mmc_log_txt = "~{raw_data_path}/~{mmc_output_prefix}.log.txt"
 	}
 
 	runtime {
