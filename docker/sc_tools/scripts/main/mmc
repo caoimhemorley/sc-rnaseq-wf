@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from cell_type_mapper.cli.map_to_on_the_fly_markers import OnTheFlyMapper
+from cell_type_mapper.cli.from_specified_markers import FromSpecifiedMarkersRunner
 from pathlib import Path
 import os
 import argparse
@@ -29,10 +30,9 @@ def main(args: argparse.Namespace):
     print(f"CSV_RESULTS: {CSV_RESULTS}")
     print(f"LOG_FILE: {LOG_FILE}")
 
-    # MMC
     config = {
         "precomputed_stats": {
-            "path": args.mmc_taxonomy_path
+            "path": args.mmc_precomputed_stats
         },
         "type_assignment": {
             "bootstrap_factor": 0.5,
@@ -58,14 +58,19 @@ def main(args: argparse.Namespace):
         "map_to_ensembl": True,
     }
 
+    if args.mmc_marker_genes:
+        config["query_markers"]["serialized_marker_lookup"] = args.mmc_marker_genes
+        runner = FromSpecifiedMarkersRunner(args=[], input_data=config)
+    else:
+        runner = OnTheFlyMapper(args=[], input_data=config)
+
     # Creates the results files: .json, .csv, .txt
     # https://github.com/AllenInstitute/cell_type_mapper/blob/main/docs/output.md
-    runner = OnTheFlyMapper(args=[], input_data=config)
     runner.run()
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Mape cell types with Allen Institute's Cell Type Mapper")
+    parser = argparse.ArgumentParser(description="Map cell types with Allen Institute's Cell Type Mapper")
     parser.add_argument(
         "--adata-input",
         type=str,
@@ -73,10 +78,16 @@ if __name__ == "__main__":
         help="AnnData object for a dataset",
     )
     parser.add_argument(
-        "--mmc-taxonomy-path",
+        "--mmc-precomputed-stats",
         type=str,
         required=True,
-        help="Path to MMC taxonomy files",
+        help="Path to MMC precomputed stats HD5F file",
+    )
+    parser.add_argument(
+        "--mmc-marker-genes",
+        type=str,
+        required=False,
+        help="Path to MMC marker genes JSON file",
     )
     parser.add_argument(
         "--output-prefix",
