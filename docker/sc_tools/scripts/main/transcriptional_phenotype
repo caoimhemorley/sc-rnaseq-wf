@@ -48,53 +48,117 @@ def read_csv_results(csv_results_path: str | Path) -> pd.DataFrame:
 def summarize_mmc_results(mmc_results: pd.DataFrame):
     # First get "classes"
     # Define row indices for each class
-    gabaergic = mmc_results["class_name"] == "Neuronal: GABAergic"
-    glutamatergic = mmc_results["class_name"] == "Neuronal: Glutamatergic"
-    non_neuronal = mmc_results["class_name"] == "Non-neuronal and Non-neural"
+    # HUMAN
+    if "Neuronal: GABAergic" in mmc_results["class_name"].unique():
+        gabaergic = mmc_results["class_name"] == "Neuronal: GABAergic"
+        glutamatergic = mmc_results["class_name"] == "Neuronal: Glutamatergic"
+        non_neuronal = mmc_results["class_name"] == "Non-neuronal and Non-neural"
 
-    mmc_results.loc[gabaergic, "phenotype"] = "GABAergic"
-    mmc_results.loc[glutamatergic, "phenotype"] = "Glutamatergic"
-    mmc_results.loc[non_neuronal, "phenotype"] = mmc_results.loc[
-        non_neuronal, "subclass_name"
-    ]
-
-    mmc_results.loc[glutamatergic, "rho"] = mmc_results.loc[
-        glutamatergic, "class_correlation_coefficient"
-    ]
-    mmc_results.loc[gabaergic, "rho"] = mmc_results.loc[
-        gabaergic, "class_correlation_coefficient"
-    ]
-    mmc_results.loc[non_neuronal, "rho"] = mmc_results.loc[
-        non_neuronal, "subclass_correlation_coefficient"
-    ]
-
-    mmc_results.loc[glutamatergic, "prob"] = mmc_results.loc[
-        glutamatergic, "class_bootstrapping_probability"
-    ]
-    mmc_results.loc[gabaergic, "prob"] = mmc_results.loc[
-        gabaergic, "class_bootstrapping_probability"
-    ]
-    mmc_results.loc[non_neuronal, "prob"] = mmc_results.loc[
-        non_neuronal, "subclass_bootstrapping_probability"
-    ]
-
-    mmc_results["cell_type"] = mmc_results["phenotype"]
-
-    # Change the phenotype to unknown if the correlation or bootstrap probability < 0.5
-    mmc_results.loc[mmc_results["rho"] < 0.5, "cell_type"] = "Unknown"
-    mmc_results.loc[mmc_results["prob"] < 0.5, "cell_type"] = "Unknown"
-
-    return mmc_results[
-        [
-            "cell_type",
-            "phenotype",
-            "rho",
-            "prob",
-            "class_name",
-            "subclass_name",
-            "supertype_name",
+        mmc_results.loc[gabaergic, "phenotype"] = "GABAergic"
+        mmc_results.loc[glutamatergic, "phenotype"] = "Glutamatergic"
+        mmc_results.loc[non_neuronal, "phenotype"] = mmc_results.loc[
+            non_neuronal, "subclass_name"
         ]
-    ]
+
+        mmc_results.loc[glutamatergic, "rho"] = mmc_results.loc[
+            glutamatergic, "class_correlation_coefficient"
+        ]
+        mmc_results.loc[gabaergic, "rho"] = mmc_results.loc[
+            gabaergic, "class_correlation_coefficient"
+        ]
+        mmc_results.loc[non_neuronal, "rho"] = mmc_results.loc[
+            non_neuronal, "subclass_correlation_coefficient"
+        ]
+
+        mmc_results.loc[glutamatergic, "prob"] = mmc_results.loc[
+            glutamatergic, "class_bootstrapping_probability"
+        ]
+        mmc_results.loc[gabaergic, "prob"] = mmc_results.loc[
+            gabaergic, "class_bootstrapping_probability"
+        ]
+        mmc_results.loc[non_neuronal, "prob"] = mmc_results.loc[
+            non_neuronal, "subclass_bootstrapping_probability"
+        ]
+
+        mmc_results["cell_type"] = mmc_results["phenotype"]
+
+        # Change the phenotype to unknown if the correlation or bootstrap probability < 0.5
+        mmc_results.loc[mmc_results["rho"] < 0.5, "cell_type"] = "Unknown"
+        mmc_results.loc[mmc_results["prob"] < 0.5, "cell_type"] = "Unknown"
+
+        return mmc_results[
+            [
+                "cell_type",
+                "phenotype",
+                "rho",
+                "prob",
+                "class_name",
+                "subclass_name",
+                "supertype_name",
+            ]
+        ]
+    else:
+        # MOUSE
+        gabaergic = mmc_results["class_name"].str.contains("GABA")
+        glutamatergic = mmc_results["class_name"].str.contains("Glut")
+        serotonergic = mmc_results["class_name"].str.contains("Sero")
+        # This includes OPC-Oligo, Astro-Epen, Vascular, Immune, and OEC (olfactory ensheathing cells - glial)
+        non_neuronal = ~(gabaergic | glutamatergic | serotonergic)
+
+        mmc_results.loc[gabaergic, "phenotype"] = "GABAergic"
+        mmc_results.loc[glutamatergic, "phenotype"] = "Glutamatergic"
+        mmc_results.loc[serotonergic, "phenotype"] = "Serotonergic"
+        mmc_results.loc[non_neuronal, "phenotype"] = mmc_results.loc[
+            non_neuronal, "subclass_name"
+        ]
+
+        mmc_results.loc[glutamatergic, "rho"] = mmc_results.loc[
+            glutamatergic, "class_correlation_coefficient"
+        ]
+        mmc_results.loc[gabaergic, "rho"] = mmc_results.loc[
+            gabaergic, "class_correlation_coefficient"
+        ]
+        mmc_results.loc[serotonergic, "rho"] = mmc_results.loc[
+            serotonergic, "class_correlation_coefficient"
+        ]
+        mmc_results.loc[non_neuronal, "rho"] = mmc_results.loc[
+            non_neuronal, "subclass_correlation_coefficient"
+        ]
+
+        mmc_results.loc[glutamatergic, "prob"] = mmc_results.loc[
+            glutamatergic, "class_bootstrapping_probability"
+        ]
+        mmc_results.loc[gabaergic, "prob"] = mmc_results.loc[
+            gabaergic, "class_bootstrapping_probability"
+        ]
+        mmc_results.loc[serotonergic, "prob"] = mmc_results.loc[
+            serotonergic, "class_bootstrapping_probability"
+        ]
+        mmc_results.loc[non_neuronal, "prob"] = mmc_results.loc[
+            non_neuronal, "subclass_bootstrapping_probability"
+        ]
+
+        mmc_results["cell_type"] = mmc_results["phenotype"]
+
+        # Change the phenotype to unknown if the correlation or bootstrap probability < 0.5
+        mmc_results.loc[mmc_results["rho"] < 0.5, "cell_type"] = "Unknown"
+        mmc_results.loc[mmc_results["prob"] < 0.5, "cell_type"] = "Unknown"
+
+        # Include cluster info but did not filter like above
+        return mmc_results[
+            [
+                "cell_type",
+                "phenotype",
+                "rho",
+                "prob",
+                "class_name",
+                "subclass_name",
+                "supertype_name",
+                "cluster_name",
+                "cluster_correlation_coefficient",
+                "cluster_bootstrapping_probability",
+            ]
+        ]
 
 
 def main(args: argparse.Namespace):
