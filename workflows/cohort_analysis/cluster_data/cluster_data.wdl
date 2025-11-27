@@ -95,6 +95,7 @@ task integrate_sample_data {
 
 		nvidia-smi
 
+		/usr/bin/time \
 		integrate_scvi \
 			--latent-key ~{scvi_latent_key} \
 			--batch-key ~{batch_key} \
@@ -158,6 +159,7 @@ task assign_remaining_cells {
 		mkdir -p "~{cohort_id}_scvi_model"
 		tar -xzvf ~{scvi_model_tar_gz} -C "~{cohort_id}_scvi_model" --strip-components=1
 
+		/usr/bin/time \
 		label_scanvi \
 			--latent-key ~{scanvi_latent_key} \
 			--predictions-key ~{scanvi_predictions_key} \
@@ -218,6 +220,7 @@ task cluster_cells {
 	command <<<
 		set -euo pipefail
 
+		/usr/bin/time \
 		clustering_umap \
 			--latent-key ~{scvi_latent_key} \
 			--n-neighbors ~{n_neighbors} \
