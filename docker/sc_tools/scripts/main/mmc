@@ -54,14 +54,12 @@ def main(args: argparse.Namespace):
 
     if args.mmc_marker_genes:
         print("Running FromSpecifiedMarkersRunner")
-        config["type_assignment"]["n_processors"] = args.n_processors
         config["query_markers"] = {
             "serialized_lookup": args.mmc_marker_genes
         }
         runner = FromSpecifiedMarkersRunner(args=[], input_data=config)
     else:
         print("Running OnTheFlyMapper")
-        config["n_processors"] = args.n_processors
         config["reference_markers"] = {
             "log2_fold_min_th": 0.5
         }
@@ -95,12 +93,6 @@ if __name__ == "__main__":
         type=str,
         required=False,
         help="Path to MMC marker genes JSON file",
-    )
-    parser.add_argument(
-        "--n-processors",
-        type=int,
-        required=False,
-        help="The number of independent worker processes to spin up",
     )
     parser.add_argument(
         "--max-gb",

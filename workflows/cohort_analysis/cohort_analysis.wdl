@@ -424,7 +424,6 @@ task map_cell_types {
 
 	String mmc_output_prefix = if defined(allen_brain_mmc_marker_genes_json) then "~{cohort_id}.mmc_markers_mapping" else "~{cohort_id}.mmc_otf_mapping.SEAAD"
 
-	Int threads = 16
 	Int mem_gb = ceil(size([filtered_adata_object, allen_brain_mmc_precomputed_stats_h5], "GB") * 18 + 20)
 	Int disk_size = ceil(size([filtered_adata_object, allen_brain_mmc_precomputed_stats_h5], "GB") * 4 + 20)
 
@@ -435,7 +434,6 @@ task map_cell_types {
 		mmc \
 			--adata-input ~{filtered_adata_object} \
 			--mmc-precomputed-stats ~{allen_brain_mmc_precomputed_stats_h5} \
-			--n-processors ~{threads - 1} \
 			--max-gb ~{mem_gb - 4} \
 			--output-prefix ~{mmc_output_prefix} \
 			~{if defined(allen_brain_mmc_marker_genes_json) then "--mmc-marker-genes " + allen_brain_mmc_marker_genes_json else ""}
@@ -457,7 +455,7 @@ task map_cell_types {
 
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.1.0"
-		cpu: threads
+		cpu: 16
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
