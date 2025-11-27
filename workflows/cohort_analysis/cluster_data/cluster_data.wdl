@@ -123,7 +123,6 @@ task integrate_sample_data {
 		cpu: 4
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
-		preemptible: 3
 		bootDiskSizeGb: 40
 		zones: zones
 		gpuType: "nvidia-tesla-t4"
@@ -188,7 +187,7 @@ task assign_remaining_cells {
 
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.1.0"
-		cpu: 4
+		cpu: 16
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3

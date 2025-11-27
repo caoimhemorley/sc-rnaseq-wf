@@ -354,7 +354,7 @@ task merge_and_plot_qc_metrics {
 
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.1.0"
-		cpu: 2
+		cpu: 4
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
@@ -377,7 +377,8 @@ task filter {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(merged_adata_object, "GB") * 18 + 20)
+	Int calc_mem_gb = ceil(size(merged_adata_object, "GB") * 18 + 20)
+	Int mem_gb = if calc_mem_gb > 624 then 624 else calc_mem_gb
 	Int disk_size = ceil(size(merged_adata_object, "GB") * 4 + 20)
 
 	command <<<
@@ -424,7 +425,7 @@ task map_cell_types {
 
 	String mmc_output_prefix = if defined(allen_brain_mmc_marker_genes_json) then "~{cohort_id}.mmc_markers_mapping" else "~{cohort_id}.mmc_otf_mapping.SEAAD"
 
-	Int mem_gb = ceil(size([filtered_adata_object, allen_brain_mmc_precomputed_stats_h5], "GB") * 18 + 20)
+	Int mem_gb = ceil(size([filtered_adata_object, allen_brain_mmc_precomputed_stats_h5], "GB") * 4 + 50)
 	Int disk_size = ceil(size([filtered_adata_object, allen_brain_mmc_precomputed_stats_h5], "GB") * 4 + 20)
 
 	command <<<
@@ -455,7 +456,7 @@ task map_cell_types {
 
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.1.0"
-		cpu: 16
+		cpu: 4
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
@@ -482,8 +483,11 @@ task normalize {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(filtered_adata_object, "GB") * 20 + 150)
-	Int disk_size = ceil(size(filtered_adata_object, "GB") * 4 + 20)
+	# GCP N2D machine configuration for memory-extensive task
+	Int calc_mem_gb = ceil(size(filtered_adata_object, "GB") * 20 + 150)
+	Int mem_gb = if calc_mem_gb > 768 then 768 else calc_mem_gb
+	Int threads = if calc_mem_gb > 768 then 96 else ceil(mem_gb / 8.0)
+	Int disk_size = ceil(size(filtered_adata_object, "GB") * 4 + 50)
 
 	command <<<
 		set -euo pipefail
@@ -515,7 +519,8 @@ task normalize {
 
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.1.0"
-		cpu: 8
+		cpu: threads
+		cpuPlatform: "AMD Rome"
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
@@ -537,7 +542,8 @@ task add_mapped_cell_types {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(normalized_adata_object, "GB") * 18 + 20)
+	Int calc_mem_gb = ceil(size(normalized_adata_object, "GB") * 18 + 20)
+	Int mem_gb = if calc_mem_gb > 624 then 624 else calc_mem_gb
 	Int disk_size = ceil(size(normalized_adata_object, "GB") * 4 + 20)
 
 	command <<<
@@ -642,8 +648,8 @@ task artifact_metrics {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(final_adata_object, "GB") * 8 + 20)
-	Int disk_size = ceil(size(final_adata_object, "GB") * 4 + 20)
+	Int mem_gb = ceil(size(final_adata_object, "GB") * 8 + 40)
+	Int disk_size = ceil(size(final_adata_object, "GB") * 4 + 40)
 
 	command <<<
 		set -euo pipefail
