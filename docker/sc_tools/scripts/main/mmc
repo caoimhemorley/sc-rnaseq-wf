@@ -49,6 +49,8 @@ def main(args: argparse.Namespace):
         "cloud_safe": True,
         "verbose_csv": True,
         "map_to_ensembl": True,
+        "n_processors": args.n_processors,
+        "max_gb": args.max_gb,
     }
 
     if args.mmc_marker_genes:
@@ -92,6 +94,18 @@ if __name__ == "__main__":
         type=str,
         required=False,
         help="Path to MMC marker genes JSON file",
+    )
+    parser.add_argument(
+        "--n-processors",
+        type=int,
+        required=False,
+        help="The number of independent worker processes to spin up",
+    )
+    parser.add_argument(
+        "--max-gb",
+        type=int,
+        required=False,
+        help="Available GB of memory for use when converting the input H5AD from a CSC sparse matrix to a CSR sparse matrix (irrelevant if the input H5AD file is already in CSR or dense form)",
     )
     parser.add_argument(
         "--output-prefix",
