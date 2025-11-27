@@ -212,16 +212,17 @@ workflow sc_rnaseq_analysis {
 
 		# Merged adata objects, QC plots, filtered adata objects, MMC results, normalized adata objects
 		Array[File?] project_merged_adata_object = project_cohort_analysis.merged_adata_object
+		Array[File?] project_qc_initial_metadata_csv = project_cohort_analysis.qc_initial_metadata_csv
 		Array[Array[File]?] project_qc_plots_png = project_cohort_analysis.qc_plots_png
 		Array[File?] project_filtered_adata_object = project_cohort_analysis.filtered_adata_object
 		Array[File?] project_mmc_extended_results_json = project_cohort_analysis.mmc_extended_results_json
 		Array[File?] project_mmc_results_csv = project_cohort_analysis.mmc_results_csv
 		Array[File?] project_mmc_log_txt = project_cohort_analysis.mmc_log_txt
 		Array[File?] project_normalized_adata_object = project_cohort_analysis.normalized_adata_object
-		Array[File?] project_mmc_adata_object = project_cohort_analysis.mmc_adata_object
-		Array[File?] project_mmc_results_parquet = project_cohort_analysis.mmc_results_parquet
 		Array[File?] project_all_genes_csv = project_cohort_analysis.all_genes_csv
 		Array[File?] project_hvg_genes_csv = project_cohort_analysis.hvg_genes_csv
+		Array[File?] project_mmc_adata_object = project_cohort_analysis.mmc_adata_object
+		Array[File?] project_mmc_results_parquet = project_cohort_analysis.mmc_results_parquet
 
 		# Clustering outputs
 		Array[File?] project_integrated_adata_object = project_cohort_analysis.integrated_adata_object
@@ -250,16 +251,17 @@ workflow sc_rnaseq_analysis {
 
 		# Merged adata objects, QC plots, filtered adata objects, MMC results, normalized adata objects
 		File? cohort_merged_adata_object = cross_team_cohort_analysis.merged_adata_object
+		File? cohort_qc_initial_metadata_csv = cross_team_cohort_analysis.qc_initial_metadata_csv
 		Array[File]? cohort_qc_plots_png = cross_team_cohort_analysis.qc_plots_png
 		File? cohort_filtered_adata_object = cross_team_cohort_analysis.filtered_adata_object
 		File? cohort_mmc_extended_results_json = cross_team_cohort_analysis.mmc_extended_results_json
 		File? cohort_mmc_results_csv = cross_team_cohort_analysis.mmc_results_csv
 		File? cohort_mmc_log_txt = cross_team_cohort_analysis.mmc_log_txt
 		File? cohort_normalized_adata_object = cross_team_cohort_analysis.normalized_adata_object
-		File? cohort_mmc_adata_object = cross_team_cohort_analysis.mmc_adata_object
-		File? cohort_mmc_results_parquet = cross_team_cohort_analysis.mmc_results_parquet
 		File? cohort_all_genes_csv = cross_team_cohort_analysis.all_genes_csv
 		File? cohort_hvg_genes_csv = cross_team_cohort_analysis.hvg_genes_csv
+		File? cohort_mmc_adata_object = cross_team_cohort_analysis.mmc_adata_object
+		File? cohort_mmc_results_parquet = cross_team_cohort_analysis.mmc_results_parquet
 
 		# Clustering outputs
 		File? cohort_integrated_adata_object = cross_team_cohort_analysis.integrated_adata_object

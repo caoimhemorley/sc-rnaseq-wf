@@ -205,7 +205,8 @@ workflow cohort_analysis {
 			write_cohort_sample_list.cohort_sample_list
 		],
 		[
-			merge_and_plot_qc_metrics.merged_adata_object
+			merge_and_plot_qc_metrics.merged_adata_object,
+			merge_and_plot_qc_metrics.qc_initial_metadata_csv
 		],
 		merge_and_plot_qc_metrics.qc_plots_png,
 		[
@@ -253,16 +254,17 @@ workflow cohort_analysis {
 
 		# Merged adata objects, QC plots, filtered adata objects, MMC results, normalized adata objects
 		File merged_adata_object = merge_and_plot_qc_metrics.merged_adata_object #!FileCoercion
+		File qc_initial_metadata_csv = merge_and_plot_qc_metrics.qc_initial_metadata_csv #!FileCoercion
 		Array[File] qc_plots_png = merge_and_plot_qc_metrics.qc_plots_png #!FileCoercion
 		File filtered_adata_object = filter.filtered_adata_object
 		File mmc_extended_results_json = map_cell_types.mmc_extended_results_json #!FileCoercion
 		File mmc_results_csv = map_cell_types.mmc_results_csv #!FileCoercion
 		File mmc_log_txt = map_cell_types.mmc_log_txt #!FileCoercion
 		File normalized_adata_object = normalize.normalized_adata_object
-		File mmc_adata_object = add_mapped_cell_types.mmc_adata_object
-		File mmc_results_parquet = add_mapped_cell_types.mmc_results_parquet #!FileCoercion
 		File all_genes_csv = normalize.all_genes_csv #!FileCoercion
 		File hvg_genes_csv = normalize.hvg_genes_csv #!FileCoercion
+		File mmc_adata_object = add_mapped_cell_types.mmc_adata_object
+		File mmc_results_parquet = add_mapped_cell_types.mmc_results_parquet #!FileCoercion
 
 		# Clustering output
 		File integrated_adata_object = cluster_data.integrated_adata_object
