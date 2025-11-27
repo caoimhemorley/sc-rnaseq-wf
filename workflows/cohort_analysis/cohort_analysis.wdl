@@ -455,7 +455,7 @@ task map_cell_types {
 
 	runtime {
 		docker: "~{container_registry}/sc_tools:1.1.0"
-		cpu: 8
+		cpu: 16
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
