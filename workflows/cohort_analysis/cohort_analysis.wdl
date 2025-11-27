@@ -435,7 +435,6 @@ task map_cell_types {
 		mmc \
 			--adata-input ~{filtered_adata_object} \
 			--mmc-precomputed-stats ~{allen_brain_mmc_precomputed_stats_h5} \
-			--max-gb ~{mem_gb - 4} \
 			--output-prefix ~{mmc_output_prefix} \
 			~{if defined(allen_brain_mmc_marker_genes_json) then "--mmc-marker-genes " + allen_brain_mmc_marker_genes_json else ""}
 
