@@ -53,6 +53,7 @@ def main(args: argparse.Namespace):
 
     if args.mmc_marker_genes:
         print("Running FromSpecifiedMarkersRunner")
+        config["type_assignment"]["n_processors"] = args.n_processors # Force tool to only use CPUs specified in WDL regardless of available CPUs
         config["query_markers"] = {
             "serialized_lookup": args.mmc_marker_genes
         }
@@ -92,6 +93,12 @@ if __name__ == "__main__":
         type=str,
         required=False,
         help="Path to MMC marker genes JSON file",
+    )
+    parser.add_argument(
+        "--n-processors",
+        type=int,
+        required=False,
+        help="The number of independent worker processes to spin up",
     )
     parser.add_argument(
         "--output-prefix",
