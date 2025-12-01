@@ -426,7 +426,10 @@ task map_cell_types {
 	String mmc_output_prefix = if defined(allen_brain_mmc_marker_genes_json) then "~{cohort_id}.mmc_markers_mapping" else "~{cohort_id}.mmc_otf_mapping.SEAAD"
 
 	Int threads = 4
-	Int mem_gb = ceil(size([filtered_adata_object, allen_brain_mmc_precomputed_stats_h5], "GB") * 4 + 50)
+	Int calc_human_mem_gb = ceil(size([filtered_adata_object, allen_brain_mmc_precomputed_stats_h5], "GB") * 4 + 50)
+	# Mouse brain mapping requires extra memory due to MMC's FromSpecifiedMarkersRunner's architecture
+	Int calc_mouse_mem_gb = ceil(size([filtered_adata_object, allen_brain_mmc_precomputed_stats_h5], "GB") * 4 + 50 + (threads * 10))
+	Int mem_gb = if defined(allen_brain_mmc_marker_genes_json) then calc_mouse_mem_gb else calc_human_mem_gb
 	Int disk_size = ceil(size([filtered_adata_object, allen_brain_mmc_precomputed_stats_h5], "GB") * 4 + 20)
 
 	command <<<
