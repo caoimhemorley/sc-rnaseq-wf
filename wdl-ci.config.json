@@ -7,7 +7,7 @@
       "tasks": {
         "merge_and_plot_qc_metrics": {
           "key": "merge_and_plot_qc_metrics",
-          "digest": "pw42j7ztwyyouiz7azjewuj74ohf4rj6",
+          "digest": "7chglartnvqajk42iehe26z5yronb2rb",
           "tests": [
             {
               "inputs": {
@@ -65,7 +65,7 @@
         },
         "filter": {
           "key": "filter",
-          "digest": "en5bfvwce2yoip5c57ozoikitoegxevx",
+          "digest": "rqtyght35idy25mqyr6eefusxv4nc2cv",
           "tests": [
             {
               "inputs": {
@@ -92,7 +92,7 @@
         },
         "map_cell_types": {
           "key": "map_cell_types",
-          "digest": "i5rxctdw2csrx5jvl4fo6iouhnj6ch4n",
+          "digest": "xnxfshedip5ibmakivcq6x76j2ekq7up",
           "tests": [
             {
               "inputs": {
@@ -134,7 +134,7 @@
         },
         "normalize": {
           "key": "normalize",
-          "digest": "pttxxzlcvfxj5vbdo6pyiesoxyekugtr",
+          "digest": "cjpiels4eeaifstmaxgrll5dn4zmpgs6",
           "tests": [
             {
               "inputs": {
@@ -145,6 +145,7 @@
                 "n_comps": "${n_comps}",
                 "batch_key": "${batch_key}",
                 "raw_data_path": "${cohort_raw_data_path}",
+                "workflow_name": "${workflow_name}",
                 "workflow_info": "${workflow_info}",
                 "billing_project": "${billing_project}",
                 "container_registry": "${container_registry}",
@@ -182,7 +183,7 @@
         },
         "add_mapped_cell_types": {
           "key": "add_mapped_cell_types",
-          "digest": "o6nv3fyq66x32h54dc6qonn2wj6a226l",
+          "digest": "al5um4a3f7zyiu65vatcrgo4pjihy2rq",
           "tests": [
             {
               "inputs": {
@@ -216,7 +217,7 @@
         },
         "integrate_harmony": {
           "key": "integrate_harmony",
-          "digest": "tuj2npr4qqdbfaykfbk5f3rpqsifgtha",
+          "digest": "ncpjro3iihmbxzxgvnsjo6zub6tunnm7",
           "tests": [
             {
               "inputs": {
@@ -252,7 +253,7 @@
         },
         "artifact_metrics": {
           "key": "artifact_metrics",
-          "digest": "iqhcdehmhs6togoqabhlsakmunluh5jx",
+          "digest": "v4dii54byl5yhqfzxrpp6alizknsnjmw",
           "tests": [
             {
               "inputs": {
@@ -289,7 +290,7 @@
         },
         "plot_groups_and_features": {
           "key": "plot_groups_and_features",
-          "digest": "uucmdrv37rdlrp7s2j4b2n53gykxlqjq",
+          "digest": "bqzcp2lfiauabqf45gmiuhsvjthniiun",
           "tests": [
             {
               "inputs": {
@@ -333,7 +334,7 @@
       "tasks": {
         "integrate_sample_data": {
           "key": "integrate_sample_data",
-          "digest": "olqke3jzuavs4cv3xi7roqvam2cnizji",
+          "digest": "pglnjhvqi72fpr7ozfghzwxjsjc6rgp6",
           "tests": [
             {
               "inputs": {
@@ -368,7 +369,7 @@
         },
         "assign_remaining_cells": {
           "key": "assign_remaining_cells",
-          "digest": "7gs2tln2uu3bumlxv3ogdutg3vahx53k",
+          "digest": "fi3sggjao5ujplaqdctqjnxxyl5xdoys",
           "tests": [
             {
               "inputs": {
@@ -411,7 +412,7 @@
         },
         "cluster_cells": {
           "key": "cluster_cells",
-          "digest": "urepy5wyj22fvmgypatd2bqi26mjcrli",
+          "digest": "tto6jzuq437hbjzagmsgw6f2uknco2bj",
           "tests": [
             {
               "inputs": {
@@ -449,7 +450,7 @@
         },
         "cellranger_count": {
           "key": "cellranger_count",
-          "digest": "koqgar3uvk33274hnl5kenkeljrqcirn",
+          "digest": "2dbsmzluf7j7kifb43haizypembzdzwp",
           "tests": [
             {
               "inputs": {
@@ -585,7 +586,7 @@
         },
         "counts_to_adata": {
           "key": "counts_to_adata",
-          "digest": "qkzl7jijs7d5oyj4l7hp6fzmvav65g7b",
+          "digest": "4igyc4iemtmjbokl2t23itvue7hgjqd6",
           "tests": [
             {
               "inputs": {
@@ -674,7 +675,7 @@
       "tasks": {
         "validate_workflow_name": {
           "key": "validate_workflow_name",
-          "digest": "",
+          "digest": "k4n53o3fprjaytzarqscl6w5sjguhx6s",
           "tests": []
         }
       }
