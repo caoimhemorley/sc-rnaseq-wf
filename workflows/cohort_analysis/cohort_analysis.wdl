@@ -54,7 +54,7 @@ workflow cohort_analysis {
 	}
 
 	String sub_workflow_name = "cohort_analysis"
-	String sub_workflow_version = "3.0.0"
+	String sub_workflow_version = "3.1.0"
 
 	Array[Array[String]] workflow_info = [[run_timestamp, workflow_name, workflow_version, workflow_release]]
 
@@ -348,8 +348,8 @@ task merge_and_plot_qc_metrics {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.0"
-		cpu: 2
+		docker: "~{container_registry}/sc_tools:1.0.1"
+		cpu: 4
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
@@ -372,7 +372,8 @@ task filter {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(merged_adata_object, "GB") * 18 + 20)
+	Int calc_mem_gb = ceil(size(merged_adata_object, "GB") * 18 + 20)
+	Int mem_gb = if calc_mem_gb > 624 then 624 else calc_mem_gb
 	Int disk_size = ceil(size(merged_adata_object, "GB") * 4 + 20)
 
 	command <<<
@@ -392,7 +393,7 @@ task filter {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.0"
+		docker: "~{container_registry}/sc_tools:1.0.1"
 		cpu: 4
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
@@ -416,7 +417,7 @@ task map_cell_types {
 		String zones
 	}
 
-	Int mem_gb = ceil(size([filtered_adata_object, allen_mtg_precomputed_stats], "GB") * 18 + 20)
+	Int mem_gb = ceil(size([filtered_adata_object, allen_mtg_precomputed_stats], "GB") * 4 + 50)
 	Int disk_size = ceil(size([filtered_adata_object, allen_mtg_precomputed_stats], "GB") * 4 + 20)
 
 	command <<<
@@ -443,8 +444,8 @@ task map_cell_types {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.0"
-		cpu: 4
+		docker: "~{container_registry}/sc_tools:1.0.1"
+		cpu: 16
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
@@ -470,8 +471,11 @@ task normalize {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(filtered_adata_object, "GB") * 20 + 150)
-	Int disk_size = ceil(size(filtered_adata_object, "GB") * 4 + 20)
+	# GCP N2D machine configuration for memory-extensive task
+	Int calc_mem_gb = ceil(size(filtered_adata_object, "GB") * 20 + 150)
+	Int mem_gb = if calc_mem_gb > 768 then 768 else calc_mem_gb
+	Int threads = if calc_mem_gb > 768 then 96 else ceil(mem_gb / 8.0)
+	Int disk_size = ceil(size(filtered_adata_object, "GB") * 4 + 50)
 
 	command <<<
 		set -euo pipefail
@@ -501,8 +505,9 @@ task normalize {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.0"
-		cpu: 8
+		docker: "~{container_registry}/sc_tools:1.0.1"
+		cpu: threads
+		cpuPlatform: "AMD Rome"
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
@@ -524,7 +529,8 @@ task add_mapped_cell_types {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(normalized_adata_object, "GB") * 18 + 20)
+	Int calc_mem_gb = ceil(size(normalized_adata_object, "GB") * 18 + 20)
+	Int mem_gb = if calc_mem_gb > 624 then 624 else calc_mem_gb
 	Int disk_size = ceil(size(normalized_adata_object, "GB") * 4 + 20)
 
 	command <<<
@@ -549,7 +555,7 @@ task add_mapped_cell_types {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.0"
+		docker: "~{container_registry}/sc_tools:1.0.1"
 		cpu: 4
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
@@ -601,7 +607,7 @@ task integrate_harmony {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.0"
+		docker: "~{container_registry}/sc_tools:1.0.1"
 		cpu: 8
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
@@ -629,12 +635,13 @@ task artifact_metrics {
 		String zones
 	}
 
-	Int mem_gb = ceil(size(final_adata_object, "GB") * 8 + 20)
-	Int disk_size = ceil(size(final_adata_object, "GB") * 4 + 20)
+	Int mem_gb = ceil(size(final_adata_object, "GB") * 8 + 40)
+	Int disk_size = ceil(size(final_adata_object, "GB") * 4 + 40)
 
 	command <<<
 		set -euo pipefail
 
+		/usr/bin/time \
 		artifact_metrics \
 			--predictions-key ~{scanvi_predictions_key} \
 			--batch-key ~{batch_key} \
@@ -658,7 +665,7 @@ task artifact_metrics {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.0"
+		docker: "~{container_registry}/sc_tools:1.0.1"
 		cpu: 16
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
@@ -712,7 +719,7 @@ task plot_groups_and_features {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.0"
+		docker: "~{container_registry}/sc_tools:1.0.1"
 		cpu: 2
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"

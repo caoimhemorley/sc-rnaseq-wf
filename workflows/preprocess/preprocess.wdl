@@ -2,7 +2,7 @@ version 1.0
 
 # Generate a preprocessed AnnData object
 
-import "../../wf-common/wdl/structs.wdl"
+import "../structs.wdl"
 
 workflow preprocess {
 	input {
@@ -11,6 +11,7 @@ workflow preprocess {
 		String dataset_doi_url
 		Array[Sample] samples
 
+		Boolean multimodal_sc_data
 		File cellranger_reference_data
 		Float cellbender_fpr
 
@@ -75,6 +76,7 @@ workflow preprocess {
 					fastq_R2s = sample.fastq_R2s,
 					fastq_I1s = sample.fastq_I1s,
 					fastq_I2s = sample.fastq_I2s,
+					multimodal_sc_data = multimodal_sc_data,
 					cellranger_reference_data = cellranger_reference_data,
 					raw_data_path = cellranger_raw_data_path,
 					workflow_info = workflow_info,
@@ -185,9 +187,9 @@ task check_output_files_exist {
 			cellbender_counts_file=$(echo "${output_files}" | cut -f 2)
 			initial_adata_object_file=$(echo "${output_files}" | cut -f 3)
 
-			if gsutil -u ~{billing_project} ls "${cellranger_counts_file}"; then
-				if gsutil -u ~{billing_project} ls "${cellbender_counts_file}"; then
-					if gsutil -u ~{billing_project} ls "${initial_adata_object_file}"; then
+			if gcloud storage ls --billing-project=~{billing_project} "${cellranger_counts_file}"; then
+				if gcloud storage ls --billing-project=~{billing_project} "${cellbender_counts_file}"; then
+					if gcloud storage ls --billing-project=~{billing_project} "${initial_adata_object_file}"; then
 						# If we find all outputs, don't rerun anything
 						echo -e "true\ttrue\ttrue" >> sample_preprocessing_complete.tsv
 					else
@@ -228,6 +230,7 @@ task cellranger_count {
 		Array[File] fastq_I1s
 		Array[File] fastq_I2s
 
+		Boolean multimodal_sc_data
 		File cellranger_reference_data
 
 		String raw_data_path
@@ -237,9 +240,11 @@ task cellranger_count {
 		String zones
 	}
 
+	String cellranger_arc_chemistry_flag = if multimodal_sc_data then "--chemistry=ARC-v1" else ""
+
 	Int threads = 16
 	Int mem_gb = 24
-	Int disk_size = ceil((size(fastq_R1s, "GB") + size(fastq_R2s, "GB") + size(fastq_I1s, "GB") + size(fastq_I2s, "GB") + size(cellranger_reference_data, "GB")) * 4 + 50)
+	Int disk_size = ceil((size(cellranger_reference_data, "GB") + size(flatten([fastq_R1s, fastq_R2s, fastq_I1s, fastq_I2s]), "GB")) * 4 + 50)
 
 	command <<<
 		set -euo pipefail
@@ -277,7 +282,8 @@ task cellranger_count {
 			--transcriptome="$(pwd)/cellranger_refdata" \
 			--fastqs="$(pwd)/fastqs" \
 			--localcores ~{threads} \
-			--localmem ~{mem_gb - 4}
+			--localmem ~{mem_gb - 4} \
+			~{cellranger_arc_chemistry_flag}
 
 		# Rename outputs to include sample ID
 		mv ~{sample_id}/outs/raw_feature_bc_matrix.h5 ~{sample_id}.raw_feature_bc_matrix.h5
@@ -423,7 +429,7 @@ task counts_to_adata {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.0"
+		docker: "~{container_registry}/sc_tools:1.0.1"
 		cpu: 4
 		memory: "32 GB"
 		disks: "local-disk ~{disk_size} HDD"

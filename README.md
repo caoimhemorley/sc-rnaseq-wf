@@ -77,24 +77,25 @@ An input template file can be found at [workflows/inputs.json](workflows/inputs.
 
 | Type | Name | Description |
 | :- | :- | :- |
-| String | team_id | Unique identifier for team; used for naming output files |
-| String | dataset_id | Unique identifier for dataset; used for metadata |
+| String | team_id | Unique identifier for team; used for naming output files. |
+| String | dataset_id | Unique identifier for dataset; used for metadata. |
 | String | dataset_doi_url | Generated Zenodo DOI URL referencing the dataset. |
-| Array[[Sample](#sample)] | samples | The set of samples associated with this project |
-| Boolean | run_project_cohort_analysis | Whether or not to run cohort analysis within the project |
-| String | raw_data_bucket | Raw data bucket; intermediate output files that are not final workflow outputs are stored here |
-| String | staging_data_bucket | Staging data bucket; final project-level outputs are stored here |
+| Array[[Sample](#sample)] | samples | The set of samples associated with this project. |
+| Boolean | multimodal_sc_data | Whether or not the sc/sn RNAseq is from multimodal data. |
+| Boolean | run_project_cohort_analysis | Whether or not to run cohort analysis within the project. |
+| String | raw_data_bucket | Raw data bucket; intermediate output files that are not final workflow outputs are stored here. |
+| String | staging_data_bucket | Staging data bucket; final project-level outputs are stored here. |
 
 ### Sample
 
 | Type | Name | Description |
 | :- | :- | :- |
-| String | sample_id | Unique identifier for the sample within the project |
+| String | sample_id | Unique identifier for the sample within the project. |
 | String? | batch | The sample's batch. If unset, the analysis will stop after running `cellranger_count`. |
-| File | fastq_R1 | Path to the sample's read 1 FASTQ file |
-| File | fastq_R2 | Path to the sample's read 2 FASTQ file |
-| File? | fastq_I1 | Optional fastq index 1 |
-| File? | fastq_I2 | Optional fastq index 2 |
+| File | fastq_R1 | Path to the sample's read 1 FASTQ file. |
+| File | fastq_R2 | Path to the sample's read 2 FASTQ file. |
+| File? | fastq_I1 | Optional fastq index 1. |
+| File? | fastq_I2 | Optional fastq index 2. |
 
 ## Generating the inputs JSON
 
@@ -106,7 +107,7 @@ The inputs JSON may be generated manually, however when running a large number o
     - `sample_id`: A unique identifier for the sample within the project
     - `batch`: The sample's batch
     - `fastq_path`: The directory in which paired sample FASTQs may be found, including the gs:// bucket name and path
-        - This is appended to the `project-tsv` from the `fastq-locs-txt`: FASTQ locations for all samples provided in the `project-tsv`, one per line. Each sample is expected to have one set of paired fastqs located at `${fastq_path}/${sample_id}*`. The read 1 file should include 'R1' somewhere in the filename; the read 2 file should inclue 'R2' somewhere in the filename. Generate this file e.g. by running `gsutil ls gs://fastq_bucket/some/path/**.fastq.gz >> fastq_locs.txt`
+        - This is appended to the `project-tsv` from the `fastq-locs-txt`: FASTQ locations for all samples provided in the `project-tsv`, one per line. Each sample is expected to have one set of paired fastqs located at `${fastq_path}/${sample_id}*`. The read 1 file should include 'R1' somewhere in the filename; the read 2 file should inclue 'R2' somewhere in the filename. Generate this file e.g. by running `gcloud storage ls gs://fastq_bucket/some/path/**.fastq.gz >> fastq_locs.txt`
 - `inputs-template`: The inputs template JSON file into which the `projects` information derived from the `project-tsv` will be inserted. Must have a key ending in `*.projects`. Other default values filled out in the inputs template will be written to the output inputs.json file.
 - `run-project-cohort-analysis`: Optionally run project-level cohort analysis for provided projects. This value will apply to all projects. [false]
 - `workflow_name`: WDL workflow name.
