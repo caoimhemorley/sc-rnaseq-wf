@@ -11,24 +11,51 @@ import sys
 # from helpers import get_validation_metrics
 
 
-def merge_adata(adata_objects_fofn: str) -> AnnData:
-    adatas = {}
+def merge_adata(adata_objects_fofn: str, chunk_size: int = 50) -> AnnData:
+    sample_files = []
     # Note that the sample id should be the official ASAP_samples
     with open(adata_objects_fofn, "r") as file:
         for sample in file:
             # Check that sample line is not empty
             if sample.strip():
                 columns = sample.strip().split("\t")
-                sample_name, file_path = columns
-                raw = sc.read_h5ad(file_path)
-                adatas[sample_name] = raw
-    # We could subset to the top_genes here before concat if we have memory issues (e.g. whole dataset harmonization)
-    adata = ad_concat(merge="same", uns_merge="same", index_unique="_", adatas=adatas)
+                sample_files.append(columns)
 
-    return adata
+    print(f"Processing {len(sample_files)} samples in chunks of {chunk_size}")
+
+    merged_chunks = []
+
+    for i in range(0, len(sample_files), chunk_size):
+        chunk_files = sample_files[i:i+chunk_size]
+        print(f"Processing chunk {i//chunk_size + 1}/{(len(sample_files)-1)//chunk_size + 1}")
+
+        adatas = {}
+        for sample_name, file_path in chunk_files:
+            raw = sc.read_h5ad(file_path)
+            adatas[sample_name] = raw
+
+        chunk_adata = ad_concat(
+            adatas, 
+            merge="same", 
+            uns_merge="same", 
+            index_unique="_"
+        )
+
+        merged_chunks.append(chunk_adata)
+
+        # Clean up memory
+        del adatas
+
+    # We could subset to the top_genes here before concat if we have memory issues (e.g. whole dataset harmonization)
+    print("Merging all chunks...")
+    final_adata = ad_concat(merged_chunks, merge="same", uns_merge="same", index_unique="_")
+
+    return final_adata
 
 
 def gen_qc_plots(adata: AnnData):
+    print("Generating QC plots...")
+
     # Fixed parameters
     metrics = [
         "n_genes_by_counts",
@@ -57,8 +84,10 @@ def main(args: argparse.Namespace):
 
     # Export concatenated data
     adata.write_h5ad(filename=args.adata_output, compression="gzip")
+    print(f"Wrote {args.adata_output}")
     # Save metadata
     adata.obs.to_csv(args.output_metadata_file, index=True)
+    print(f"Wrote {args.output_metadata_file}")
 
     # #######  Validation metrics
     # val_metrics = get_validation_metrics(adata, "concatenation")
