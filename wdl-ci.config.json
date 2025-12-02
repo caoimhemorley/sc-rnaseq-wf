@@ -668,13 +668,13 @@
         }
       }
     },
-    "wf-common/wdl/tasks/validate_workflow_name.wdl": {
-      "key": "wf-common/wdl/tasks/validate_workflow_name.wdl",
+    "wf-common/wdl/tasks/get_workflow_name.wdl": {
+      "key": "wf-common/wdl/tasks/get_workflow_name.wdl",
       "name": "",
       "description": "",
       "tasks": {
         "validate_workflow_name": {
-          "key": "validate_workflow_name",
+          "key": "get_workflow_name",
           "digest": "k4n53o3fprjaytzarqscl6w5sjguhx6s",
           "tests": []
         }

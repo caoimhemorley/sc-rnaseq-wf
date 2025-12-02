@@ -3,14 +3,14 @@ version 1.0
 # Harmonized human PMDBS and non-human (mouse) brain sc/sn RNAseq workflow entrypoint
 
 import "structs.wdl"
-import "../wf-common/wdl/tasks/validate_workflow_name.wdl" as ValidateWorkflowName
+import "../wf-common/wdl/tasks/get_workflow_name.wdl" as GetWorkflowName
 import "../wf-common/wdl/tasks/get_workflow_metadata.wdl" as GetWorkflowMetadata
 import "preprocess/preprocess.wdl" as Preprocess
 import "cohort_analysis/cohort_analysis.wdl" as CohortAnalysis
 
 workflow sc_rnaseq_analysis {
 	input {
-		String workflow_name
+		String organism
 		String cohort_id
 		Array[Project] projects
 
@@ -59,21 +59,19 @@ workflow sc_rnaseq_analysis {
 	String workflow_version = "v4.0.0"
 	String workflow_release = "https://github.com/ASAP-CRN/sc-rnaseq-wf/releases/tag/sc_rnaseq_analysis-~{workflow_version}"
 
-	call ValidateWorkflowName.validate_workflow_name {
+	call GetWorkflowName.get_workflow_name {
 		input:
-			workflow_name = workflow_name,
+			organism = organism,
 			zones = zones
 	}
 
-	if (validate_workflow_name.workflow_name_validated) {
-		call GetWorkflowMetadata.get_workflow_metadata {
-			input:
-				zones = zones
-		}
+	call GetWorkflowMetadata.get_workflow_metadata {
+		input:
+			zones = zones
 	}
 
 	scatter (project in projects) {
-		String project_raw_data_path_prefix = "~{project.raw_data_bucket}/~{workflow_execution_path}/~{workflow_name}"
+		String project_raw_data_path_prefix = "~{project.raw_data_bucket}/~{workflow_execution_path}/~{get_workflow_name.workflow_name}"
 
 		call Preprocess.preprocess {
 			input:
@@ -84,12 +82,12 @@ workflow sc_rnaseq_analysis {
 				multimodal_sc_data = project.multimodal_sc_data,
 				cellranger_reference_data = cellranger_reference_data,
 				cellbender_fpr = cellbender_fpr,
-				workflow_name = workflow_name,
+				workflow_name = get_workflow_name.workflow_name,
 				workflow_version = workflow_version,
 				workflow_release = workflow_release,
-				run_timestamp = select_first([get_workflow_metadata.timestamp]),
+				run_timestamp = get_workflow_metadata.timestamp,
 				raw_data_path_prefix = project_raw_data_path_prefix,
-				billing_project = select_first([get_workflow_metadata.billing_project]),
+				billing_project = get_workflow_metadata.billing_project,
 				container_registry = container_registry,
 				zones = zones
 		}
@@ -134,13 +132,13 @@ workflow sc_rnaseq_analysis {
 					leiden_res = leiden_res,
 					groups = groups,
 					features = features,
-					workflow_name = workflow_name,
+					workflow_name = get_workflow_name.workflow_name,
 					workflow_version = workflow_version,
 					workflow_release = workflow_release,
-					run_timestamp = select_first([get_workflow_metadata.timestamp]),
+					run_timestamp = get_workflow_metadata.timestamp,
 					raw_data_path_prefix = project_raw_data_path_prefix,
 					staging_data_buckets = project.staging_data_buckets,
-					billing_project = select_first([get_workflow_metadata.billing_project]),
+					billing_project = get_workflow_metadata.billing_project,
 					container_registry = container_registry,
 					zones = zones
 			}
@@ -148,7 +146,7 @@ workflow sc_rnaseq_analysis {
 	}
 
 	if (run_cross_team_cohort_analysis) {
-		String cohort_raw_data_path_prefix = "~{cohort_raw_data_bucket}/~{workflow_execution_path}/~{workflow_name}"
+		String cohort_raw_data_path_prefix = "~{cohort_raw_data_bucket}/~{workflow_execution_path}/~{get_workflow_name.workflow_name}"
 
 		call CohortAnalysis.cohort_analysis as cross_team_cohort_analysis {
 			input:
@@ -173,13 +171,13 @@ workflow sc_rnaseq_analysis {
 				leiden_res = leiden_res,
 				groups = groups,
 				features = features,
-				workflow_name = workflow_name,
+				workflow_name = get_workflow_name.workflow_name,
 				workflow_version = workflow_version,
 				workflow_release = workflow_release,
-				run_timestamp = select_first([get_workflow_metadata.timestamp]),
+				run_timestamp = get_workflow_metadata.timestamp,
 				raw_data_path_prefix = cohort_raw_data_path_prefix,
 				staging_data_buckets = cohort_staging_data_buckets,
-				billing_project = select_first([get_workflow_metadata.billing_project]),
+				billing_project = get_workflow_metadata.billing_project,
 				container_registry = container_registry,
 				zones = zones
 		}
@@ -290,6 +288,7 @@ workflow sc_rnaseq_analysis {
 	}
 
 	parameter_meta {
+		organism: {help: "Organism; used to select workflow name. Options: 'human' or 'mouse'. If human, 'pmdbs_sc_rnaseq' will be the workflow name (i.e., bucket folder name) and if mouse, 'mouse_sc_rnaseq' will be selected."}
 		cohort_id: {help: "Name of the cohort; used to name output files during cross-team cohort analysis."}
 		projects: {help: "The project ID, set of samples and their associated reads and metadata, output bucket locations, sc data type, and whether or not to run project-level cohort analysis."}
 		cellranger_reference_data: {help: "Cellranger transcriptome reference data; see https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest."}
