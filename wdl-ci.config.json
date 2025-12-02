@@ -191,6 +191,7 @@
                 "normalized_adata_object": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.normalized.h5ad",
                 "mmc_results_csv": "${input_resources_file_path}/${cohort_workflow_name}/${cohort_id}.mmc_otf_mapping.SEAAD.results.csv",
                 "raw_data_path": "${cohort_raw_data_path}",
+                "workflow_name": "${workflow_name}",
                 "workflow_info": "${workflow_info}",
                 "billing_project": "${billing_project}",
                 "container_registry": "${container_registry}",
