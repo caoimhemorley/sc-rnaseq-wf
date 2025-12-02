@@ -183,7 +183,7 @@
         },
         "add_mapped_cell_types": {
           "key": "add_mapped_cell_types",
-          "digest": "al5um4a3f7zyiu65vatcrgo4pjihy2rq",
+          "digest": "rt6pza6pu2eopx6sovqnl22ubigcu55i",
           "tests": [
             {
               "inputs": {
@@ -675,7 +675,7 @@
       "description": "",
       "tasks": {
         "validate_workflow_name": {
-          "key": "get_workflow_name",
+          "key": "validate_workflow_name",
           "digest": "k4n53o3fprjaytzarqscl6w5sjguhx6s",
           "tests": []
         }
