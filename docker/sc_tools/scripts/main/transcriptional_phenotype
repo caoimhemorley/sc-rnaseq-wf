@@ -45,11 +45,11 @@ def read_csv_results(csv_results_path: str | Path) -> pd.DataFrame:
     return results
 
 
-def summarize_mmc_results(mmc_results: pd.DataFrame):
+def summarize_mmc_results(mmc_results: pd.DataFrame, workflow_name: str):
     # First get "classes"
     # Define row indices for each class
     # HUMAN
-    if "Neuronal: GABAergic" in mmc_results["class_name"].unique():
+    if workflow_name == "pmdbs_sc_rnaseq":
         gabaergic = mmc_results["class_name"] == "Neuronal: GABAergic"
         glutamatergic = mmc_results["class_name"] == "Neuronal: Glutamatergic"
         non_neuronal = mmc_results["class_name"] == "Non-neuronal and Non-neural"
@@ -97,7 +97,7 @@ def summarize_mmc_results(mmc_results: pd.DataFrame):
                 "supertype_name",
             ]
         ]
-    else:
+    elif workflow_name == "mouse_sc_rnaseq":
         # MOUSE
         gabaergic = mmc_results["class_name"].str.contains("GABA")
         glutamatergic = mmc_results["class_name"].str.contains("Glut")
@@ -159,12 +159,14 @@ def summarize_mmc_results(mmc_results: pd.DataFrame):
                 "cluster_bootstrapping_probability",
             ]
         ]
+    else:
+        raise ValueError(f"[ERROR] Source cannot be detected from workflow name: [{workflow_name}]")
 
 
 def main(args: argparse.Namespace):
     # Load MMC results
     results = read_csv_results(args.mmc_results)
-    results = summarize_mmc_results(results)
+    results = summarize_mmc_results(results, args.workflow_name)
     # Save the results to parquet file.. or feather?
     results.to_parquet(args.output_cell_types_file, compression="gzip")
 
@@ -182,6 +184,12 @@ if __name__ == "__main__":
         type=str,
         required=True,
         help="AnnData object for a dataset",
+    )
+    parser.add_argument(
+        "--workflow-name",
+        type=str,
+        required=True,
+        help="Workflow name to detect sample source. Options for source are 'human' or 'mouse'",
     )
     parser.add_argument(
         "--mmc-results",

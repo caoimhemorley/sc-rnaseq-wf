@@ -27,9 +27,9 @@ def process_adata(
     sc.pp.log1p(adata)
 
     # Detect sample source from workflow name
-    if "pmdbs" in workflow_name:
+    if workflow_name == "pmdbs_sc_rnaseq":
         source = "human"
-    elif "mouse" in workflow_name:
+    elif workflow_name == "mouse_sc_rnaseq":
         source = "mouse"
     else:
         raise ValueError(f"[ERROR] Source cannot be detected from workflow name: [{workflow_name}]")

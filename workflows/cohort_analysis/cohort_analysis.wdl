@@ -130,6 +130,7 @@ workflow cohort_analysis {
 			normalized_adata_object = normalize.normalized_adata_object,
 			mmc_results_csv = map_cell_types.mmc_results_csv, #!FileCoercion
 			raw_data_path = raw_data_path,
+			workflow_name = workflow_name,
 			workflow_info = workflow_info,
 			billing_project = billing_project,
 			container_registry = container_registry,
@@ -540,6 +541,7 @@ task add_mapped_cell_types {
 		File mmc_results_csv
 
 		String raw_data_path
+		String workflow_name
 		Array[Array[String]] workflow_info
 		String billing_project
 		String container_registry
@@ -555,6 +557,7 @@ task add_mapped_cell_types {
 
 		transcriptional_phenotype \
 			--adata-input ~{normalized_adata_object} \
+			--workflow-name ~{workflow_name} \
 			--mmc-results ~{mmc_results_csv} \
 			--adata-output ~{cohort_id}.mmc.h5ad \
 			--output-cell-types-file ~{cohort_id}.mmc_results.parquet
