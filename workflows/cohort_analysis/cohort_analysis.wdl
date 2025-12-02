@@ -100,7 +100,7 @@ workflow cohort_analysis {
 			cohort_id = cohort_id,
 			filtered_adata_object = filter.filtered_adata_object,
 			allen_brain_mmc_precomputed_stats_h5 = allen_brain_mmc_precomputed_stats_h5,
-			allen_brain_mmc_marker_genes_json = select_first([allen_brain_mmc_marker_genes_json]),
+			allen_brain_mmc_marker_genes_json = allen_brain_mmc_marker_genes_json,
 			raw_data_path = raw_data_path,
 			workflow_info = workflow_info,
 			billing_project = billing_project,
