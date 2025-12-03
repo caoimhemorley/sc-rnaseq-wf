@@ -380,6 +380,7 @@
                 "scanvi_latent_key": "${scanvi_latent_key}",
                 "scanvi_predictions_key": "${scanvi_predictions_key}",
                 "raw_data_path": "${cohort_raw_data_path}",
+                "workflow_name": "${workflow_name}",
                 "workflow_info": "${workflow_info}",
                 "billing_project": "${billing_project}",
                 "container_registry": "${container_registry}",
