@@ -148,6 +148,7 @@ workflow cohort_analysis {
 			n_neighbors = n_neighbors,
 			leiden_res = leiden_res,
 			raw_data_path = raw_data_path,
+			workflow_name = workflow_name,
 			workflow_info = workflow_info,
 			billing_project = billing_project,
 			container_registry = container_registry,
