@@ -18,6 +18,7 @@ workflow cluster_data {
 		Array[Float] leiden_res
 
 		String raw_data_path
+		String workflow_name
 		Array[Array[String]] workflow_info
 		String billing_project
 		String container_registry
@@ -45,6 +46,7 @@ workflow cluster_data {
 			scanvi_latent_key = scanvi_latent_key,
 			scanvi_predictions_key = scanvi_predictions_key,
 			raw_data_path = raw_data_path,
+			workflow_name = workflow_name,
 			workflow_info = workflow_info,
 			billing_project = billing_project,
 			container_registry = container_registry,
@@ -119,7 +121,7 @@ task integrate_sample_data {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.1"
+		docker: "~{container_registry}/sc_tools:1.1.0"
 		cpu: 4
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
@@ -141,6 +143,7 @@ task assign_remaining_cells {
 		String scanvi_predictions_key
 
 		String raw_data_path
+		String workflow_name
 		Array[Array[String]] workflow_info
 		String billing_project
 		String container_registry
@@ -160,6 +163,7 @@ task assign_remaining_cells {
 
 		/usr/bin/time \
 		label_scanvi \
+			--workflow-name ~{workflow_name} \
 			--latent-key ~{scanvi_latent_key} \
 			--predictions-key ~{scanvi_predictions_key} \
 			--adata-input ~{integrated_adata_object} \
@@ -186,11 +190,10 @@ task assign_remaining_cells {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.1"
+		docker: "~{container_registry}/sc_tools:1.1.0"
 		cpu: 16
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
-		preemptible: 3
 		bootDiskSizeGb: 40
 		zones: zones
 		gpuType: "nvidia-tesla-t4"
@@ -233,7 +236,7 @@ task cluster_cells {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.1"
+		docker: "~{container_registry}/sc_tools:1.1.0"
 		cpu: 16
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"

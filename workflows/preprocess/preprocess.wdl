@@ -243,7 +243,7 @@ task cellranger_count {
 	String cellranger_arc_chemistry_flag = if multimodal_sc_data then "--chemistry=ARC-v1" else ""
 
 	Int threads = 16
-	Int mem_gb = 24
+	Int mem_gb = 48
 	Int disk_size = ceil((size(cellranger_reference_data, "GB") + size(flatten([fastq_R1s, fastq_R2s, fastq_I1s, fastq_I2s]), "GB")) * 4 + 50)
 
 	command <<<
@@ -429,7 +429,7 @@ task counts_to_adata {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.1"
+		docker: "~{container_registry}/sc_tools:1.1.0"
 		cpu: 4
 		memory: "32 GB"
 		disks: "local-disk ~{disk_size} HDD"

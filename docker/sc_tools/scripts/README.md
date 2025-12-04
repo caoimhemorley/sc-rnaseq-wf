@@ -21,7 +21,7 @@
 ## _PROCESSING_
 
 - _map my cells_: [`mmc`](./main/mmc)
-    - Leverage Allen Brain Map's [MapMyCells](https://portal.brain-map.org/atlases-and-data/bkp/mapmycells) on SEA-AD taxonomy
+    - Leverage Allen Brain Map's [MapMyCells](https://portal.brain-map.org/atlases-and-data/bkp/mapmycells) on SEA-AD taxonomy for Human and 10x whole brain Mouse taxonomy for Mouse
     - This needs to be done BEFORE feature selection so we can leverage as many genes as possible
         - FUTURE: In the future we can map to just a subset of the taxonomy for efficiency (e.g. `nodes_to_drop`, or constructing a simplified reference)
 

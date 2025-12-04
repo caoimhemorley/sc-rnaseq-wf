@@ -1,14 +1,16 @@
 version 1.0
 
-# Harmonized human PMDBS sc/sn RNAseq workflow entrypoint
+# Harmonized human PMDBS and non-human (mouse) brain sc/sn RNAseq workflow entrypoint
 
 import "structs.wdl"
+import "../wf-common/wdl/tasks/get_workflow_name.wdl" as GetWorkflowName
 import "../wf-common/wdl/tasks/get_workflow_metadata.wdl" as GetWorkflowMetadata
 import "preprocess/preprocess.wdl" as Preprocess
 import "cohort_analysis/cohort_analysis.wdl" as CohortAnalysis
 
-workflow pmdbs_sc_rnaseq_analysis {
+workflow sc_rnaseq_analysis {
 	input {
+		String organism
 		String cohort_id
 		Array[Project] projects
 
@@ -23,7 +25,8 @@ workflow pmdbs_sc_rnaseq_analysis {
 		Array[Int] n_genes_by_counts_limits = [100, 10000]
 
 		# Allen Institute's Map My Cells
-		File allen_mtg_precomputed_stats
+		File allen_brain_mmc_precomputed_stats_h5
+		File? allen_brain_mmc_marker_genes_json
 
 		# Normalization parameters
 		Int norm_target_sum = 10000
@@ -53,9 +56,14 @@ workflow pmdbs_sc_rnaseq_analysis {
 	}
 
 	String workflow_execution_path = "workflow_execution"
-	String workflow_name = "pmdbs_sc_rnaseq"
-	String workflow_version = "v3.1.0"
-	String workflow_release = "https://github.com/ASAP-CRN/pmdbs-sc-rnaseq-wf/releases/tag/pmdbs_sc_rnaseq_analysis-~{workflow_version}"
+	String workflow_version = "v4.0.0"
+	String workflow_release = "https://github.com/ASAP-CRN/sc-rnaseq-wf/releases/tag/sc_rnaseq_analysis-~{workflow_version}"
+
+	call GetWorkflowName.get_workflow_name {
+		input:
+			organism = organism,
+			zones = zones
+	}
 
 	call GetWorkflowMetadata.get_workflow_metadata {
 		input:
@@ -63,7 +71,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 	}
 
 	scatter (project in projects) {
-		String project_raw_data_path_prefix = "~{project.raw_data_bucket}/~{workflow_execution_path}/~{workflow_name}"
+		String project_raw_data_path_prefix = "~{project.raw_data_bucket}/~{workflow_execution_path}/~{get_workflow_name.workflow_name}"
 
 		call Preprocess.preprocess {
 			input:
@@ -74,7 +82,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 				multimodal_sc_data = project.multimodal_sc_data,
 				cellranger_reference_data = cellranger_reference_data,
 				cellbender_fpr = cellbender_fpr,
-				workflow_name = workflow_name,
+				workflow_name = get_workflow_name.workflow_name,
 				workflow_version = workflow_version,
 				workflow_release = workflow_release,
 				run_timestamp = get_workflow_metadata.timestamp,
@@ -111,7 +119,8 @@ workflow pmdbs_sc_rnaseq_analysis {
 					doublet_score_max = doublet_score_max,
 					total_counts_limits = total_counts_limits,
 					n_genes_by_counts_limits = n_genes_by_counts_limits,
-					allen_mtg_precomputed_stats = allen_mtg_precomputed_stats,
+					allen_brain_mmc_precomputed_stats_h5 = allen_brain_mmc_precomputed_stats_h5,
+					allen_brain_mmc_marker_genes_json = allen_brain_mmc_marker_genes_json,
 					norm_target_sum = norm_target_sum,
 					n_top_genes = n_top_genes,
 					n_comps = n_comps,
@@ -123,7 +132,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 					leiden_res = leiden_res,
 					groups = groups,
 					features = features,
-					workflow_name = workflow_name,
+					workflow_name = get_workflow_name.workflow_name,
 					workflow_version = workflow_version,
 					workflow_release = workflow_release,
 					run_timestamp = get_workflow_metadata.timestamp,
@@ -137,7 +146,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 	}
 
 	if (run_cross_team_cohort_analysis) {
-		String cohort_raw_data_path_prefix = "~{cohort_raw_data_bucket}/~{workflow_execution_path}/~{workflow_name}"
+		String cohort_raw_data_path_prefix = "~{cohort_raw_data_bucket}/~{workflow_execution_path}/~{get_workflow_name.workflow_name}"
 
 		call CohortAnalysis.cohort_analysis as cross_team_cohort_analysis {
 			input:
@@ -149,7 +158,8 @@ workflow pmdbs_sc_rnaseq_analysis {
 				doublet_score_max = doublet_score_max,
 				total_counts_limits = total_counts_limits,
 				n_genes_by_counts_limits = n_genes_by_counts_limits,
-				allen_mtg_precomputed_stats = allen_mtg_precomputed_stats,
+				allen_brain_mmc_precomputed_stats_h5 = allen_brain_mmc_precomputed_stats_h5,
+				allen_brain_mmc_marker_genes_json = allen_brain_mmc_marker_genes_json,
 				norm_target_sum = norm_target_sum,
 				n_top_genes = n_top_genes,
 				n_comps = n_comps,
@@ -161,7 +171,7 @@ workflow pmdbs_sc_rnaseq_analysis {
 				leiden_res = leiden_res,
 				groups = groups,
 				features = features,
-				workflow_name = workflow_name,
+				workflow_name = get_workflow_name.workflow_name,
 				workflow_version = workflow_version,
 				workflow_release = workflow_release,
 				run_timestamp = get_workflow_metadata.timestamp,
@@ -201,16 +211,17 @@ workflow pmdbs_sc_rnaseq_analysis {
 
 		# Merged adata objects, QC plots, filtered adata objects, MMC results, normalized adata objects
 		Array[File?] project_merged_adata_object = project_cohort_analysis.merged_adata_object
+		Array[File?] project_qc_initial_metadata_csv = project_cohort_analysis.qc_initial_metadata_csv
 		Array[Array[File]?] project_qc_plots_png = project_cohort_analysis.qc_plots_png
 		Array[File?] project_filtered_adata_object = project_cohort_analysis.filtered_adata_object
 		Array[File?] project_mmc_extended_results_json = project_cohort_analysis.mmc_extended_results_json
 		Array[File?] project_mmc_results_csv = project_cohort_analysis.mmc_results_csv
 		Array[File?] project_mmc_log_txt = project_cohort_analysis.mmc_log_txt
 		Array[File?] project_normalized_adata_object = project_cohort_analysis.normalized_adata_object
-		Array[File?] project_mmc_adata_object = project_cohort_analysis.mmc_adata_object
-		Array[File?] project_mmc_results_parquet = project_cohort_analysis.mmc_results_parquet
 		Array[File?] project_all_genes_csv = project_cohort_analysis.all_genes_csv
 		Array[File?] project_hvg_genes_csv = project_cohort_analysis.hvg_genes_csv
+		Array[File?] project_mmc_adata_object = project_cohort_analysis.mmc_adata_object
+		Array[File?] project_mmc_results_parquet = project_cohort_analysis.mmc_results_parquet
 
 		# Clustering outputs
 		Array[File?] project_integrated_adata_object = project_cohort_analysis.integrated_adata_object
@@ -239,16 +250,17 @@ workflow pmdbs_sc_rnaseq_analysis {
 
 		# Merged adata objects, QC plots, filtered adata objects, MMC results, normalized adata objects
 		File? cohort_merged_adata_object = cross_team_cohort_analysis.merged_adata_object
+		File? cohort_qc_initial_metadata_csv = cross_team_cohort_analysis.qc_initial_metadata_csv
 		Array[File]? cohort_qc_plots_png = cross_team_cohort_analysis.qc_plots_png
 		File? cohort_filtered_adata_object = cross_team_cohort_analysis.filtered_adata_object
 		File? cohort_mmc_extended_results_json = cross_team_cohort_analysis.mmc_extended_results_json
 		File? cohort_mmc_results_csv = cross_team_cohort_analysis.mmc_results_csv
 		File? cohort_mmc_log_txt = cross_team_cohort_analysis.mmc_log_txt
 		File? cohort_normalized_adata_object = cross_team_cohort_analysis.normalized_adata_object
-		File? cohort_mmc_adata_object = cross_team_cohort_analysis.mmc_adata_object
-		File? cohort_mmc_results_parquet = cross_team_cohort_analysis.mmc_results_parquet
 		File? cohort_all_genes_csv = cross_team_cohort_analysis.all_genes_csv
 		File? cohort_hvg_genes_csv = cross_team_cohort_analysis.hvg_genes_csv
+		File? cohort_mmc_adata_object = cross_team_cohort_analysis.mmc_adata_object
+		File? cohort_mmc_results_parquet = cross_team_cohort_analysis.mmc_results_parquet
 
 		# Clustering outputs
 		File? cohort_integrated_adata_object = cross_team_cohort_analysis.integrated_adata_object
@@ -272,10 +284,11 @@ workflow pmdbs_sc_rnaseq_analysis {
 	}
 
 	meta {
-		description: "Harmonized human postmortem-derived brain sequencing (PMDBS) sc/sn RNA-seq workflow"
+		description: "Harmonized human postmortem-derived brain sequencing (PMDBS) and non-human (mouse) brain sc/sn RNA-seq workflow"
 	}
 
 	parameter_meta {
+		organism: {help: "Organism; used to select workflow name. Options: 'human' or 'mouse'. If human, 'pmdbs_sc_rnaseq' will be the workflow name (i.e., bucket folder name) and if mouse, 'mouse_sc_rnaseq' will be selected."}
 		cohort_id: {help: "Name of the cohort; used to name output files during cross-team cohort analysis."}
 		projects: {help: "The project ID, set of samples and their associated reads and metadata, output bucket locations, sc data type, and whether or not to run project-level cohort analysis."}
 		cellranger_reference_data: {help: "Cellranger transcriptome reference data; see https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest."}
@@ -284,7 +297,8 @@ workflow pmdbs_sc_rnaseq_analysis {
 		doublet_score_max: {help: "Maximum doublet detection score threshold. [0.2]"}
 		total_counts_limits: {help: "Minimum and maximum total UMI (unique molecular identifier) counts per cell. [100, 100000]"}
 		n_genes_by_counts_limits: {help: "Minimum and maximum number of genes detected per cell (genes with at least one count). [100, 10000]"}
-		allen_mtg_precomputed_stats: {help: "A precomputed statistics file from the Allen Brain Cell Atlas - Seattle Alzheimer’s Disease Brain Cell Atlas (SEA-AD) consortium containing reference statistics for the middle temporal gyrus (MTG) brain region."}
+		allen_brain_mmc_precomputed_stats_h5: {help: "A precomputed statistics file from the Allen Brain Cell Atlas containing reference statistics (the average gene expression profile per cell type cluster and cell type taxonomy)."}
+		allen_brain_mmc_marker_genes_json: {help: "A text file that contains the JSON serialization of a dict file from the Allen Brain Cell Atlas specifying which marker genes to use at which node in the cell type taxonomy. Currently, only used when processing mouse data."}
 		norm_target_sum: {help: "The total count value that each cell will be normalized to. [10000]"}
 		n_top_genes: {help: "Number of HVG genes to keep. [8000]"}
 		n_comps: {help: "Number of principal components to compute. [30]"}

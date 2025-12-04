@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import scipy.sparse as sp
 import anndata
-from typing import Dict, Optional
+from typing import Dict, Optional, Literal
 
 from scipy.stats import multinomial
 from sklearn.neighbors import NearestNeighbors
@@ -508,7 +508,7 @@ def knn_smooth_pred_class(
 
 # copied from scib: https://github.com/theislab/scib/blob/main/scib/preprocessing.py
 # Cell Cycle
-def score_cell_cycle(adata, organism="mouse"):
+def score_cell_cycle(adata, organism: Literal["mouse", "human"]):
     """Score cell cycle score given an organism
 
     Wrapper function for `scanpy.tl.score_genes_cell_cycle`_

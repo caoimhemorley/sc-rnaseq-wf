@@ -22,7 +22,8 @@ workflow cohort_analysis {
 		Array[Int] n_genes_by_counts_limits
 
 		# Allen Institute's Map My Cells
-		File allen_mtg_precomputed_stats
+		File allen_brain_mmc_precomputed_stats_h5
+		File? allen_brain_mmc_marker_genes_json
 
 		# Normalization parameters
 		Int norm_target_sum
@@ -54,7 +55,7 @@ workflow cohort_analysis {
 	}
 
 	String sub_workflow_name = "cohort_analysis"
-	String sub_workflow_version = "3.1.0"
+	String sub_workflow_version = "4.0.0"
 
 	Array[Array[String]] workflow_info = [[run_timestamp, workflow_name, workflow_version, workflow_release]]
 
@@ -98,7 +99,8 @@ workflow cohort_analysis {
 		input:
 			cohort_id = cohort_id,
 			filtered_adata_object = filter.filtered_adata_object,
-			allen_mtg_precomputed_stats = allen_mtg_precomputed_stats,
+			allen_brain_mmc_precomputed_stats_h5 = allen_brain_mmc_precomputed_stats_h5,
+			allen_brain_mmc_marker_genes_json = allen_brain_mmc_marker_genes_json,
 			raw_data_path = raw_data_path,
 			workflow_info = workflow_info,
 			billing_project = billing_project,
@@ -115,6 +117,7 @@ workflow cohort_analysis {
 			n_comps = n_comps,
 			batch_key = batch_key,
 			raw_data_path = raw_data_path,
+			workflow_name = workflow_name,
 			workflow_info = workflow_info,
 			billing_project = billing_project,
 			container_registry = container_registry,
@@ -127,6 +130,7 @@ workflow cohort_analysis {
 			normalized_adata_object = normalize.normalized_adata_object,
 			mmc_results_csv = map_cell_types.mmc_results_csv, #!FileCoercion
 			raw_data_path = raw_data_path,
+			workflow_name = workflow_name,
 			workflow_info = workflow_info,
 			billing_project = billing_project,
 			container_registry = container_registry,
@@ -144,6 +148,7 @@ workflow cohort_analysis {
 			n_neighbors = n_neighbors,
 			leiden_res = leiden_res,
 			raw_data_path = raw_data_path,
+			workflow_name = workflow_name,
 			workflow_info = workflow_info,
 			billing_project = billing_project,
 			container_registry = container_registry,
@@ -202,7 +207,8 @@ workflow cohort_analysis {
 			write_cohort_sample_list.cohort_sample_list
 		],
 		[
-			merge_and_plot_qc_metrics.merged_adata_object
+			merge_and_plot_qc_metrics.merged_adata_object,
+			merge_and_plot_qc_metrics.qc_initial_metadata_csv
 		],
 		merge_and_plot_qc_metrics.qc_plots_png,
 		[
@@ -250,16 +256,17 @@ workflow cohort_analysis {
 
 		# Merged adata objects, QC plots, filtered adata objects, MMC results, normalized adata objects
 		File merged_adata_object = merge_and_plot_qc_metrics.merged_adata_object #!FileCoercion
+		File qc_initial_metadata_csv = merge_and_plot_qc_metrics.qc_initial_metadata_csv #!FileCoercion
 		Array[File] qc_plots_png = merge_and_plot_qc_metrics.qc_plots_png #!FileCoercion
 		File filtered_adata_object = filter.filtered_adata_object
 		File mmc_extended_results_json = map_cell_types.mmc_extended_results_json #!FileCoercion
 		File mmc_results_csv = map_cell_types.mmc_results_csv #!FileCoercion
 		File mmc_log_txt = map_cell_types.mmc_log_txt #!FileCoercion
 		File normalized_adata_object = normalize.normalized_adata_object
-		File mmc_adata_object = add_mapped_cell_types.mmc_adata_object
-		File mmc_results_parquet = add_mapped_cell_types.mmc_results_parquet #!FileCoercion
 		File all_genes_csv = normalize.all_genes_csv #!FileCoercion
 		File hvg_genes_csv = normalize.hvg_genes_csv #!FileCoercion
+		File mmc_adata_object = add_mapped_cell_types.mmc_adata_object
+		File mmc_results_parquet = add_mapped_cell_types.mmc_results_parquet #!FileCoercion
 
 		# Clustering output
 		File integrated_adata_object = cluster_data.integrated_adata_object
@@ -348,7 +355,7 @@ task merge_and_plot_qc_metrics {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.1"
+		docker: "~{container_registry}/sc_tools:1.1.0"
 		cpu: 4
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
@@ -393,7 +400,7 @@ task filter {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.1"
+		docker: "~{container_registry}/sc_tools:1.1.0"
 		cpu: 4
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
@@ -408,7 +415,8 @@ task map_cell_types {
 		String cohort_id
 		File filtered_adata_object
 
-		File allen_mtg_precomputed_stats
+		File allen_brain_mmc_precomputed_stats_h5
+		File? allen_brain_mmc_marker_genes_json
 
 		String raw_data_path
 		Array[Array[String]] workflow_info
@@ -417,35 +425,44 @@ task map_cell_types {
 		String zones
 	}
 
-	Int mem_gb = ceil(size([filtered_adata_object, allen_mtg_precomputed_stats], "GB") * 4 + 50)
-	Int disk_size = ceil(size([filtered_adata_object, allen_mtg_precomputed_stats], "GB") * 4 + 20)
+	String mmc_output_prefix = if defined(allen_brain_mmc_marker_genes_json) then "~{cohort_id}.mmc_markers_mapping" else "~{cohort_id}.mmc_otf_mapping.SEAAD"
+
+	Int threads = 4
+	Int calc_human_mem_gb = ceil(size([filtered_adata_object, allen_brain_mmc_precomputed_stats_h5], "GB") * 4 + 50)
+	# Mouse brain mapping requires extra memory due to MMC's FromSpecifiedMarkersRunner's architecture
+	Int calc_mouse_mem_gb = ceil(size([filtered_adata_object, allen_brain_mmc_precomputed_stats_h5], "GB") * 4 + 50 + (threads * 10))
+	Int mem_gb = if defined(allen_brain_mmc_marker_genes_json) then calc_mouse_mem_gb else calc_human_mem_gb
+	Int disk_size = ceil(size([filtered_adata_object, allen_brain_mmc_precomputed_stats_h5], "GB") * 4 + 20)
 
 	command <<<
 		set -euo pipefail
 
+		/usr/bin/time \
 		mmc \
 			--adata-input ~{filtered_adata_object} \
-			--mmc-taxonomy-path ~{allen_mtg_precomputed_stats} \
-			--output-prefix ~{cohort_id}.mmc_otf_mapping.SEAAD
+			--mmc-precomputed-stats ~{allen_brain_mmc_precomputed_stats_h5} \
+			--n-processors ~{if threads > 4 then 4 else threads} \
+			--output-prefix ~{mmc_output_prefix} \
+			~{if defined(allen_brain_mmc_marker_genes_json) then "--mmc-marker-genes " + allen_brain_mmc_marker_genes_json else ""}
 
 		upload_outputs \
 			-b ~{billing_project} \
 			-d ~{raw_data_path} \
 			-i ~{write_tsv(workflow_info)} \
-			-o "~{cohort_id}.mmc_otf_mapping.SEAAD.extended_results.json" \
-			-o "~{cohort_id}.mmc_otf_mapping.SEAAD.results.csv" \
-			-o "~{cohort_id}.mmc_otf_mapping.SEAAD.log.txt"
+			-o "~{mmc_output_prefix}.extended_results.json" \
+			-o "~{mmc_output_prefix}.results.csv" \
+			-o "~{mmc_output_prefix}.log.txt"
 	>>>
 
 	output {
-		String mmc_extended_results_json = "~{raw_data_path}/~{cohort_id}.mmc_otf_mapping.SEAAD.extended_results.json"
-		String mmc_results_csv = "~{raw_data_path}/~{cohort_id}.mmc_otf_mapping.SEAAD.results.csv"
-		String mmc_log_txt = "~{raw_data_path}/~{cohort_id}.mmc_otf_mapping.SEAAD.log.txt"
+		String mmc_extended_results_json = "~{raw_data_path}/~{mmc_output_prefix}.extended_results.json"
+		String mmc_results_csv = "~{raw_data_path}/~{mmc_output_prefix}.results.csv"
+		String mmc_log_txt = "~{raw_data_path}/~{mmc_output_prefix}.log.txt"
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.1"
-		cpu: 16
+		docker: "~{container_registry}/sc_tools:1.1.0"
+		cpu: threads
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
 		preemptible: 3
@@ -465,6 +482,7 @@ task normalize {
 		String batch_key
 
 		String raw_data_path
+		String workflow_name
 		Array[Array[String]] workflow_info
 		String billing_project
 		String container_registry
@@ -482,6 +500,7 @@ task normalize {
 
 		process \
 			--adata-input ~{filtered_adata_object} \
+			--workflow-name ~{workflow_name} \
 			--batch-key ~{batch_key} \
 			--norm-target-sum ~{norm_target_sum} \
 			--n-top-genes ~{n_top_genes} \
@@ -505,7 +524,7 @@ task normalize {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.1"
+		docker: "~{container_registry}/sc_tools:1.1.0"
 		cpu: threads
 		cpuPlatform: "AMD Rome"
 		memory: "~{mem_gb} GB"
@@ -523,6 +542,7 @@ task add_mapped_cell_types {
 		File mmc_results_csv
 
 		String raw_data_path
+		String workflow_name
 		Array[Array[String]] workflow_info
 		String billing_project
 		String container_registry
@@ -538,6 +558,7 @@ task add_mapped_cell_types {
 
 		transcriptional_phenotype \
 			--adata-input ~{normalized_adata_object} \
+			--workflow-name ~{workflow_name} \
 			--mmc-results ~{mmc_results_csv} \
 			--adata-output ~{cohort_id}.mmc.h5ad \
 			--output-cell-types-file ~{cohort_id}.mmc_results.parquet
@@ -555,7 +576,7 @@ task add_mapped_cell_types {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.1"
+		docker: "~{container_registry}/sc_tools:1.1.0"
 		cpu: 4
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
@@ -607,7 +628,7 @@ task integrate_harmony {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.1"
+		docker: "~{container_registry}/sc_tools:1.1.0"
 		cpu: 8
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
@@ -665,7 +686,7 @@ task artifact_metrics {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.1"
+		docker: "~{container_registry}/sc_tools:1.1.0"
 		cpu: 16
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"
@@ -719,7 +740,7 @@ task plot_groups_and_features {
 	}
 
 	runtime {
-		docker: "~{container_registry}/sc_tools:1.0.1"
+		docker: "~{container_registry}/sc_tools:1.1.0"
 		cpu: 2
 		memory: "~{mem_gb} GB"
 		disks: "local-disk ~{disk_size} HDD"

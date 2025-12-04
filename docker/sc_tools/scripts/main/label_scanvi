@@ -10,6 +10,7 @@ def label_with_scanvi(
     adata: ad.AnnData,
     model: scvi.model.SCVI,
     num_workers: int,
+    workflow_name: str
 ) -> tuple[ad.AnnData, scvi.model.SCANVI]:
     """
     Fit scANVI model to AnnData object
@@ -25,8 +26,13 @@ def label_with_scanvi(
     early_stopping = True
     early_stopping_patience = 20
 
-    # Set parameters based on numerical instabilities
-    threshold_cells = 3.05e6 # No. of cells in Sep 2025 PMDBS sc cohort (Lee, Hardy, Hafler, Jakobsson, Scherzer)
+    # Set parameters based on numerical instabilities and source
+    if workflow_name == "pmdbs_sc_rnaseq":
+        threshold_cells = 3.05e6 # No. of cells in Sep 2025 PMDBS sc cohort (Lee, Hardy, Hafler, Jakobsson, Scherzer)
+    elif workflow_name == "mouse_sc_rnaseq":
+        threshold_cells = 1e6 # Approx. no. of cells in Dec 2025 Mouse sc cohort (Cragg, Biederer)
+    else:
+        raise ValueError(f"[ERROR] Source cannot be detected from workflow name: [{workflow_name}]")
     if adata.n_obs > threshold_cells:
         plan_kwargs = {"lr": 1e-4}
         gradient_clip_val = 5.0
@@ -82,7 +88,7 @@ def main(args: argparse.Namespace):
         adata=adata,
     )
     # 4. Get scANVI model
-    adata, scanvi_model = label_with_scanvi(adata, model, num_workers)
+    adata, scanvi_model = label_with_scanvi(adata, model, num_workers, args.workflow_name)
     # 5. Save the integrated adata and scANVI model
     scanvi_model.save(args.output_scanvi_dir, overwrite=True)
     # 6. Save the latent space
@@ -95,6 +101,12 @@ def main(args: argparse.Namespace):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Leverage cell-type from MMC to assign the rest of the cells with scANVI")
+    parser.add_argument(
+        "--workflow-name",
+        type=str,
+        required=True,
+        help="Workflow name to set training parameters based on source ('human' or 'mouse') due to numerical instabilities",
+    )
     parser.add_argument(
         "--latent-key",
         type=str,
