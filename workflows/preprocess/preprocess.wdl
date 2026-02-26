@@ -1,6 +1,6 @@
 version 1.0
 
-import "../structs.wdl"
+import "https://raw.githubusercontent.com/caoimhemorley/sc-rnaseq-wf/main/structs.wdl"
 
 workflow preprocess {
 	input {
